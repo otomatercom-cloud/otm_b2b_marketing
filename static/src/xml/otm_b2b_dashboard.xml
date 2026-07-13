@@ -111,6 +111,37 @@
                     </div>
                 </div>
 
+                <div class="o_otm_b2b_panel mt-4" t-if="state.isManager">
+                    <h4>Territory Manager Performance</h4>
+                    <div class="o_otm_b2b_table_wrap">
+                        <table class="o_otm_b2b_perf_table">
+                            <thead>
+                                <tr>
+                                    <th>Manager</th>
+                                    <th class="text-end">Today</th>
+                                    <th class="text-end">This Week</th>
+                                    <th class="text-end">This Month</th>
+                                    <th class="text-end">Seminars</th>
+                                    <th class="text-end">Proposals Sent</th>
+                                    <th class="text-end">Approved</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="state.territoryPerformance" t-as="row" t-key="row_index">
+                                    <td><t t-esc="row.name"/></td>
+                                    <td class="text-end"><t t-esc="row.visits_today"/></td>
+                                    <td class="text-end"><t t-esc="row.visits_week"/></td>
+                                    <td class="text-end"><t t-esc="row.visits_month"/></td>
+                                    <td class="text-end"><t t-esc="row.seminars"/></td>
+                                    <td class="text-end"><t t-esc="row.mou_proposal_sent"/></td>
+                                    <td class="text-end"><t t-esc="row.mou_approved"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p t-if="!state.territoryPerformance.length" class="text-muted mb-0">No territory managers with assigned institutions yet.</p>
+                </div>
+
                 <div class="o_otm_b2b_charts_row mt-4">
                     <div class="o_otm_b2b_panel">
                         <h4>Institution type distribution</h4>

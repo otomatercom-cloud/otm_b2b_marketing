@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
+from odoo.tools.date_utils import start_of
 
 
 class OtmB2bInstitution(models.Model):
@@ -372,6 +373,59 @@ class OtmB2bInstitution(models.Model):
             'marketing_activity': v.marketing_activity_type_id.name or '',
         } for v in today_completed_visits]
 
+        # Territory Manager performance leaderboard - manager/head only,
+        # matching every other manager-only scoping in this method.
+        territory_performance = []
+        if is_manager:
+            week_start = start_of(today, 'week')
+            month_start = start_of(today, 'month')
+            executive_group = self.env.ref(
+                'otm_b2b_marketing.group_otm_b2b_marketing_executive', raise_if_not_found=False)
+            managers = executive_group.users if executive_group else self.env['res.users']
+            Seminar = self.env['otm.b2b.seminar']
+            Mou = self.env['otm.b2b.mou']
+            # A MOU that has moved past 'discussion' has, by definition of
+            # the linear pipeline (discussion -> proposal_sent ->
+            # under_review -> approved -> signed -> renewed), had a
+            # proposal sent at some point - there's no separate history
+            # log to check, so this is the accurate cumulative reading of
+            # "proposals sent" rather than just a current-state snapshot.
+            proposal_stage_states = ('proposal_sent', 'under_review', 'approved', 'signed', 'renewed')
+            approved_stage_states = ('approved', 'signed', 'renewed')
+            for manager in managers:
+                mgr_institution_ids = Institution.search([
+                    '|', ('marketing_manager_id', '=', manager.id), ('user_id', '=', manager.id),
+                ]).ids
+                if not mgr_institution_ids and not VisitRecord.search_count([('user_id', '=', manager.id)]):
+                    continue  # skip officers with no assigned institutions and no visit history at all
+                territory_performance.append({
+                    'name': manager.name,
+                    'visits_today': VisitRecord.search_count([
+                        ('user_id', '=', manager.id), ('visit_date', '=', today),
+                        ('state', '!=', 'cancelled'),
+                    ]),
+                    'visits_week': VisitRecord.search_count([
+                        ('user_id', '=', manager.id),
+                        ('visit_date', '>=', week_start), ('visit_date', '<=', today),
+                        ('state', '!=', 'cancelled'),
+                    ]),
+                    'visits_month': VisitRecord.search_count([
+                        ('user_id', '=', manager.id),
+                        ('visit_date', '>=', month_start), ('visit_date', '<=', today),
+                        ('state', '!=', 'cancelled'),
+                    ]),
+                    'seminars': Seminar.search_count([('visit_id.user_id', '=', manager.id)]),
+                    'mou_proposal_sent': Mou.search_count([
+                        ('institution_id', 'in', mgr_institution_ids),
+                        ('state', 'in', proposal_stage_states),
+                    ]),
+                    'mou_approved': Mou.search_count([
+                        ('institution_id', 'in', mgr_institution_ids),
+                        ('state', 'in', approved_stage_states),
+                    ]),
+                })
+            territory_performance.sort(key=lambda row: row['visits_month'], reverse=True)
+
         return {
             'is_manager': is_manager,
             'user_name': self.env.user.name,
@@ -396,4 +450,5 @@ class OtmB2bInstitution(models.Model):
             'upcoming_visit_list': upcoming_visit_list,
             'live_visit_list': live_visit_list,
             'today_completed_list': today_completed_list,
+            'territory_performance': territory_performance,
         }

@@ -119,6 +119,36 @@
     text-decoration: none;
 }
 
+.o_otm_b2b_table_wrap {
+    overflow-x: auto;
+}
+
+.o_otm_b2b_perf_table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.o_otm_b2b_perf_table th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #6c757d;
+    padding: 6px 10px;
+    border-bottom: 1px solid #e0e0e0;
+    white-space: nowrap;
+}
+
+.o_otm_b2b_perf_table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f1f1f1;
+    white-space: nowrap;
+}
+
+.o_otm_b2b_perf_table tbody tr:hover {
+    background-color: #faf8fa;
+}
+
 .o_otm_b2b_visit_row {
     display: flex;
     align-items: center;

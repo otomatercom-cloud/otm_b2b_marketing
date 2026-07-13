@@ -35,6 +35,7 @@ export class OtmB2bDashboard extends Component {
             upcomingVisits: [],
             liveVisits: [],
             todayCompleted: [],
+            territoryPerformance: [],
             isManager: true,
             userName: "",
             loading: true,
@@ -56,6 +57,7 @@ export class OtmB2bDashboard extends Component {
         this.state.upcomingVisits = data.upcoming_visit_list;
         this.state.liveVisits = data.live_visit_list;
         this.state.todayCompleted = data.today_completed_list;
+        this.state.territoryPerformance = data.territory_performance;
         this.state.isManager = data.is_manager;
         this.state.userName = data.user_name;
         this.state.loading = false;
