@@ -164,7 +164,7 @@
                             </div>
                         </div>
                         <span class="o_otm_b2b_visit_date">Since <t t-esc="visit.checkin_time"/></span>
-                        <button class="o_otm_b2b_checkin_btn" t-on-click="() => this.checkOut(visit.id)">Check Out</button>
+                        <button class="o_otm_b2b_checkin_btn" t-on-click="() => this.checkOut(visit)">Check Out</button>
                     </div>
                     <p t-if="!state.liveVisits.length" class="text-muted mb-0">No one is checked in right now.</p>
                 </div>

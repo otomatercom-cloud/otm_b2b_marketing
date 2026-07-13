@@ -72,28 +72,38 @@ export class OtmB2bDashboard extends Component {
     async checkIn(planId) {
         const result = await this.orm.call("otm.b2b.visit.plan", "action_dashboard_check_in", [planId]);
 
-        if (result.portal_url && navigator.clipboard) {
-            try {
-                await navigator.clipboard.writeText(result.portal_url);
-            } catch (e) {
-                // Clipboard permission can be denied silently in some
-                // browsers/webviews - the link is still shown below.
+        if (result.portal_url) {
+            window.open(result.portal_url, "_blank");
+            if (navigator.clipboard) {
+                try {
+                    await navigator.clipboard.writeText(result.portal_url);
+                } catch (e) {
+                    // Clipboard permission can be denied silently in some
+                    // browsers/webviews - the link still opened above.
+                }
             }
         }
 
-        this.notification.add(
-            `Checked in at ${result.institution}. Mobile update link (copied to clipboard): ${result.portal_url}`,
-            { type: "success", sticky: true, title: "Checked In" }
-        );
+        this.notification.add(`Checked in at ${result.institution}. Portal form opened in a new tab.`, {
+            type: "success",
+        });
 
         await this.loadDashboard();
     }
 
-    async checkOut(visitId) {
-        await this.orm.call("otm.b2b.visit.record", "action_check_out", [visitId]);
-        this.notification.add("Checked out. Open the visit to add activity type and remarks.", {
-            type: "success",
-        });
+    async checkOut(visit) {
+        await this.orm.call("otm.b2b.visit.record", "action_check_out", [visit.id]);
+
+        if (visit.portal_url) {
+            window.open(visit.portal_url, "_blank");
+            this.notification.add(
+                `Checked out of ${visit.institution}. Complete the visit update in the new tab.`,
+                { type: "success" }
+            );
+        } else {
+            this.notification.add("Checked out.", { type: "success" });
+        }
+
         await this.loadDashboard();
     }
 

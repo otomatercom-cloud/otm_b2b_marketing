@@ -22,10 +22,14 @@ class OtmB2bPortalController(http.Controller):
         if not visit:
             return request.not_found()
         activity_types = request.env['otm.b2b.activity.type'].sudo().search([])
+        # Once a visit is completed the link is locked: re-opening it (or
+        # re-POSTing to it) always shows the read-only confirmation screen,
+        # never the editable form again, so a submitted update can't be
+        # silently overwritten by re-visiting an old link.
         values = {
             'visit': visit,
             'activity_types': activity_types,
-            'submitted': False,
+            'submitted': visit.state == 'completed',
         }
         return request.render('otm_b2b_marketing.portal_visit_complete_form', values)
 
@@ -35,25 +39,30 @@ class OtmB2bPortalController(http.Controller):
         if not visit:
             return request.not_found()
 
-        now = fields.Datetime.now()
-        vals = {
-            'remarks': post.get('remarks') or '',
-            'next_action': post.get('next_action') or '',
-            'state': 'completed',
-            'checkout_time': visit.checkout_time or now,
-        }
-        if not visit.checkin_time:
-            vals['checkin_time'] = now
-        activity_type_id = post.get('marketing_activity_type_id')
-        if activity_type_id:
-            vals['marketing_activity_type_id'] = int(activity_type_id)
-        next_followup_date = post.get('next_followup_date')
-        if next_followup_date:
-            vals['next_followup_date'] = next_followup_date
-        visit.sudo().write(vals)
+        if visit.state != 'completed':
+            now = fields.Datetime.now()
+            vals = {
+                'remarks': post.get('remarks') or '',
+                'next_action': post.get('next_action') or '',
+                'state': 'completed',
+                'checkout_time': visit.checkout_time or now,
+            }
+            if not visit.checkin_time:
+                vals['checkin_time'] = now
+            activity_type_id = post.get('marketing_activity_type_id')
+            if activity_type_id:
+                vals['marketing_activity_type_id'] = int(activity_type_id)
+            next_followup_date = post.get('next_followup_date')
+            if next_followup_date:
+                vals['next_followup_date'] = next_followup_date
+            visit.sudo().write(vals)
 
-        if visit.visit_plan_id and visit.visit_plan_id.state != 'completed':
-            visit.visit_plan_id.sudo().write({'state': 'completed'})
+            if visit.visit_plan_id and visit.visit_plan_id.state != 'completed':
+                visit.visit_plan_id.sudo().write({'state': 'completed'})
+        # else: already completed - this is a resubmission of a locked
+        # link (double-tap, back-button, or a stale bookmark). Skip the
+        # write entirely and just show the same locked confirmation, so a
+        # second submit can never overwrite a first one.
 
         activity_types = request.env['otm.b2b.activity.type'].sudo().search([])
         values = {

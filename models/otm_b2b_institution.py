@@ -356,6 +356,7 @@ class OtmB2bInstitution(models.Model):
             'executive': v.user_id.name,
             'district': district_labels.get(v.institution_id.district, ''),
             'checkin_time': fields.Datetime.to_string(v.checkin_time) if v.checkin_time else '',
+            'portal_url': v.portal_url,
         } for v in live_visits]
 
         today_completed_visits = VisitRecord.search(

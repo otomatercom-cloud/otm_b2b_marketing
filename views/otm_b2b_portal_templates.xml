@@ -32,7 +32,7 @@
                 <div class="o_b2b_done">
                     <div class="o_b2b_done_icon">&#10004;</div>
                     <p class="o_b2b_title">Visit update recorded</p>
-                    <p class="o_b2b_sub">Thanks - the visit to <t t-esc="visit.institution_id.name"/> has been marked done.</p>
+                    <p class="o_b2b_sub">Thanks - the visit to <t t-esc="visit.institution_id.name"/> has been marked done. This link is now locked and can't be used to update the visit again.</p>
                 </div>
             </t>
             <t t-else="">
