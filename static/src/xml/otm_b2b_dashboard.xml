@@ -46,6 +46,20 @@
                         </div>
                         <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.pending_visits"/></div>
                     </div>
+                    <div class="o_otm_b2b_kpi_card">
+                        <div class="o_otm_b2b_kpi_top">
+                            <span class="o_otm_b2b_kpi_label">Live now</span>
+                            <i class="fa fa-circle o_otm_b2b_kpi_icon" style="color:#dc3545;"/>
+                        </div>
+                        <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.live_visits"/></div>
+                    </div>
+                    <div class="o_otm_b2b_kpi_card">
+                        <div class="o_otm_b2b_kpi_top">
+                            <span class="o_otm_b2b_kpi_label">Completed today</span>
+                            <i class="fa fa-check-circle-o o_otm_b2b_kpi_icon"/>
+                        </div>
+                        <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.today_completed"/></div>
+                    </div>
                     <div class="o_otm_b2b_kpi_card" t-on-click="openInstitutions">
                         <div class="o_otm_b2b_kpi_top">
                             <span class="o_otm_b2b_kpi_label">Institutions assigned</span>
@@ -130,6 +144,52 @@
                             <p t-if="!state.byDistrict.length" class="text-muted mb-0">No data yet.</p>
                         </div>
                     </div>
+                </div>
+
+                <div class="o_otm_b2b_panel mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="mb-0">
+                            <span class="o_otm_b2b_live_dot"/> Live visits
+                        </h4>
+                    </div>
+                    <div class="o_otm_b2b_visit_row" t-foreach="state.liveVisits" t-as="visit" t-key="visit_index">
+                        <div class="o_otm_b2b_visit_avatar o_otm_b2b_visit_avatar_live">
+                            <t t-esc="visit.executive ? visit.executive.slice(0,2).toUpperCase() : '--'"/>
+                        </div>
+                        <div class="o_otm_b2b_visit_info">
+                            <div class="o_otm_b2b_visit_name"><t t-esc="visit.institution"/></div>
+                            <div class="o_otm_b2b_visit_meta">
+                                <t t-esc="visit.executive"/>
+                                <t t-if="visit.district"> · <t t-esc="visit.district"/></t>
+                            </div>
+                        </div>
+                        <span class="o_otm_b2b_visit_date">Since <t t-esc="visit.checkin_time"/></span>
+                        <button class="o_otm_b2b_checkin_btn" t-on-click="() => this.checkOut(visit.id)">Check Out</button>
+                    </div>
+                    <p t-if="!state.liveVisits.length" class="text-muted mb-0">No one is checked in right now.</p>
+                </div>
+
+                <div class="o_otm_b2b_panel mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="mb-0">Today's completed visits</h4>
+                        <a href="#" class="o_otm_b2b_view_all" t-on-click.prevent="openVisitPlans">View all</a>
+                    </div>
+                    <div class="o_otm_b2b_visit_row" t-foreach="state.todayCompleted" t-as="visit" t-key="visit_index">
+                        <div class="o_otm_b2b_visit_avatar o_otm_b2b_visit_avatar_done">
+                            <t t-esc="visit.executive ? visit.executive.slice(0,2).toUpperCase() : '--'"/>
+                        </div>
+                        <div class="o_otm_b2b_visit_info">
+                            <div class="o_otm_b2b_visit_name"><t t-esc="visit.institution"/></div>
+                            <div class="o_otm_b2b_visit_meta">
+                                <t t-esc="visit.executive"/>
+                                <t t-if="visit.district"> · <t t-esc="visit.district"/></t>
+                            </div>
+                        </div>
+                        <span class="o_otm_b2b_visit_date" t-if="visit.marketing_activity"><t t-esc="visit.marketing_activity"/></span>
+                        <button class="o_otm_b2b_checkin_btn o_otm_b2b_checkin_btn_ghost"
+                                t-on-click="() => this.openVisitRecord(visit.id)">View</button>
+                    </div>
+                    <p t-if="!state.todayCompleted.length" class="text-muted mb-0">No visits completed yet today.</p>
                 </div>
 
                 <div class="o_otm_b2b_panel mt-3">

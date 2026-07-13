@@ -20,6 +20,8 @@ export class OtmB2bDashboard extends Component {
                 upcoming_visits: 0,
                 completed_visits: 0,
                 pending_visits: 0,
+                live_visits: 0,
+                today_completed: 0,
                 institutions_assigned: 0,
                 total_institutions: 0,
                 new_institutions: 0,
@@ -31,6 +33,8 @@ export class OtmB2bDashboard extends Component {
             byType: [],
             byDistrict: [],
             upcomingVisits: [],
+            liveVisits: [],
+            todayCompleted: [],
             isManager: true,
             userName: "",
             loading: true,
@@ -50,6 +54,8 @@ export class OtmB2bDashboard extends Component {
         this.state.byType = this._withBarPercent(data.by_type);
         this.state.byDistrict = this._withBarPercent(data.by_district);
         this.state.upcomingVisits = data.upcoming_visit_list;
+        this.state.liveVisits = data.live_visit_list;
+        this.state.todayCompleted = data.today_completed_list;
         this.state.isManager = data.is_manager;
         this.state.userName = data.user_name;
         this.state.loading = false;
@@ -81,6 +87,24 @@ export class OtmB2bDashboard extends Component {
         );
 
         await this.loadDashboard();
+    }
+
+    async checkOut(visitId) {
+        await this.orm.call("otm.b2b.visit.record", "action_check_out", [visitId]);
+        this.notification.add("Checked out. Open the visit to add activity type and remarks.", {
+            type: "success",
+        });
+        await this.loadDashboard();
+    }
+
+    openVisitRecord(visitId) {
+        this.action.doAction({
+            type: "ir.actions.act_window",
+            res_model: "otm.b2b.visit.record",
+            res_id: visitId,
+            view_mode: "form",
+            views: [[false, "form"]],
+        });
     }
 
     openInstitutions() {

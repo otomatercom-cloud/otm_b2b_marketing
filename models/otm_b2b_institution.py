@@ -297,9 +297,11 @@ class OtmB2bInstitution(models.Model):
 
         institution_domain = []
         visit_plan_domain = []
+        visit_record_domain = []
         if not is_manager:
             institution_domain = ['|', ('marketing_manager_id', '=', uid), ('user_id', '=', uid)]
             visit_plan_domain = [('user_id', '=', uid)]
+            visit_record_domain = [('user_id', '=', uid)]
 
         Institution = self.env['otm.b2b.institution']
         institutions = Institution.search(institution_domain)
@@ -341,6 +343,34 @@ class OtmB2bInstitution(models.Model):
             'priority': plan.priority,
         } for plan in upcoming_plans[:5]]
 
+        VisitRecord = self.env['otm.b2b.visit.record']
+        live_visits = VisitRecord.search(
+            visit_record_domain + [
+                ('checkin_time', '!=', False),
+                ('checkout_time', '=', False),
+                ('state', 'not in', ('cancelled', 'completed')),
+            ], order='checkin_time desc', limit=5)
+        live_visit_list = [{
+            'id': v.id,
+            'institution': v.institution_id.name,
+            'executive': v.user_id.name,
+            'district': district_labels.get(v.institution_id.district, ''),
+            'checkin_time': fields.Datetime.to_string(v.checkin_time) if v.checkin_time else '',
+        } for v in live_visits]
+
+        today_completed_visits = VisitRecord.search(
+            visit_record_domain + [
+                ('state', '=', 'completed'),
+                ('visit_date', '=', today),
+            ], order='checkout_time desc', limit=8)
+        today_completed_list = [{
+            'id': v.id,
+            'institution': v.institution_id.name,
+            'executive': v.user_id.name,
+            'district': district_labels.get(v.institution_id.district, ''),
+            'marketing_activity': v.marketing_activity_type_id.name or '',
+        } for v in today_completed_visits]
+
         return {
             'is_manager': is_manager,
             'user_name': self.env.user.name,
@@ -349,6 +379,8 @@ class OtmB2bInstitution(models.Model):
                 'upcoming_visits': len(upcoming_plans),
                 'completed_visits': completed_visits,
                 'pending_visits': pending_visits,
+                'live_visits': len(live_visits),
+                'today_completed': len(today_completed_visits),
                 'institutions_assigned': Institution.search_count(
                     ['|', ('marketing_manager_id', '=', uid), ('user_id', '=', uid)]),
                 'total_institutions': len(institutions),
@@ -361,4 +393,6 @@ class OtmB2bInstitution(models.Model):
             'by_type': by_type,
             'by_district': by_district,
             'upcoming_visit_list': upcoming_visit_list,
+            'live_visit_list': live_visit_list,
+            'today_completed_list': today_completed_list,
         }

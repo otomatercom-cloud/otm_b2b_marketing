@@ -188,3 +188,39 @@
 .o_otm_b2b_checkin_btn:hover {
     background-color: #5c3c54;
 }
+
+.o_otm_b2b_checkin_btn_ghost {
+    background-color: transparent;
+    color: #714B67;
+    border: 1px solid #714B67;
+}
+
+.o_otm_b2b_checkin_btn_ghost:hover {
+    background-color: #f1e9ef;
+}
+
+.o_otm_b2b_visit_avatar_live {
+    background-color: #fde8ea;
+    color: #dc3545;
+}
+
+.o_otm_b2b_visit_avatar_done {
+    background-color: #e6f4ea;
+    color: #28a745;
+}
+
+.o_otm_b2b_live_dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #dc3545;
+    margin-right: 4px;
+    animation: o_otm_b2b_pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes o_otm_b2b_pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
