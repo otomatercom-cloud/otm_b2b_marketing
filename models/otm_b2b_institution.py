@@ -315,7 +315,7 @@ class OtmB2bInstitution(models.Model):
             lambda p: p.state == 'planned' and p.visit_date and p.visit_date >= today
         ).sorted('visit_date')
         completed_visits = len(visit_plans.filtered(lambda p: p.state == 'completed'))
-        pending_visits = len(visit_plans.filtered(lambda p: p.state in ('draft', 'planned')))
+        pending_visits = len(visit_plans.filtered(lambda p: p.state in ('draft', 'planned', 'in_progress')))
 
         type_groups = Institution._read_group(
             institution_domain, groupby=['institution_type_id'], aggregates=['__count'])

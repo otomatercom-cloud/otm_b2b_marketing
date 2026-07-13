@@ -26,6 +26,7 @@ class OtmB2bVisitPlan(models.Model):
     state = fields.Selection([
         ('draft', 'Draft'),
         ('planned', 'Planned'),
+        ('in_progress', 'Checked In'),
         ('completed', 'Completed'),
         ('cancelled', 'Cancelled'),
     ], string='Status', default='draft', required=True, tracking=True)
@@ -81,17 +82,28 @@ class OtmB2bVisitPlan(models.Model):
 
     def action_open_complete_wizard(self):
         self.ensure_one()
+        # If the officer already checked in, a Visit Record exists for
+        # this plan - complete THAT record (sets checkout time) rather
+        # than creating a second one.
+        context = (
+            {'default_visit_record_id': self.visit_record_id.id}
+            if self.visit_record_id
+            else {'default_visit_plan_id': self.id}
+        )
         return {
             'type': 'ir.actions.act_window',
             'name': _('Complete Visit'),
             'res_model': 'otm.b2b.visit.complete.wizard',
             'view_mode': 'form',
             'target': 'new',
-            'context': {'default_visit_plan_id': self.id},
+            'context': context,
         }
 
-    def action_start_visit(self):
-        """Create a Visit Record from this plan and mark plan completed."""
+    def action_check_in(self):
+        """Officer has arrived at the institution: create the Visit
+        Record, stamp check-in time, and move the plan to 'Checked In'.
+        The visit is completed later via Check Out / the Complete Visit
+        wizard, either from here or from the Visit Record itself."""
         self.ensure_one()
         visit = self.env['otm.b2b.visit.record'].create({
             'institution_id': self.institution_id.id,
@@ -99,8 +111,9 @@ class OtmB2bVisitPlan(models.Model):
             'user_id': self.user_id.id,
             'visit_date': fields.Date.context_today(self),
             'company_id': self.company_id.id,
+            'checkin_time': fields.Datetime.now(),
         })
-        self.write({'state': 'completed', 'visit_record_id': visit.id})
+        self.write({'state': 'in_progress', 'visit_record_id': visit.id})
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'otm.b2b.visit.record',
