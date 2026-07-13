@@ -13,6 +13,7 @@ export class OtmB2bDashboard extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
+        this.notification = useService("notification");
         this.state = useState({
             cards: {
                 today_visits: 0,
@@ -60,6 +61,26 @@ export class OtmB2bDashboard extends Component {
             ...r,
             pct: max ? Math.round((r.count * 100) / max) : 0,
         }));
+    }
+
+    async checkIn(planId) {
+        const result = await this.orm.call("otm.b2b.visit.plan", "action_dashboard_check_in", [planId]);
+
+        if (result.portal_url && navigator.clipboard) {
+            try {
+                await navigator.clipboard.writeText(result.portal_url);
+            } catch (e) {
+                // Clipboard permission can be denied silently in some
+                // browsers/webviews - the link is still shown below.
+            }
+        }
+
+        this.notification.add(
+            `Checked in at ${result.institution}. Mobile update link (copied to clipboard): ${result.portal_url}`,
+            { type: "success", sticky: true, title: "Checked In" }
+        );
+
+        await this.loadDashboard();
     }
 
     openInstitutions() {

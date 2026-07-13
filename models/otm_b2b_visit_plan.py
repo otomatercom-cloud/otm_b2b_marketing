@@ -12,6 +12,14 @@ class OtmB2bVisitPlan(models.Model):
     institution_id = fields.Many2one(
         'otm.b2b.institution', string='Institution', required=True,
         tracking=True, index=True)
+    filter_tier_id = fields.Many2one(
+        'otm.b2b.tier', string='Filter by Category / Tier',
+        help='Pick a Tier here to narrow the Institution list below to that category only.')
+    filter_zone_id = fields.Many2one(
+        'otm.b2b.zone', string='Filter by Zone',
+        help='Pick a Zone here to narrow the Institution list below to that zone only.')
+    tier_id = fields.Many2one(related='institution_id.tier_id', string='Category / Tier', store=True, readonly=True)
+    zone_id = fields.Many2one(related='institution_id.zone_id', string='Zone', store=True, readonly=True)
     visit_date = fields.Date(string='Visit Date', required=True, tracking=True)
     expected_time = fields.Float(string='Expected Time')
     purpose = fields.Char(string='Purpose')
@@ -119,4 +127,16 @@ class OtmB2bVisitPlan(models.Model):
             'res_model': 'otm.b2b.visit.record',
             'view_mode': 'form',
             'res_id': visit.id,
+        }
+
+    def action_dashboard_check_in(self):
+        """Same check-in as action_check_in, but returns plain data
+        instead of an act_window so the Dashboard widget can show the
+        portal link immediately without navigating away."""
+        self.ensure_one()
+        self.action_check_in()
+        return {
+            'institution': self.institution_id.name,
+            'visit_id': self.visit_record_id.id,
+            'portal_url': self.visit_record_id.portal_url,
         }

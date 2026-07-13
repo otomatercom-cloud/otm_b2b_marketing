@@ -333,6 +333,7 @@ class OtmB2bInstitution(models.Model):
         )[:6]
 
         upcoming_visit_list = [{
+            'id': plan.id,
             'institution': plan.institution_id.name,
             'executive': plan.user_id.name,
             'district': district_labels.get(plan.institution_id.district, ''),

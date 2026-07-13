@@ -170,3 +170,21 @@
     border-radius: 6px;
     white-space: nowrap;
 }
+
+.o_otm_b2b_checkin_btn {
+    margin-left: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    background-color: #714B67;
+    color: #ffffff;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.o_otm_b2b_checkin_btn:hover {
+    background-color: #5c3c54;
+}

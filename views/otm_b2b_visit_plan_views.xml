@@ -20,9 +20,20 @@
                     <field name="state" widget="statusbar" statusbar_visible="draft,planned,in_progress,completed"/>
                 </header>
                 <sheet>
-                    <div class="oe_title">
-                        <h1><field name="institution_id" options="{'no_create': True}"/></h1>
-                    </div>
+                    <group>
+                        <group string="Filter Institutions By">
+                            <field name="filter_tier_id"/>
+                            <field name="filter_zone_id"/>
+                        </group>
+                        <group string="Institution">
+                            <field name="institution_id" string="College / Institution"
+                                   options="{'no_create': True}"
+                                   domain="([('tier_id', '=', filter_tier_id)] if filter_tier_id else [])
+                                           + ([('zone_id', '=', filter_zone_id)] if filter_zone_id else [])"/>
+                            <field name="tier_id" readonly="1" invisible="not tier_id"/>
+                            <field name="zone_id" readonly="1" invisible="not zone_id"/>
+                        </group>
+                    </group>
                     <group>
                         <group>
                             <field name="visit_date"/>
@@ -51,6 +62,8 @@
                   decoration-success="state == 'completed'" decoration-muted="state == 'cancelled'">
                 <field name="visit_date"/>
                 <field name="institution_id"/>
+                <field name="tier_id" optional="show"/>
+                <field name="zone_id" optional="hide"/>
                 <field name="purpose"/>
                 <field name="priority" widget="priority"/>
                 <field name="user_id"/>
@@ -90,6 +103,8 @@
             <search string="Search Visit Plans">
                 <field name="institution_id"/>
                 <field name="user_id"/>
+                <field name="tier_id"/>
+                <field name="zone_id"/>
                 <filter string="Today" name="filter_today"
                         domain="[('visit_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="Upcoming" name="filter_upcoming"
@@ -102,6 +117,8 @@
                 <filter string="Completed" name="filter_completed" domain="[('state', '=', 'completed')]"/>
                 <group>
                     <filter string="Assigned To" name="groupby_user" context="{'group_by': 'user_id'}"/>
+                    <filter string="Category / Tier" name="groupby_tier" context="{'group_by': 'tier_id'}"/>
+                    <filter string="Zone" name="groupby_zone" context="{'group_by': 'zone_id'}"/>
                     <filter string="Status" name="groupby_state" context="{'group_by': 'state'}"/>
                     <filter string="Visit Date" name="groupby_date" context="{'group_by': 'visit_date'}"/>
                 </group>

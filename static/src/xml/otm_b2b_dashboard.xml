@@ -149,6 +149,7 @@
                             </div>
                         </div>
                         <span class="o_otm_b2b_visit_date"><t t-esc="visit.visit_date"/></span>
+                        <button class="o_otm_b2b_checkin_btn" t-on-click="() => this.checkIn(visit.id)">Check In</button>
                     </div>
                     <p t-if="!state.upcomingVisits.length" class="text-muted mb-0">No upcoming visits planned.</p>
                 </div>
