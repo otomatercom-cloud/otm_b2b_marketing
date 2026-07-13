@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_otm_b2b_mou_form" model="ir.ui.view">
+        <field name="name">otm.b2b.mou.form</field>
+        <field name="model">otm.b2b.mou</field>
+        <field name="arch" type="xml">
+            <form string="MOU">
+                <header>
+                    <button name="action_send_proposal" type="object" string="Send Proposal"
+                            invisible="state != 'discussion'"/>
+                    <button name="action_under_review" type="object" string="Under Review"
+                            invisible="state != 'proposal_sent'"/>
+                    <button name="action_approve" type="object" string="Approve"
+                            invisible="state != 'under_review'"/>
+                    <button name="action_sign" type="object" string="Sign" class="btn-primary"
+                            invisible="state != 'approved'"/>
+                    <button name="action_renew" type="object" string="Renew"
+                            invisible="state != 'signed'"/>
+                    <button name="action_reject" type="object" string="Reject"
+                            invisible="state in ('signed', 'rejected', 'renewed')"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="discussion,proposal_sent,under_review,approved,signed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="institution_id" options="{'no_create': True}"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="mou_type_id"/>
+                            <field name="discussion_date"/>
+                            <field name="agreement_number"/>
+                        </group>
+                        <group>
+                            <field name="signed_date" invisible="state not in ('signed', 'renewed')"/>
+                            <field name="expiry_date"/>
+                            <field name="renewal_date"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Discussion" name="discussion">
+                            <field name="discussion"/>
+                        </page>
+                        <page string="Agreement" name="agreement">
+                            <field name="attachment" filename="attachment_filename" widget="binary"/>
+                            <field name="attachment_filename" invisible="1"/>
+                            <field name="remarks"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_otm_b2b_mou_list" model="ir.ui.view">
+        <field name="name">otm.b2b.mou.list</field>
+        <field name="model">otm.b2b.mou</field>
+        <field name="arch" type="xml">
+            <list string="MOUs" decoration-success="state == 'signed'" decoration-danger="state == 'rejected'">
+                <field name="institution_id"/>
+                <field name="mou_type_id"/>
+                <field name="discussion_date"/>
+                <field name="agreement_number"/>
+                <field name="signed_date"/>
+                <field name="expiry_date"/>
+                <field name="renewal_date" optional="hide"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_otm_b2b_mou_search" model="ir.ui.view">
+        <field name="name">otm.b2b.mou.search</field>
+        <field name="model">otm.b2b.mou</field>
+        <field name="arch" type="xml">
+            <search string="Search MOUs">
+                <field name="institution_id"/>
+                <field name="agreement_number"/>
+                <field name="mou_type_id"/>
+                <filter string="Signed" name="filter_signed" domain="[('state', '=', 'signed')]"/>
+                <filter string="Under Discussion" name="filter_discussion" domain="[('state', '=', 'discussion')]"/>
+                <group>
+                    <filter string="Institution" name="groupby_institution" context="{'group_by': 'institution_id'}"/>
+                    <filter string="MOU Type" name="groupby_mou_type" context="{'group_by': 'mou_type_id'}"/>
+                    <filter string="Status" name="groupby_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_otm_b2b_mou" model="ir.actions.act_window">
+        <field name="name">MOU Management</field>
+        <field name="res_model">otm.b2b.mou</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smart_action">Start tracking your first MOU</p>
+        </field>
+    </record>
+
+</odoo>

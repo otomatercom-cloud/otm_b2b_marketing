@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_otm_b2b_visit_record_form" model="ir.ui.view">
+        <field name="name">otm.b2b.visit.record.form</field>
+        <field name="model">otm.b2b.visit.record</field>
+        <field name="arch" type="xml">
+            <form string="Visit Record">
+                <header>
+                    <button name="action_check_in" type="object" string="Check In"
+                            class="btn-primary" invisible="checkin_time or state != 'draft'"/>
+                    <button name="action_check_out" type="object" string="Check Out"
+                            invisible="not checkin_time or checkout_time"/>
+                    <button name="action_open_complete_wizard" type="object" string="Complete Visit"
+                            class="btn-primary" invisible="state not in ('draft', 'partially_completed')"/>
+                    <button name="action_mark_completed" type="object" string="Mark Completed"
+                            invisible="state not in ('draft', 'partially_completed')"/>
+                    <button name="action_mark_partial" type="object" string="Mark Partially Completed"
+                            invisible="state != 'draft'"/>
+                    <button name="action_cancel" type="object" string="Cancel"
+                            invisible="state in ('completed', 'cancelled')"/>
+                    <button name="action_reset_draft" type="object" string="Reset to Draft"
+                            invisible="state != 'cancelled'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,completed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_leads" type="object" class="oe_stat_button" icon="fa-users">
+                            <field name="lead_count" widget="statinfo" string="Leads"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="institution_id" options="{'no_create': True}"/>
+                            <field name="visit_plan_id" readonly="1" invisible="not visit_plan_id"/>
+                            <field name="user_id"/>
+                            <field name="visit_date"/>
+                            <field name="marketing_activity_type_id"/>
+                        </group>
+                        <group>
+                            <field name="checkin_time"/>
+                            <field name="checkout_time"/>
+                            <field name="duration" widget="float_time"/>
+                            <label for="gps_latitude" string="GPS Coordinates"/>
+                            <div class="o_row">
+                                <field name="gps_latitude"/>
+                                <field name="gps_longitude"/>
+                            </div>
+                            <field name="portal_url" widget="url" readonly="1"
+                                   string="Mobile update link" invisible="not portal_url"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Discussion" name="discussion">
+                            <group>
+                                <field name="remarks"/>
+                                <field name="discussion_summary"/>
+                                <field name="next_action"/>
+                                <field name="next_followup_date"/>
+                            </group>
+                        </page>
+                        <page string="Collected Data" name="collected">
+                            <group>
+                                <group>
+                                    <field name="collected_prospect_count"/>
+                                    <field name="collected_student_count"/>
+                                    <field name="collected_parent_count"/>
+                                    <field name="collected_faculty_contact_count"/>
+                                </group>
+                                <group>
+                                    <field name="interested_courses"/>
+                                    <field name="competitor_name"/>
+                                    <field name="competitor_fees"/>
+                                    <field name="currency_id" invisible="1"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Attachments" name="attachments">
+                            <group>
+                                <field name="photo" widget="image" class="oe_avatar"/>
+                                <field name="business_card" widget="image" class="oe_avatar"/>
+                                <field name="location_photo" widget="image" class="oe_avatar"/>
+                            </group>
+                            <field name="attachment_ids" widget="many2many_binary"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_otm_b2b_visit_record_list" model="ir.ui.view">
+        <field name="name">otm.b2b.visit.record.list</field>
+        <field name="model">otm.b2b.visit.record</field>
+        <field name="arch" type="xml">
+            <list string="Visit Records" decoration-success="state == 'completed'"
+                  decoration-warning="state == 'partially_completed'" decoration-muted="state == 'cancelled'">
+                <field name="name"/>
+                <field name="visit_date"/>
+                <field name="institution_id"/>
+                <field name="user_id"/>
+                <field name="marketing_activity_type_id"/>
+                <field name="duration" widget="float_time"/>
+                <field name="next_followup_date"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_otm_b2b_visit_record_kanban" model="ir.ui.view">
+        <field name="name">otm.b2b.visit.record.kanban</field>
+        <field name="model">otm.b2b.visit.record</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="institution_id"/>
+                <field name="visit_date"/>
+                <field name="user_id"/>
+                <field name="marketing_activity_type_id"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <strong><field name="institution_id"/></strong>
+                            <div class="text-muted"><field name="marketing_activity_type_id"/></div>
+                            <div><field name="visit_date"/></div>
+                            <div><field name="user_id" widget="many2one_avatar_user"/></div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_otm_b2b_visit_record_search" model="ir.ui.view">
+        <field name="name">otm.b2b.visit.record.search</field>
+        <field name="model">otm.b2b.visit.record</field>
+        <field name="arch" type="xml">
+            <search string="Search Visit Records">
+                <field name="name"/>
+                <field name="institution_id"/>
+                <field name="user_id"/>
+                <field name="marketing_activity_type_id"/>
+                <filter string="Today" name="filter_today"
+                        domain="[('visit_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="This Month" name="filter_this_month"
+                        domain="[('visit_date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+                <filter string="My Visits" name="filter_mine" domain="[('user_id', '=', uid)]"/>
+                <separator/>
+                <filter string="Completed" name="filter_completed" domain="[('state', '=', 'completed')]"/>
+                <filter string="Partially Completed" name="filter_partial" domain="[('state', '=', 'partially_completed')]"/>
+                <filter string="Pending Followup" name="filter_pending_followup"
+                        domain="[('next_followup_date', '!=', False), ('next_followup_date', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <group>
+                    <filter string="Institution" name="groupby_institution" context="{'group_by': 'institution_id'}"/>
+                    <filter string="Marketing Executive" name="groupby_user" context="{'group_by': 'user_id'}"/>
+                    <filter string="Activity Type" name="groupby_activity" context="{'group_by': 'marketing_activity_type_id'}"/>
+                    <filter string="Status" name="groupby_state" context="{'group_by': 'state'}"/>
+                    <filter string="Visit Date" name="groupby_date" context="{'group_by': 'visit_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_otm_b2b_visit_record" model="ir.actions.act_window">
+        <field name="name">Visit Records</field>
+        <field name="res_model">otm.b2b.visit.record</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smart_action">Log your first institution visit</p>
+        </field>
+    </record>
+
+</odoo>

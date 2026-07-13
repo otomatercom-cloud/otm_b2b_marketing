@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="portal_visit_complete_form" name="B2B Visit - Mobile Update">
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Visit update - Logic School Of Management</title>
+    <style>
+        body { font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background:#f5f4f2; margin:0; padding:0; color:#2b2b2b; }
+        .o_b2b_wrap { max-width:480px; margin:0 auto; padding:24px 20px; }
+        .o_b2b_card { background:#ffffff; border-radius:12px; border:1px solid #e0e0e0; padding:20px; }
+        .o_b2b_title { font-size:18px; font-weight:600; margin:0 0 4px; }
+        .o_b2b_sub { font-size:13px; color:#6c757d; margin:0 0 20px; }
+        label { display:block; font-size:13px; font-weight:600; margin:16px 0 6px; }
+        select, textarea, input[type=text], input[type=date] {
+            width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid #d0d0d0;
+            border-radius:8px; font-size:15px; background:#fff;
+        }
+        textarea { min-height:90px; resize:vertical; }
+        button { width:100%; margin-top:24px; padding:12px; border:none; border-radius:8px;
+                 background:#714B67; color:#ffffff; font-size:15px; font-weight:600; cursor:pointer; }
+        .o_b2b_done { text-align:center; padding:24px 0; }
+        .o_b2b_done_icon { font-size:40px; color:#28a745; margin-bottom:8px; }
+    </style>
+</head>
+<body>
+    <div class="o_b2b_wrap">
+        <div class="o_b2b_card">
+            <t t-if="submitted">
+                <div class="o_b2b_done">
+                    <div class="o_b2b_done_icon">&#10004;</div>
+                    <p class="o_b2b_title">Visit update recorded</p>
+                    <p class="o_b2b_sub">Thanks - the visit to <t t-esc="visit.institution_id.name"/> has been marked done.</p>
+                </div>
+            </t>
+            <t t-else="">
+                <p class="o_b2b_title"><t t-esc="visit.institution_id.name"/></p>
+                <p class="o_b2b_sub">Visit on <t t-esc="visit.visit_date"/> · <t t-esc="visit.user_id.name"/></p>
+                <form t-attf-action="/b2b/visit/#{visit.id}/#{visit.access_token}/submit" method="post">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <label for="marketing_activity_type_id">Activity type</label>
+                    <select name="marketing_activity_type_id" id="marketing_activity_type_id" required="required">
+                        <option value="">Select...</option>
+                        <t t-foreach="activity_types" t-as="at">
+                            <option t-att-value="at.id"><t t-esc="at.name"/></option>
+                        </t>
+                    </select>
+                    <label for="remarks">Remarks</label>
+                    <textarea name="remarks" id="remarks" required="required" placeholder="What was discussed..."></textarea>
+                    <label for="next_action">Next action</label>
+                    <input type="text" name="next_action" id="next_action" placeholder="e.g. Send brochure"/>
+                    <label for="next_followup_date">Next followup date</label>
+                    <input type="date" name="next_followup_date" id="next_followup_date"/>
+                    <button type="submit">Mark visit done</button>
+                </form>
+            </t>
+        </div>
+    </div>
+</body>
+</html>
+    </template>
+
+</odoo>

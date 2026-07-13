@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_otm_b2b_marketing_root" name="B2B Marketing" sequence="25"
+              web_icon="otm_b2b_marketing,static/description/icon.png"
+              groups="otm_b2b_marketing.group_otm_b2b_marketing_executive"/>
+
+    <menuitem id="menu_otm_b2b_dashboard" name="Dashboard" parent="menu_otm_b2b_marketing_root"
+              action="action_otm_b2b_dashboard" sequence="10"/>
+
+    <menuitem id="menu_otm_b2b_institution" name="Institutions" parent="menu_otm_b2b_marketing_root"
+              action="action_otm_b2b_institution" sequence="20"/>
+
+    <menuitem id="menu_otm_b2b_visit_plan" name="Visit Planning" parent="menu_otm_b2b_marketing_root"
+              action="action_otm_b2b_visit_plan" sequence="30"/>
+
+    <menuitem id="menu_otm_b2b_visit_record" name="Visit Records" parent="menu_otm_b2b_marketing_root"
+              action="action_otm_b2b_visit_record" sequence="40"/>
+
+    <menuitem id="menu_otm_b2b_activity" name="Marketing Activities" parent="menu_otm_b2b_marketing_root"
+              action="action_otm_b2b_visit_record" sequence="50"
+              groups="otm_b2b_marketing.group_otm_b2b_marketing_manager"/>
+
+    <menuitem id="menu_otm_b2b_lead" name="Leads Collected" parent="menu_otm_b2b_marketing_root"
+              action="action_otm_b2b_lead" sequence="60"/>
+
+    <menuitem id="menu_otm_b2b_seminar" name="Seminar Management" parent="menu_otm_b2b_marketing_root"
+              action="action_otm_b2b_seminar" sequence="70"/>
+
+    <menuitem id="menu_otm_b2b_mou" name="MOU Management" parent="menu_otm_b2b_marketing_root"
+              action="action_otm_b2b_mou" sequence="80"/>
+
+    <!-- Reports -->
+    <menuitem id="menu_otm_b2b_reports" name="Reports" parent="menu_otm_b2b_marketing_root" sequence="90"
+              groups="otm_b2b_marketing.group_otm_b2b_marketing_manager"/>
+
+    <menuitem id="menu_otm_b2b_report_visit" name="Institution Visit Report" parent="menu_otm_b2b_reports"
+              action="action_otm_b2b_report_visit_analysis" sequence="10"/>
+
+    <menuitem id="menu_otm_b2b_report_executive" name="Executive Performance Report" parent="menu_otm_b2b_reports"
+              action="action_otm_b2b_report_executive_performance" sequence="20"/>
+
+    <menuitem id="menu_otm_b2b_report_lead" name="Lead Collection Report" parent="menu_otm_b2b_reports"
+              action="action_otm_b2b_report_lead" sequence="30"/>
+
+    <menuitem id="menu_otm_b2b_report_seminar" name="Seminar Report" parent="menu_otm_b2b_reports"
+              action="action_otm_b2b_report_seminar" sequence="40"/>
+
+    <menuitem id="menu_otm_b2b_report_mou" name="MOU Report" parent="menu_otm_b2b_reports"
+              action="action_otm_b2b_report_mou" sequence="50"/>
+
+    <menuitem id="menu_otm_b2b_report_monthly_visit" name="Monthly Visit Report" parent="menu_otm_b2b_reports"
+              action="action_otm_b2b_report_monthly_visit" sequence="60"/>
+
+    <menuitem id="menu_otm_b2b_report_institution_type" name="Institution Type / District Wise Report"
+              parent="menu_otm_b2b_reports" action="action_otm_b2b_report_institution_type" sequence="70"/>
+
+    <!-- Configuration -->
+    <menuitem id="menu_otm_b2b_configuration" name="Configuration" parent="menu_otm_b2b_marketing_root" sequence="100"
+              groups="otm_b2b_marketing.group_otm_b2b_marketing_head"/>
+
+    <menuitem id="menu_otm_b2b_institution_type" name="Institution Types" parent="menu_otm_b2b_configuration"
+              action="action_otm_b2b_institution_type" sequence="10"/>
+
+    <menuitem id="menu_otm_b2b_activity_type" name="Activity Types" parent="menu_otm_b2b_configuration"
+              action="action_otm_b2b_activity_type" sequence="20"/>
+
+    <menuitem id="menu_otm_b2b_tag" name="Tags" parent="menu_otm_b2b_configuration"
+              action="action_otm_b2b_tag" sequence="30"/>
+
+    <menuitem id="menu_otm_b2b_university" name="Universities" parent="menu_otm_b2b_configuration"
+              action="action_otm_b2b_university" sequence="40"/>
+
+    <menuitem id="menu_otm_b2b_zone" name="Zones" parent="menu_otm_b2b_configuration"
+              action="action_otm_b2b_zone" sequence="50"/>
+
+    <menuitem id="menu_otm_b2b_tier" name="Categories / Tiers" parent="menu_otm_b2b_configuration"
+              action="action_otm_b2b_tier" sequence="60"/>
+
+    <menuitem id="menu_otm_b2b_mou_type" name="MOU Types" parent="menu_otm_b2b_configuration"
+              action="action_otm_b2b_mou_type" sequence="70"/>
+
+</odoo>

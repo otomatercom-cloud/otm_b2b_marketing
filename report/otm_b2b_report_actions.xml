@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_report_otm_b2b_visit_record" model="ir.actions.report">
+        <field name="name">Visit Report</field>
+        <field name="model">otm.b2b.visit.record</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">otm_b2b_marketing.report_otm_b2b_visit_record</field>
+        <field name="report_file">otm_b2b_marketing.report_otm_b2b_visit_record</field>
+        <field name="print_report_name">'Visit Report - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_otm_b2b_visit_record"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_otm_b2b_mou" model="ir.actions.report">
+        <field name="name">MOU Summary</field>
+        <field name="model">otm.b2b.mou</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">otm_b2b_marketing.report_otm_b2b_mou</field>
+        <field name="report_file">otm_b2b_marketing.report_otm_b2b_mou</field>
+        <field name="print_report_name">'MOU Summary - %s' % (object.institution_id.name)</field>
+        <field name="binding_model_id" ref="model_otm_b2b_mou"/>
+        <field name="binding_type">report</field>
+    </record>
+
+</odoo>

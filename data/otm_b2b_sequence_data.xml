@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="seq_otm_b2b_institution" model="ir.sequence">
+        <field name="name">B2B Institution Code</field>
+        <field name="code">otm.b2b.institution</field>
+        <field name="prefix">INST/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <record id="seq_otm_b2b_visit_record" model="ir.sequence">
+        <field name="name">B2B Visit Number</field>
+        <field name="code">otm.b2b.visit.record</field>
+        <field name="prefix">VISIT/%(year)s/</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+</odoo>

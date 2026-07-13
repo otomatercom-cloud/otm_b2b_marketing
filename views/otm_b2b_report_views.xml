@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Visit Record analysis: pivot + graph, reused for Institution Visit Report
+         and Monthly / District Wise Visit Report via group-by context -->
+    <record id="view_otm_b2b_visit_record_pivot" model="ir.ui.view">
+        <field name="name">otm.b2b.visit.record.pivot</field>
+        <field name="model">otm.b2b.visit.record</field>
+        <field name="arch" type="xml">
+            <pivot string="Visit Analysis">
+                <field name="visit_date" type="row" interval="month"/>
+                <field name="user_id" type="row"/>
+                <field name="state" type="col"/>
+                <field name="duration" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_otm_b2b_visit_record_graph" model="ir.ui.view">
+        <field name="name">otm.b2b.visit.record.graph</field>
+        <field name="model">otm.b2b.visit.record</field>
+        <field name="arch" type="xml">
+            <graph string="Visit Analysis" type="bar">
+                <field name="visit_date" type="row" interval="month"/>
+                <field name="user_id" type="row"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_otm_b2b_report_visit_analysis" model="ir.actions.act_window">
+        <field name="name">Institution Visit Report</field>
+        <field name="res_model">otm.b2b.visit.record</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="context">{'search_default_groupby_institution': 1}</field>
+    </record>
+
+    <record id="action_otm_b2b_report_executive_performance" model="ir.actions.act_window">
+        <field name="name">Executive Performance Report</field>
+        <field name="res_model">otm.b2b.visit.record</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="context">{'search_default_groupby_user': 1, 'pivot_row_groupby': ['user_id']}</field>
+    </record>
+
+    <record id="action_otm_b2b_report_monthly_visit" model="ir.actions.act_window">
+        <field name="name">Monthly Visit Report</field>
+        <field name="res_model">otm.b2b.visit.record</field>
+        <field name="view_mode">pivot,graph,list</field>
+    </record>
+
+    <!-- Lead analysis -->
+    <record id="view_otm_b2b_lead_pivot" model="ir.ui.view">
+        <field name="name">otm.b2b.lead.pivot</field>
+        <field name="model">otm.b2b.lead</field>
+        <field name="arch" type="xml">
+            <pivot string="Lead Analysis">
+                <field name="institution_id" type="row"/>
+                <field name="state" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_otm_b2b_report_lead" model="ir.actions.act_window">
+        <field name="name">Lead Collection Report</field>
+        <field name="res_model">otm.b2b.lead</field>
+        <field name="view_mode">pivot,graph,list</field>
+    </record>
+
+    <!-- Seminar analysis -->
+    <record id="view_otm_b2b_seminar_pivot" model="ir.ui.view">
+        <field name="name">otm.b2b.seminar.pivot</field>
+        <field name="model">otm.b2b.seminar</field>
+        <field name="arch" type="xml">
+            <pivot string="Seminar Analysis">
+                <field name="institution_id" type="row"/>
+                <field name="student_count" type="measure"/>
+                <field name="faculty_count" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_otm_b2b_report_seminar" model="ir.actions.act_window">
+        <field name="name">Seminar Report</field>
+        <field name="res_model">otm.b2b.seminar</field>
+        <field name="view_mode">pivot,graph,list</field>
+    </record>
+
+    <!-- MOU analysis -->
+    <record id="view_otm_b2b_mou_pivot" model="ir.ui.view">
+        <field name="name">otm.b2b.mou.pivot</field>
+        <field name="model">otm.b2b.mou</field>
+        <field name="arch" type="xml">
+            <pivot string="MOU Analysis">
+                <field name="institution_id" type="row"/>
+                <field name="state" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_otm_b2b_report_mou" model="ir.actions.act_window">
+        <field name="name">MOU Report</field>
+        <field name="res_model">otm.b2b.mou</field>
+        <field name="view_mode">pivot,graph,list</field>
+    </record>
+
+    <!-- Institution type / district-wise report reuses the Institution list/pivot -->
+    <record id="view_otm_b2b_institution_pivot" model="ir.ui.view">
+        <field name="name">otm.b2b.institution.pivot</field>
+        <field name="model">otm.b2b.institution</field>
+        <field name="arch" type="xml">
+            <pivot string="Institution Analysis">
+                <field name="institution_type_id" type="row"/>
+                <field name="district" type="col"/>
+                <field name="total_visits" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_otm_b2b_report_institution_type" model="ir.actions.act_window">
+        <field name="name">Institution Type / District Wise Report</field>
+        <field name="res_model">otm.b2b.institution</field>
+        <field name="view_mode">pivot,graph,list</field>
+    </record>
+
+</odoo>

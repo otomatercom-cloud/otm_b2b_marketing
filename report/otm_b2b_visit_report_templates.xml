@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="report_otm_b2b_visit_record_document">
+        <t t-call="web.external_layout">
+            <t t-foreach="docs" t-as="doc">
+                <div class="page">
+                    <h2>Visit Report - <t t-esc="doc.name"/></h2>
+                    <table class="table table-sm table-borderless" style="width:100%;">
+                        <tr>
+                            <td><strong>Institution:</strong> <t t-esc="doc.institution_id.name"/></td>
+                            <td><strong>Visit Date:</strong> <t t-esc="doc.visit_date"/></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Marketing Executive:</strong> <t t-esc="doc.user_id.name"/></td>
+                            <td><strong>Activity Type:</strong> <t t-esc="doc.marketing_activity_type_id.name"/></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Check In:</strong> <t t-esc="doc.checkin_time"/></td>
+                            <td><strong>Check Out:</strong> <t t-esc="doc.checkout_time"/></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Duration (hrs):</strong> <t t-esc="doc.duration"/></td>
+                            <td><strong>Status:</strong> <t t-esc="doc.state"/></td>
+                        </tr>
+                    </table>
+
+                    <h4>Discussion Summary</h4>
+                    <p t-esc="doc.discussion_summary or '-'"/>
+
+                    <h4>Remarks</h4>
+                    <p t-esc="doc.remarks or '-'"/>
+
+                    <h4>Collected Data</h4>
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Prospects</th>
+                                <th>Students</th>
+                                <th>Parents</th>
+                                <th>Faculty Contacts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><t t-esc="doc.collected_prospect_count"/></td>
+                                <td><t t-esc="doc.collected_student_count"/></td>
+                                <td><t t-esc="doc.collected_parent_count"/></td>
+                                <td><t t-esc="doc.collected_faculty_contact_count"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <p><strong>Next Followup Date:</strong> <t t-esc="doc.next_followup_date or '-'"/></p>
+                    <p><strong>Next Action:</strong> <t t-esc="doc.next_action or '-'"/></p>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_otm_b2b_visit_record">
+        <t t-call="web.html_container">
+            <t t-call="otm_b2b_marketing.report_otm_b2b_visit_record_document"/>
+        </t>
+    </template>
+
+</odoo>

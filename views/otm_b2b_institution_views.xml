@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ==================== FORM ==================== -->
+    <record id="view_otm_b2b_institution_form" model="ir.ui.view">
+        <field name="name">otm.b2b.institution.form</field>
+        <field name="model">otm.b2b.institution</field>
+        <field name="arch" type="xml">
+            <form string="Institution">
+                <header>
+                    <field name="status" widget="statusbar" statusbar_visible="new,active,inactive,blacklisted"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Blacklisted" bg_color="text-bg-danger"
+                            invisible="status != 'blacklisted'"/>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_visits" type="object" class="oe_stat_button" icon="fa-map-marker">
+                            <field name="visit_count" widget="statinfo" string="Visits"/>
+                        </button>
+                        <button name="action_view_seminars" type="object" class="oe_stat_button" icon="fa-graduation-cap">
+                            <field name="seminar_count" widget="statinfo" string="Seminars"/>
+                        </button>
+                        <button name="action_view_leads" type="object" class="oe_stat_button" icon="fa-users">
+                            <field name="lead_count" widget="statinfo" string="Leads"/>
+                        </button>
+                        <button name="action_view_mous" type="object" class="oe_stat_button" icon="fa-file-text-o">
+                            <field name="mou_count" widget="statinfo" string="MOU"/>
+                        </button>
+                        <button name="action_view_contacts" type="object" class="oe_stat_button" icon="fa-address-book">
+                            <field name="contact_count" widget="statinfo" string="Contacts"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Institution Name"/></h1>
+                        <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                    </div>
+                    <group>
+                        <group string="Classification">
+                            <field name="code" readonly="1"/>
+                            <field name="institution_type_id"/>
+                            <field name="university_id"/>
+                            <field name="tier_id"/>
+                            <field name="zone_id"/>
+                        </group>
+                        <group string="Ownership">
+                            <field name="marketing_manager_id"/>
+                            <field name="user_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Address &amp; Contacts" name="address">
+                            <group>
+                                <group string="Address">
+                                    <field name="street"/>
+                                    <field name="street2"/>
+                                    <field name="city"/>
+                                    <field name="location"/>
+                                    <field name="district"/>
+                                    <field name="state_id"/>
+                                    <field name="country_id"/>
+                                    <field name="zip"/>
+                                    <label for="partner_latitude" string="Coordinates"/>
+                                    <div class="o_row">
+                                        <field name="partner_latitude"/>
+                                        <field name="partner_longitude"/>
+                                    </div>
+                                </group>
+                                <group string="Key Contacts">
+                                    <field name="decision_maker"/>
+                                    <field name="principal_name"/>
+                                    <field name="principal_mobile"/>
+                                    <field name="vice_principal_name"/>
+                                    <field name="hod_name"/>
+                                    <field name="hod_mobile"/>
+                                    <field name="management_contact_name"/>
+                                    <field name="placement_officer_name"/>
+                                    <field name="admission_officer_name"/>
+                                    <field name="counsellor_name"/>
+                                    <field name="supporting_staff_name"/>
+                                    <field name="supporting_staff_mobile"/>
+                                    <field name="phone"/>
+                                    <field name="email" widget="email"/>
+                                    <field name="website" widget="url"/>
+                                </group>
+                            </group>
+                            <field name="contact_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="designation"/>
+                                    <field name="mobile"/>
+                                    <field name="email"/>
+                                    <field name="whatsapp"/>
+                                    <field name="birthday"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Academic Strength" name="strength">
+                            <group>
+                                <group>
+                                    <field name="student_strength"/>
+                                    <field name="plus_two_strength"/>
+                                    <field name="final_year_strength"/>
+                                    <field name="second_year_strength"/>
+                                    <field name="first_year_strength"/>
+                                </group>
+                                <group>
+                                    <field name="ug_strength"/>
+                                    <field name="pg_strength"/>
+                                    <field name="commerce_strength"/>
+                                    <field name="science_strength"/>
+                                    <field name="humanities_strength"/>
+                                    <field name="placement_strength"/>
+                                </group>
+                            </group>
+                            <field name="courses_offered" placeholder="List of courses offered..."/>
+                        </page>
+                        <page string="Visit Summary" name="visit_summary">
+                            <group>
+                                <group>
+                                    <field name="total_visits"/>
+                                    <field name="first_visit_date"/>
+                                    <field name="last_visit_date"/>
+                                </group>
+                                <group>
+                                    <field name="days_since_last_visit"/>
+                                    <field name="upcoming_visit_date"/>
+                                </group>
+                            </group>
+                            <group string="Latest Visit">
+                                <field name="last_marketing_activity_id" readonly="1"/>
+                                <field name="last_visit_status" readonly="1"/>
+                                <field name="last_visit_remarks" readonly="1"/>
+                            </group>
+                            <separator string="Visit Timeline"/>
+                            <field name="visit_record_ids" readonly="1">
+                                <list decoration-success="state == 'completed'"
+                                      decoration-warning="state == 'partially_completed'"
+                                      decoration-muted="state == 'cancelled'">
+                                    <field name="visit_date"/>
+                                    <field name="user_id"/>
+                                    <field name="marketing_activity_type_id"/>
+                                    <field name="remarks"/>
+                                    <field name="duration"/>
+                                    <field name="next_followup_date"/>
+                                    <field name="state"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="MOU Overview" name="mou_overview">
+                            <group>
+                                <group>
+                                    <field name="mou_type_id" readonly="1"/>
+                                    <field name="mou_status" readonly="1"/>
+                                </group>
+                                <group>
+                                    <field name="mou_signed_date" readonly="1"/>
+                                    <field name="mou_valid_till" readonly="1"/>
+                                    <field name="mou_renewal_date" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Status &amp; Remarks" name="status">
+                            <field name="remarks" placeholder="Internal remarks..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ==================== LIST ==================== -->
+    <record id="view_otm_b2b_institution_list" model="ir.ui.view">
+        <field name="name">otm.b2b.institution.list</field>
+        <field name="model">otm.b2b.institution</field>
+        <field name="arch" type="xml">
+            <list string="Institutions" decoration-danger="status == 'blacklisted'"
+                  decoration-muted="status == 'inactive'">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="institution_type_id"/>
+                <field name="university_id" optional="hide"/>
+                <field name="tier_id" optional="show"/>
+                <field name="zone_id" optional="hide"/>
+                <field name="district"/>
+                <field name="state_id" optional="hide"/>
+                <field name="marketing_manager_id"/>
+                <field name="last_visit_date"/>
+                <field name="upcoming_visit_date"/>
+                <field name="total_visits"/>
+                <field name="mou_status" widget="badge" optional="show"/>
+                <field name="status" widget="badge"
+                       decoration-success="status == 'active'"
+                       decoration-info="status == 'new'"
+                       decoration-danger="status == 'blacklisted'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ==================== KANBAN ==================== -->
+    <record id="view_otm_b2b_institution_kanban" model="ir.ui.view">
+        <field name="name">otm.b2b.institution.kanban</field>
+        <field name="model">otm.b2b.institution</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" default_group_by="status" records_draggable="false">
+                <field name="name"/>
+                <field name="institution_type_id"/>
+                <field name="tier_id"/>
+                <field name="marketing_manager_id"/>
+                <field name="last_visit_date"/>
+                <field name="upcoming_visit_date"/>
+                <field name="total_visits"/>
+                <field name="status"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <strong><field name="name"/></strong>
+                            <div class="text-muted"><field name="institution_type_id"/>
+                                <span t-if="record.tier_id.raw_value"> · <field name="tier_id"/></span>
+                            </div>
+                            <div>
+                                <field name="marketing_manager_id" widget="many2one_avatar_user"/>
+                            </div>
+                            <div class="d-flex justify-content-between mt-1">
+                                <span>Last Visit: <field name="last_visit_date"/></span>
+                                <span class="badge text-bg-primary"><field name="total_visits"/> visits</span>
+                            </div>
+                            <div t-if="record.upcoming_visit_date.raw_value">
+                                Next Visit: <field name="upcoming_visit_date"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ==================== SEARCH ==================== -->
+    <record id="view_otm_b2b_institution_search" model="ir.ui.view">
+        <field name="name">otm.b2b.institution.search</field>
+        <field name="model">otm.b2b.institution</field>
+        <field name="arch" type="xml">
+            <search string="Search Institutions">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="institution_type_id"/>
+                <field name="university_id"/>
+                <field name="zone_id"/>
+                <field name="tier_id"/>
+                <field name="district"/>
+                <field name="state_id"/>
+                <field name="marketing_manager_id"/>
+                <field name="tag_ids"/>
+                <filter string="New" name="filter_new" domain="[('status', '=', 'new')]"/>
+                <filter string="Active" name="filter_active" domain="[('status', '=', 'active')]"/>
+                <filter string="Inactive" name="filter_inactive" domain="[('status', '=', 'inactive')]"/>
+                <filter string="Blacklisted" name="filter_blacklisted" domain="[('status', '=', 'blacklisted')]"/>
+                <separator/>
+                <filter string="No Visit Yet" name="filter_no_visit" domain="[('total_visits', '=', 0)]"/>
+                <filter string="Has Upcoming Visit" name="filter_upcoming_visit"
+                        domain="[('upcoming_visit_date', '!=', False)]"/>
+                <filter string="Seminar Conducted" name="filter_seminar_done" domain="[('seminar_count', '>', 0)]"/>
+                <filter string="MOU Signed" name="filter_mou_signed" domain="[('mou_signed', '=', True)]"/>
+                <filter string="Lead Available" name="filter_lead_available" domain="[('lead_count', '>', 0)]"/>
+                <separator/>
+                <filter string="My Institutions" name="filter_mine"
+                        domain="['|', ('marketing_manager_id', '=', uid), ('user_id', '=', uid)]"/>
+                <group>
+                    <filter string="Institution Type" name="groupby_type" context="{'group_by': 'institution_type_id'}"/>
+                    <filter string="University" name="groupby_university" context="{'group_by': 'university_id'}"/>
+                    <filter string="Zone" name="groupby_zone" context="{'group_by': 'zone_id'}"/>
+                    <filter string="Category / Tier" name="groupby_tier" context="{'group_by': 'tier_id'}"/>
+                    <filter string="District" name="groupby_district" context="{'group_by': 'district'}"/>
+                    <filter string="State" name="groupby_state" context="{'group_by': 'state_id'}"/>
+                    <filter string="Marketing Manager" name="groupby_manager" context="{'group_by': 'marketing_manager_id'}"/>
+                    <filter string="Status" name="groupby_status" context="{'group_by': 'status'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ==================== ACTION ==================== -->
+    <record id="action_otm_b2b_institution" model="ir.actions.act_window">
+        <field name="name">Institutions</field>
+        <field name="res_model">otm.b2b.institution</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="search_view_id" ref="view_otm_b2b_institution_search"/>
+        <field name="context">{'search_default_filter_mine': 0}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smart_action">Create your first institution</p>
+            <p>Track schools, colleges, universities and training institutes that your
+                marketing team visits regularly.</p>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="institution_type_school" model="otm.b2b.institution.type">
+        <field name="name">School</field>
+        <field name="code">SCHOOL</field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="institution_type_college" model="otm.b2b.institution.type">
+        <field name="name">College</field>
+        <field name="code">COLLEGE</field>
+        <field name="sequence">20</field>
+    </record>
+    <record id="institution_type_university" model="otm.b2b.institution.type">
+        <field name="name">University</field>
+        <field name="code">UNIVERSITY</field>
+        <field name="sequence">30</field>
+    </record>
+    <record id="institution_type_polytechnic" model="otm.b2b.institution.type">
+        <field name="name">Polytechnic</field>
+        <field name="code">POLYTECHNIC</field>
+        <field name="sequence">40</field>
+    </record>
+    <record id="institution_type_engineering_college" model="otm.b2b.institution.type">
+        <field name="name">Engineering College</field>
+        <field name="code">ENGG_COLLEGE</field>
+        <field name="sequence">50</field>
+    </record>
+    <record id="institution_type_arts_college" model="otm.b2b.institution.type">
+        <field name="name">Arts College</field>
+        <field name="code">ARTS_COLLEGE</field>
+        <field name="sequence">60</field>
+    </record>
+    <record id="institution_type_training_institute" model="otm.b2b.institution.type">
+        <field name="name">Training Institute</field>
+        <field name="code">TRAINING_INSTITUTE</field>
+        <field name="sequence">70</field>
+    </record>
+    <record id="institution_type_coaching_centre" model="otm.b2b.institution.type">
+        <field name="name">Coaching Centre</field>
+        <field name="code">COACHING_CENTRE</field>
+        <field name="sequence">80</field>
+    </record>
+    <record id="institution_type_iti" model="otm.b2b.institution.type">
+        <field name="name">ITI</field>
+        <field name="code">ITI</field>
+        <field name="sequence">90</field>
+    </record>
+    <record id="institution_type_other" model="otm.b2b.institution.type">
+        <field name="name">Other</field>
+        <field name="code">OTHER</field>
+        <field name="sequence">100</field>
+    </record>
+
+</odoo>

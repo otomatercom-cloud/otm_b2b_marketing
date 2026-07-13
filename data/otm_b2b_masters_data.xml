@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- Zones -->
+    <record id="zone_1" model="otm.b2b.zone">
+        <field name="name">Zone 1</field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="zone_2" model="otm.b2b.zone">
+        <field name="name">Zone 2</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <!-- Category / Tier -->
+    <record id="tier_1" model="otm.b2b.tier">
+        <field name="name">Tier 1</field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="tier_2" model="otm.b2b.tier">
+        <field name="name">Tier 2</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <!-- MOU types -->
+    <record id="mou_type_placement" model="otm.b2b.mou.type">
+        <field name="name">Placement</field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="mou_type_training" model="otm.b2b.mou.type">
+        <field name="name">Training</field>
+        <field name="sequence">20</field>
+    </record>
+    <record id="mou_type_academic" model="otm.b2b.mou.type">
+        <field name="name">Academic</field>
+        <field name="sequence">30</field>
+    </record>
+    <record id="mou_type_other" model="otm.b2b.mou.type">
+        <field name="name">Other</field>
+        <field name="sequence">40</field>
+    </record>
+
+    <!-- Universities -->
+    <record id="university_mgu" model="otm.b2b.university">
+        <field name="name">MGU</field>
+        <field name="code">MGU</field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="university_calicut" model="otm.b2b.university">
+        <field name="name">Calicut University</field>
+        <field name="code">CALICUT</field>
+        <field name="sequence">20</field>
+    </record>
+    <record id="university_kerala" model="otm.b2b.university">
+        <field name="name">University of Kerala</field>
+        <field name="code">KERALA</field>
+        <field name="sequence">30</field>
+    </record>
+    <record id="university_ktu" model="otm.b2b.university">
+        <field name="name">KTU</field>
+        <field name="code">KTU</field>
+        <field name="sequence">40</field>
+    </record>
+
+</odoo>

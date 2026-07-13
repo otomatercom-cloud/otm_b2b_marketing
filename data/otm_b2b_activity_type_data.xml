@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="activity_type_first_visit" model="otm.b2b.activity.type">
+        <field name="name">First Visit</field>
+        <field name="code">FIRST_VISIT</field>
+        <field name="sequence">10</field>
+        <field name="color">1</field>
+    </record>
+    <record id="activity_type_follow_up" model="otm.b2b.activity.type">
+        <field name="name">Follow Up</field>
+        <field name="code">FOLLOW_UP</field>
+        <field name="sequence">20</field>
+        <field name="color">2</field>
+    </record>
+    <record id="activity_type_lead_collection" model="otm.b2b.activity.type">
+        <field name="name">Lead Collection</field>
+        <field name="code">LEAD_COLLECTION</field>
+        <field name="sequence">30</field>
+        <field name="color">3</field>
+    </record>
+    <record id="activity_type_seminar_discussion" model="otm.b2b.activity.type">
+        <field name="name">Seminar Discussion</field>
+        <field name="code">SEMINAR_DISCUSSION</field>
+        <field name="sequence">40</field>
+        <field name="color">4</field>
+    </record>
+    <record id="activity_type_seminar_conducted" model="otm.b2b.activity.type">
+        <field name="name">Seminar Conducted</field>
+        <field name="code">SEMINAR_CONDUCTED</field>
+        <field name="sequence">50</field>
+        <field name="color">5</field>
+    </record>
+    <record id="activity_type_event" model="otm.b2b.activity.type">
+        <field name="name">Event</field>
+        <field name="code">EVENT</field>
+        <field name="sequence">60</field>
+        <field name="color">6</field>
+    </record>
+    <record id="activity_type_career_guidance" model="otm.b2b.activity.type">
+        <field name="name">Career Guidance</field>
+        <field name="code">CAREER_GUIDANCE</field>
+        <field name="sequence">70</field>
+        <field name="color">7</field>
+    </record>
+    <record id="activity_type_admission_campaign" model="otm.b2b.activity.type">
+        <field name="name">Admission Campaign</field>
+        <field name="code">ADMISSION_CAMPAIGN</field>
+        <field name="sequence">80</field>
+        <field name="color">8</field>
+    </record>
+    <record id="activity_type_mou_discussion" model="otm.b2b.activity.type">
+        <field name="name">MOU Discussion</field>
+        <field name="code">MOU_DISCUSSION</field>
+        <field name="sequence">90</field>
+        <field name="color">9</field>
+    </record>
+    <record id="activity_type_mou_signed" model="otm.b2b.activity.type">
+        <field name="name">MOU Signed</field>
+        <field name="code">MOU_SIGNED</field>
+        <field name="sequence">100</field>
+        <field name="color">10</field>
+    </record>
+    <record id="activity_type_placement_discussion" model="otm.b2b.activity.type">
+        <field name="name">Placement Discussion</field>
+        <field name="code">PLACEMENT_DISCUSSION</field>
+        <field name="sequence">110</field>
+        <field name="color">11</field>
+    </record>
+    <record id="activity_type_faculty_meeting" model="otm.b2b.activity.type">
+        <field name="name">Faculty Meeting</field>
+        <field name="code">FACULTY_MEETING</field>
+        <field name="sequence">120</field>
+        <field name="color">3</field>
+    </record>
+    <record id="activity_type_principal_meeting" model="otm.b2b.activity.type">
+        <field name="name">Principal Meeting</field>
+        <field name="code">PRINCIPAL_MEETING</field>
+        <field name="sequence">130</field>
+        <field name="color">4</field>
+    </record>
+    <record id="activity_type_management_meeting" model="otm.b2b.activity.type">
+        <field name="name">Management Meeting</field>
+        <field name="code">MANAGEMENT_MEETING</field>
+        <field name="sequence">140</field>
+        <field name="color">5</field>
+    </record>
+    <record id="activity_type_other" model="otm.b2b.activity.type">
+        <field name="name">Other</field>
+        <field name="code">OTHER</field>
+        <field name="sequence">150</field>
+        <field name="color">0</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_otm_b2b_tag_list" model="ir.ui.view">
+        <field name="name">otm.b2b.tag.list</field>
+        <field name="model">otm.b2b.tag</field>
+        <field name="arch" type="xml">
+            <list string="Tags" editable="bottom">
+                <field name="name"/>
+                <field name="color" widget="color_picker" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_otm_b2b_tag" model="ir.actions.act_window">
+        <field name="name">Tags</field>
+        <field name="res_model">otm.b2b.tag</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

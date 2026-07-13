@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ==================== UNIVERSITY ==================== -->
+    <record id="view_otm_b2b_university_list" model="ir.ui.view">
+        <field name="name">otm.b2b.university.list</field>
+        <field name="model">otm.b2b.university</field>
+        <field name="arch" type="xml">
+            <list string="Universities" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="active" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_otm_b2b_university" model="ir.actions.act_window">
+        <field name="name">Universities</field>
+        <field name="res_model">otm.b2b.university</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ==================== ZONE ==================== -->
+    <record id="view_otm_b2b_zone_list" model="ir.ui.view">
+        <field name="name">otm.b2b.zone.list</field>
+        <field name="model">otm.b2b.zone</field>
+        <field name="arch" type="xml">
+            <list string="Zones" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="active" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_otm_b2b_zone" model="ir.actions.act_window">
+        <field name="name">Zones</field>
+        <field name="res_model">otm.b2b.zone</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ==================== TIER / CATEGORY ==================== -->
+    <record id="view_otm_b2b_tier_list" model="ir.ui.view">
+        <field name="name">otm.b2b.tier.list</field>
+        <field name="model">otm.b2b.tier</field>
+        <field name="arch" type="xml">
+            <list string="Categories / Tiers" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="active" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_otm_b2b_tier" model="ir.actions.act_window">
+        <field name="name">Categories / Tiers</field>
+        <field name="res_model">otm.b2b.tier</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ==================== MOU TYPE ==================== -->
+    <record id="view_otm_b2b_mou_type_list" model="ir.ui.view">
+        <field name="name">otm.b2b.mou.type.list</field>
+        <field name="model">otm.b2b.mou.type</field>
+        <field name="arch" type="xml">
+            <list string="MOU Types" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="active" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_otm_b2b_mou_type" model="ir.actions.act_window">
+        <field name="name">MOU Types</field>
+        <field name="res_model">otm.b2b.mou.type</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

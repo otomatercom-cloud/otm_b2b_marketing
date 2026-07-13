@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="otm_b2b_marketing.Dashboard">
+        <div class="o_otm_b2b_dashboard p-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <div>
+                    <h2 class="mb-0">B2B Marketing</h2>
+                    <p class="o_otm_b2b_org_label">Logic School Of Management</p>
+                </div>
+            </div>
+            <p class="o_otm_b2b_scope_label" t-if="!state.loading">
+                <t t-if="state.isManager">Showing all Marketing data</t>
+                <t t-else="">Showing your data, <t t-esc="state.userName"/></t>
+            </p>
+
+            <div t-if="state.loading" class="text-muted mt-3">Loading dashboard...</div>
+
+            <t t-if="!state.loading">
+                <div class="o_otm_b2b_kpi_row mt-3">
+                    <div class="o_otm_b2b_kpi_card" t-on-click="openVisitPlans">
+                        <div class="o_otm_b2b_kpi_top">
+                            <span class="o_otm_b2b_kpi_label">Today's visits</span>
+                            <i class="fa fa-map-marker o_otm_b2b_kpi_icon"/>
+                        </div>
+                        <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.today_visits"/></div>
+                    </div>
+                    <div class="o_otm_b2b_kpi_card" t-on-click="openVisitPlans">
+                        <div class="o_otm_b2b_kpi_top">
+                            <span class="o_otm_b2b_kpi_label">Upcoming visits</span>
+                            <i class="fa fa-calendar o_otm_b2b_kpi_icon"/>
+                        </div>
+                        <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.upcoming_visits"/></div>
+                    </div>
+                    <div class="o_otm_b2b_kpi_card">
+                        <div class="o_otm_b2b_kpi_top">
+                            <span class="o_otm_b2b_kpi_label">Completed visits</span>
+                            <i class="fa fa-check-circle o_otm_b2b_kpi_icon"/>
+                        </div>
+                        <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.completed_visits"/></div>
+                    </div>
+                    <div class="o_otm_b2b_kpi_card">
+                        <div class="o_otm_b2b_kpi_top">
+                            <span class="o_otm_b2b_kpi_label">Pending visits</span>
+                            <i class="fa fa-hourglass-half o_otm_b2b_kpi_icon"/>
+                        </div>
+                        <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.pending_visits"/></div>
+                    </div>
+                    <div class="o_otm_b2b_kpi_card" t-on-click="openInstitutions">
+                        <div class="o_otm_b2b_kpi_top">
+                            <span class="o_otm_b2b_kpi_label">Institutions assigned</span>
+                            <i class="fa fa-building o_otm_b2b_kpi_icon"/>
+                        </div>
+                        <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.institutions_assigned"/></div>
+                    </div>
+                    <div class="o_otm_b2b_kpi_card" t-on-click="openInstitutions">
+                        <div class="o_otm_b2b_kpi_top">
+                            <span class="o_otm_b2b_kpi_label">Total institutions</span>
+                            <i class="fa fa-university o_otm_b2b_kpi_icon"/>
+                        </div>
+                        <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.total_institutions"/></div>
+                    </div>
+                    <div class="o_otm_b2b_kpi_card">
+                        <div class="o_otm_b2b_kpi_top">
+                            <span class="o_otm_b2b_kpi_label">New institutions</span>
+                            <i class="fa fa-star-o o_otm_b2b_kpi_icon"/>
+                        </div>
+                        <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.new_institutions"/></div>
+                    </div>
+                    <div class="o_otm_b2b_kpi_card">
+                        <div class="o_otm_b2b_kpi_top">
+                            <span class="o_otm_b2b_kpi_label">Inactive institutions</span>
+                            <i class="fa fa-ban o_otm_b2b_kpi_icon"/>
+                        </div>
+                        <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.inactive_institutions"/></div>
+                    </div>
+                    <div class="o_otm_b2b_kpi_card" t-on-click="openLeads">
+                        <div class="o_otm_b2b_kpi_top">
+                            <span class="o_otm_b2b_kpi_label">Leads collected</span>
+                            <i class="fa fa-users o_otm_b2b_kpi_icon"/>
+                        </div>
+                        <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.leads_collected"/></div>
+                    </div>
+                    <div class="o_otm_b2b_kpi_card">
+                        <div class="o_otm_b2b_kpi_top">
+                            <span class="o_otm_b2b_kpi_label">Seminars conducted</span>
+                            <i class="fa fa-graduation-cap o_otm_b2b_kpi_icon"/>
+                        </div>
+                        <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.seminars_conducted"/></div>
+                    </div>
+                    <div class="o_otm_b2b_kpi_card" t-on-click="openMou">
+                        <div class="o_otm_b2b_kpi_top">
+                            <span class="o_otm_b2b_kpi_label">MOU signed</span>
+                            <i class="fa fa-file-text-o o_otm_b2b_kpi_icon"/>
+                        </div>
+                        <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.mou_signed"/></div>
+                    </div>
+                </div>
+
+                <div class="o_otm_b2b_charts_row mt-4">
+                    <div class="o_otm_b2b_panel">
+                        <h4>Institution type distribution</h4>
+                        <div class="o_otm_b2b_bar_list">
+                            <div class="o_otm_b2b_bar_row" t-foreach="state.byType" t-as="row" t-key="row.label">
+                                <div class="o_otm_b2b_bar_head">
+                                    <span><t t-esc="row.label"/></span>
+                                    <span class="text-muted"><t t-esc="row.count"/></span>
+                                </div>
+                                <div class="o_otm_b2b_bar_track">
+                                    <div class="o_otm_b2b_bar_fill o_otm_b2b_bar_accent"
+                                         t-attf-style="width: {{row.pct}}%"/>
+                                </div>
+                            </div>
+                            <p t-if="!state.byType.length" class="text-muted mb-0">No data yet.</p>
+                        </div>
+                    </div>
+                    <div class="o_otm_b2b_panel">
+                        <h4>District wise institutions</h4>
+                        <div class="o_otm_b2b_bar_list">
+                            <div class="o_otm_b2b_bar_row" t-foreach="state.byDistrict" t-as="row" t-key="row.label">
+                                <div class="o_otm_b2b_bar_head">
+                                    <span><t t-esc="row.label"/></span>
+                                    <span class="text-muted"><t t-esc="row.count"/></span>
+                                </div>
+                                <div class="o_otm_b2b_bar_track">
+                                    <div class="o_otm_b2b_bar_fill o_otm_b2b_bar_success"
+                                         t-attf-style="width: {{row.pct}}%"/>
+                                </div>
+                            </div>
+                            <p t-if="!state.byDistrict.length" class="text-muted mb-0">No data yet.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="o_otm_b2b_panel mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="mb-0">Upcoming visits</h4>
+                        <a href="#" class="o_otm_b2b_view_all" t-on-click.prevent="openVisitPlans">View all</a>
+                    </div>
+                    <div class="o_otm_b2b_visit_row" t-foreach="state.upcomingVisits" t-as="visit" t-key="visit_index">
+                        <div class="o_otm_b2b_visit_avatar">
+                            <t t-esc="visit.executive ? visit.executive.slice(0,2).toUpperCase() : '--'"/>
+                        </div>
+                        <div class="o_otm_b2b_visit_info">
+                            <div class="o_otm_b2b_visit_name"><t t-esc="visit.institution"/></div>
+                            <div class="o_otm_b2b_visit_meta">
+                                <t t-esc="visit.executive"/>
+                                <t t-if="visit.district"> · <t t-esc="visit.district"/></t>
+                            </div>
+                        </div>
+                        <span class="o_otm_b2b_visit_date"><t t-esc="visit.visit_date"/></span>
+                    </div>
+                    <p t-if="!state.upcomingVisits.length" class="text-muted mb-0">No upcoming visits planned.</p>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>

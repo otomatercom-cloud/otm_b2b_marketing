@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="cron_otm_b2b_visit_reminders" model="ir.cron">
+        <field name="name">B2B Marketing: Visit &amp; Follow-up Reminders</field>
+        <field name="model_id" ref="model_otm_b2b_visit_plan"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_send_visit_reminders()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active">True</field>
+    </record>
+
+    <record id="cron_otm_b2b_mou_expiry_reminders" model="ir.cron">
+        <field name="name">B2B Marketing: MOU Expiry Reminders</field>
+        <field name="model_id" ref="model_otm_b2b_mou"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_mou_expiry_reminders()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active">True</field>
+    </record>
+
+</odoo>

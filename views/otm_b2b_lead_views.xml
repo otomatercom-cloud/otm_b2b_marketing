@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_otm_b2b_lead_form" model="ir.ui.view">
+        <field name="name">otm.b2b.lead.form</field>
+        <field name="model">otm.b2b.lead</field>
+        <field name="arch" type="xml">
+            <form string="B2B Lead">
+                <header>
+                    <button name="action_set_contacted" type="object" string="Mark Contacted"
+                            invisible="state != 'new'"/>
+                    <button name="action_set_interested" type="object" string="Mark Interested"
+                            invisible="state != 'contacted'"/>
+                    <button name="action_set_admission" type="object" string="Mark Admission"
+                            class="btn-primary" invisible="state not in ('interested', 'contacted')"/>
+                    <button name="action_set_lost" type="object" string="Mark Lost"
+                            invisible="state in ('admission', 'lost')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="new,contacted,interested,admission"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Student Name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="mobile"/>
+                            <field name="email"/>
+                            <field name="course_interested"/>
+                            <field name="current_class"/>
+                        </group>
+                        <group>
+                            <field name="institution_id" options="{'no_create': True}"/>
+                            <field name="visit_id"/>
+                            <field name="source"/>
+                            <field name="counselor_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_otm_b2b_lead_list" model="ir.ui.view">
+        <field name="name">otm.b2b.lead.list</field>
+        <field name="model">otm.b2b.lead</field>
+        <field name="arch" type="xml">
+            <list string="B2B Leads" decoration-success="state == 'admission'" decoration-muted="state == 'lost'">
+                <field name="name"/>
+                <field name="mobile"/>
+                <field name="course_interested"/>
+                <field name="institution_id"/>
+                <field name="source"/>
+                <field name="counselor_id"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_otm_b2b_lead_kanban" model="ir.ui.view">
+        <field name="name">otm.b2b.lead.kanban</field>
+        <field name="model">otm.b2b.lead</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="institution_id"/>
+                <field name="course_interested"/>
+                <field name="counselor_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <strong><field name="name"/></strong>
+                            <div class="text-muted"><field name="institution_id"/></div>
+                            <div><field name="course_interested"/></div>
+                            <field name="counselor_id" widget="many2one_avatar_user"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_otm_b2b_lead_search" model="ir.ui.view">
+        <field name="name">otm.b2b.lead.search</field>
+        <field name="model">otm.b2b.lead</field>
+        <field name="arch" type="xml">
+            <search string="Search Leads">
+                <field name="name"/>
+                <field name="institution_id"/>
+                <field name="counselor_id"/>
+                <filter string="New" name="filter_new" domain="[('state', '=', 'new')]"/>
+                <filter string="Interested" name="filter_interested" domain="[('state', '=', 'interested')]"/>
+                <filter string="Admission" name="filter_admission" domain="[('state', '=', 'admission')]"/>
+                <filter string="Lost" name="filter_lost" domain="[('state', '=', 'lost')]"/>
+                <group>
+                    <filter string="Institution" name="groupby_institution" context="{'group_by': 'institution_id'}"/>
+                    <filter string="Source" name="groupby_source" context="{'group_by': 'source'}"/>
+                    <filter string="Counselor" name="groupby_counselor" context="{'group_by': 'counselor_id'}"/>
+                    <filter string="Status" name="groupby_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_otm_b2b_lead" model="ir.actions.act_window">
+        <field name="name">Leads Collected</field>
+        <field name="res_model">otm.b2b.lead</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smart_action">Record your first B2B lead</p>
+        </field>
+    </record>
+
+</odoo>
