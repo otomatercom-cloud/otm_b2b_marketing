@@ -381,7 +381,7 @@ class OtmB2bInstitution(models.Model):
             month_start = start_of(today, 'month')
             executive_group = self.env.ref(
                 'otm_b2b_marketing.group_otm_b2b_marketing_executive', raise_if_not_found=False)
-            managers = executive_group.users if executive_group else self.env['res.users']
+            managers = executive_group.user_ids if executive_group else self.env['res.users']
             Seminar = self.env['otm.b2b.seminar']
             Mou = self.env['otm.b2b.mou']
             # A MOU that has moved past 'discussion' has, by definition of
