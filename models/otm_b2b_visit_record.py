@@ -94,7 +94,12 @@ class OtmB2bVisitRecord(models.Model):
     def _compute_portal_url(self):
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         for rec in self:
-            is_saved = rec.id and not isinstance(rec.id, models.NewId)
+            # A real saved record always has an int id; an unsaved/onchange
+            # record has a NewId placeholder instead. Checking
+            # isinstance(..., int) avoids depending on NewId's exact import
+            # path (it moved from odoo.models to odoo.orm.identifiers
+            # between versions) - this check is stable across versions.
+            is_saved = isinstance(rec.id, int)
             rec.portal_url = (
                 f"{base_url}/b2b/visit/{rec.id}/{rec.access_token}"
                 if is_saved and rec.access_token else False
