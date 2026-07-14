@@ -19,6 +19,8 @@ Features
 * Lead collection during institutional visits
 * Seminar and event management
 * MOU (Memorandum of Understanding) lifecycle tracking
+* Telegram notifications - officers self-connect via a personal deep link,
+  no chat IDs entered manually anywhere
 * Multi-level security: Marketing Executive / Manager / Head
 * OWL dashboard with KPI cards and charts
 * Reports: visit, executive performance, lead, seminar, MOU
@@ -41,6 +43,7 @@ Features
         # wizard
         'wizard/otm_b2b_assign_manager_wizard_views.xml',
         'wizard/otm_b2b_visit_complete_wizard_views.xml',
+        'wizard/otm_b2b_telegram_settings_wizard_views.xml',
         # views
         'views/otm_b2b_institution_type_views.xml',
         'views/otm_b2b_activity_type_views.xml',
@@ -55,6 +58,7 @@ Features
         'views/otm_b2b_dashboard_views.xml',
         'views/otm_b2b_report_views.xml',
         'views/otm_b2b_portal_templates.xml',
+        'views/otm_b2b_res_users_views.xml',
         # reports (QWeb)
         'report/otm_b2b_visit_report_templates.xml',
         'report/otm_b2b_mou_report_templates.xml',

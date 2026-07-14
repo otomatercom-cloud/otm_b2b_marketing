@@ -74,6 +74,11 @@ class OtmB2bVisitPlan(models.Model):
                 date_deadline=plan.visit_date,
                 user_id=plan.user_id.id,
             )
+            if plan.user_id.otm_telegram_connected:
+                plan.user_id._otm_telegram_send(
+                    f"Reminder: visit to {plan.institution_id.name} planned for {label.lower()} "
+                    f"({plan.visit_date})."
+                )
 
         followups = self.env['otm.b2b.visit.record'].search([
             ('next_followup_date', '=', today),
@@ -87,6 +92,10 @@ class OtmB2bVisitPlan(models.Model):
                 date_deadline=today,
                 user_id=visit.user_id.id,
             )
+            if visit.user_id.otm_telegram_connected:
+                visit.user_id._otm_telegram_send(
+                    f"Follow-up due today for {visit.institution_id.name}."
+                )
 
     def action_open_complete_wizard(self):
         self.ensure_one()
@@ -135,8 +144,14 @@ class OtmB2bVisitPlan(models.Model):
         portal link immediately without navigating away."""
         self.ensure_one()
         self.action_check_in()
+        visit = self.visit_record_id
+        if self.user_id.otm_telegram_connected:
+            self.user_id._otm_telegram_send(
+                f"Checked in at {self.institution_id.name}.\n"
+                f"Fill in the visit details here when you're done: {visit.portal_url}"
+            )
         return {
             'institution': self.institution_id.name,
-            'visit_id': self.visit_record_id.id,
-            'portal_url': self.visit_record_id.portal_url,
+            'visit_id': visit.id,
+            'portal_url': visit.portal_url,
         }

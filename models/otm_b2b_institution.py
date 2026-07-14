@@ -429,6 +429,8 @@ class OtmB2bInstitution(models.Model):
         return {
             'is_manager': is_manager,
             'user_name': self.env.user.name,
+            'telegram_connected': self.env.user.otm_telegram_connected,
+            'telegram_deep_link': self.env.user.otm_telegram_deep_link,
             'cards': {
                 'today_visits': today_visits,
                 'upcoming_visits': len(upcoming_plans),

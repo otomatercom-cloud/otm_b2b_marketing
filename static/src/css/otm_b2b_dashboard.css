@@ -15,6 +15,34 @@
     margin: 0 0 8px;
 }
 
+.o_otm_b2b_telegram_badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: none;
+    cursor: default;
+    white-space: nowrap;
+}
+
+.o_otm_b2b_telegram_connected {
+    background-color: #e6f4ea;
+    color: #28a745;
+}
+
+.o_otm_b2b_telegram_connect {
+    background-color: #229ED9;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.o_otm_b2b_telegram_connect:hover {
+    background-color: #1b8bc0;
+}
+
 .o_otm_b2b_kpi_row {
     display: flex;
     flex-wrap: wrap;

@@ -72,3 +72,9 @@ class OtmB2bMou(models.Model):
                 date_deadline=mou.expiry_date,
                 user_id=mou.institution_id.marketing_manager_id.id or self.env.uid,
             )
+            manager = mou.institution_id.marketing_manager_id
+            if manager.otm_telegram_connected:
+                manager._otm_telegram_send(
+                    f"MOU with {mou.institution_id.name} expires on {mou.expiry_date}. "
+                    f"Time to start the renewal discussion."
+                )

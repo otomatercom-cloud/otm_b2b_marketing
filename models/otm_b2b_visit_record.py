@@ -117,6 +117,12 @@ class OtmB2bVisitRecord(models.Model):
 
     def action_check_out(self):
         self.write({'checkout_time': fields.Datetime.now()})
+        for visit in self:
+            if visit.user_id.otm_telegram_connected:
+                visit.user_id._otm_telegram_send(
+                    f"Checked out of {visit.institution_id.name}.\n"
+                    f"Log the activity type and remarks here: {visit.portal_url}"
+                )
 
     def action_mark_completed(self):
         self.write({'state': 'completed'})

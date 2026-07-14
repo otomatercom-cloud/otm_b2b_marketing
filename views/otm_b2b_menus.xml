@@ -80,4 +80,8 @@
     <menuitem id="menu_otm_b2b_mou_type" name="MOU Types" parent="menu_otm_b2b_configuration"
               action="action_otm_b2b_mou_type" sequence="70"/>
 
+    <menuitem id="menu_otm_b2b_telegram_settings" name="Telegram Settings" parent="menu_otm_b2b_configuration"
+              action="action_otm_b2b_telegram_settings_wizard" sequence="80"
+              groups="otm_b2b_marketing.group_otm_b2b_marketing_head"/>
+
 </odoo>

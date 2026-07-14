@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_otm_b2b_telegram_settings_wizard_form" model="ir.ui.view">
+        <field name="name">otm.b2b.telegram.settings.wizard.form</field>
+        <field name="model">otm.b2b.telegram.settings.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Telegram Bot Settings">
+                <group>
+                    <field name="bot_username" placeholder="LogicSchoolB2BBot"/>
+                    <field name="bot_token" password="True" placeholder="From @BotFather"/>
+                    <field name="webhook_status" readonly="1" invisible="not webhook_status"/>
+                </group>
+                <p class="text-muted">
+                    1. Create a bot with @BotFather on Telegram and paste its token above.<br/>
+                    2. Set the bot's username above (without the @).<br/>
+                    3. Click "Save &amp; Set Webhook" - this tells Telegram where to send messages
+                    for this bot. Your server must be reachable over HTTPS at its real domain
+                    (web.base.url) for this step to succeed.<br/>
+                    4. Officers can then tap "Connect Telegram" on their B2B Marketing dashboard
+                    to link their own chat automatically - no chat IDs are ever entered by hand.
+                </p>
+                <footer>
+                    <button name="action_save_and_set_webhook" type="object"
+                            string="Save &amp; Set Webhook" class="btn-primary"/>
+                    <button name="action_save" type="object" string="Save Only"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_otm_b2b_telegram_settings_wizard" model="ir.actions.act_window">
+        <field name="name">Telegram Settings</field>
+        <field name="res_model">otm.b2b.telegram.settings.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

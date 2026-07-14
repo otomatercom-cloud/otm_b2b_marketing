@@ -8,6 +8,15 @@
                     <h2 class="mb-0">B2B Marketing</h2>
                     <p class="o_otm_b2b_org_label">Logic School Of Management</p>
                 </div>
+                <div t-if="!state.loading">
+                    <span t-if="state.telegramConnected" class="o_otm_b2b_telegram_badge o_otm_b2b_telegram_connected">
+                        <i class="fa fa-paper-plane"/> Telegram connected
+                    </span>
+                    <button t-else="" class="o_otm_b2b_telegram_badge o_otm_b2b_telegram_connect"
+                            t-on-click="connectTelegram">
+                        <i class="fa fa-paper-plane"/> Connect Telegram
+                    </button>
+                </div>
             </div>
             <p class="o_otm_b2b_scope_label" t-if="!state.loading">
                 <t t-if="state.isManager">Showing all Marketing data</t>

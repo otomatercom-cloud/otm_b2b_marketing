@@ -38,6 +38,8 @@ export class OtmB2bDashboard extends Component {
             territoryPerformance: [],
             isManager: true,
             userName: "",
+            telegramConnected: false,
+            telegramDeepLink: false,
             loading: true,
         });
 
@@ -60,7 +62,26 @@ export class OtmB2bDashboard extends Component {
         this.state.territoryPerformance = data.territory_performance;
         this.state.isManager = data.is_manager;
         this.state.userName = data.user_name;
+        this.state.telegramConnected = data.telegram_connected;
+        this.state.telegramDeepLink = data.telegram_deep_link;
         this.state.loading = false;
+    }
+
+    connectTelegram() {
+        if (this.state.telegramDeepLink) {
+            window.open(this.state.telegramDeepLink, "_blank");
+            this.notification.add(
+                "Opened Telegram. Tap Start in the chat to finish connecting - this dashboard "
+                "will show you as connected once you do.",
+                { type: "info", sticky: true }
+            );
+        } else {
+            this.notification.add(
+                "Telegram isn't set up yet - ask your admin to configure the bot under "
+                "B2B Marketing > Configuration > Telegram Settings.",
+                { type: "warning" }
+            );
+        }
     }
 
     _withBarPercent(rows) {

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_users_form_otm_telegram" model="ir.ui.view">
+        <field name="name">res.users.form.otm.telegram</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="B2B Marketing Telegram" name="otm_b2b_telegram">
+                    <group>
+                        <field name="otm_telegram_connected" widget="boolean_toggle" readonly="1"/>
+                        <field name="otm_telegram_chat_id" readonly="1" invisible="not otm_telegram_chat_id"/>
+                        <field name="otm_telegram_deep_link" widget="url" readonly="1"
+                               string="Connect Link" invisible="otm_telegram_connected"/>
+                    </group>
+                    <button name="action_regenerate_telegram_link" type="object"
+                            string="Regenerate Link" class="btn-secondary"/>
+                    <button name="action_send_telegram_test" type="object"
+                            string="Send Test Message" class="btn-secondary"
+                            invisible="not otm_telegram_connected"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

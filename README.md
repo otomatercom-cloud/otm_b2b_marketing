@@ -30,6 +30,12 @@ Coaching Centres and Training Institutes.
 - **Automatic KPIs on the Institution form** — total visits, first/last
   visit date, days since last visit, upcoming visit, leads/seminars/MOUs
   collected — plus smart buttons for Visits, Seminars, Leads, MOU, Contacts.
+- **Telegram notifications** — each officer taps "Connect Telegram" on the
+  dashboard once; a personal deep link (`t.me/<bot>?start=<token>`) maps
+  their chat automatically via a webhook handshake, no chat ID is ever
+  entered by hand. Once connected they get visit reminders, follow-up
+  alerts, MOU expiry warnings, and the mobile portal link automatically on
+  check-in/check-out.
 - **OWL Dashboard** — KPI cards (today's/upcoming/completed/pending visits,
   institutions assigned, leads, seminars, MOU signed, etc.), institution
   type and district-wise distributions, and an upcoming-visits list.
