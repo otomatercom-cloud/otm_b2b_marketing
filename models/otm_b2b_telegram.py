@@ -48,7 +48,7 @@ class ResUsers(models.Model):
         bot_username = self.env['ir.config_parameter'].sudo().get_param('otm_b2b_marketing.telegram_bot_username')
         for user in self:
             user.otm_telegram_deep_link = (
-                f"https://t.me/{bot_username}?start={user.otm_telegram_link_token}"
+                f"https://telegram.me/{bot_username}?start={user.otm_telegram_link_token}"
                 if bot_username and user.otm_telegram_link_token else False
             )
 
