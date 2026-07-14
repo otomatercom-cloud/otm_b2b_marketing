@@ -71,13 +71,13 @@ export class OtmB2bDashboard extends Component {
         if (this.state.telegramDeepLink) {
             window.open(this.state.telegramDeepLink, "_blank");
             this.notification.add(
-                "Opened Telegram. Tap Start in the chat to finish connecting - this dashboard "
+                "Opened Telegram. Tap Start in the chat to finish connecting - this dashboard " +
                 "will show you as connected once you do.",
                 { type: "info", sticky: true }
             );
         } else {
             this.notification.add(
-                "Telegram isn't set up yet - ask your admin to configure the bot under "
+                "Telegram isn't set up yet - ask your admin to configure the bot under " +
                 "B2B Marketing > Configuration > Telegram Settings.",
                 { type: "warning" }
             );
