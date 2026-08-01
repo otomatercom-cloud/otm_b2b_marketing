@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError
 from odoo.tools.date_utils import start_of
 
 
@@ -239,6 +239,41 @@ class OtmB2bInstitution(models.Model):
     # ---------------------------------------------------------------
     # Smart button actions
     # ---------------------------------------------------------------
+    def action_plan_visit_quick(self):
+        """One click from the Institutions list/form: plan a visit for
+        today, skipping the Draft step and the full Visit Planning form
+        entirely. This is what puts an institution onto the "My
+        Institutions" quick check-in panel on the dashboard - assigned
+        institutions with no plan don't clutter that panel, only the
+        ones actually queued up for action do."""
+        self.ensure_one()
+        today = fields.Date.context_today(self)
+        existing = self.env['otm.b2b.visit.plan'].search([
+            ('institution_id', '=', self.id),
+            ('user_id', '=', self.env.uid),
+            ('visit_date', '=', today),
+            ('state', 'in', ('draft', 'planned', 'in_progress')),
+        ], limit=1)
+        if existing:
+            raise UserError(_('%s is already planned for today.', self.name))
+
+        self.env['otm.b2b.visit.plan'].create({
+            'institution_id': self.id,
+            'visit_date': today,
+            'user_id': self.env.uid,
+            'company_id': self.company_id.id,
+            'state': 'planned',
+        })
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Planned'),
+                'message': _('%s added to your dashboard for today.', self.name),
+                'type': 'success',
+            },
+        }
+
     def action_view_visits(self):
         self.ensure_one()
         action = self.env['ir.actions.act_window']._for_xml_id(
@@ -336,32 +371,36 @@ class OtmB2bInstitution(models.Model):
             key=lambda row: row['count'], reverse=True,
         )[:6]
 
-        # "My Institutions" - always the current user's own institutions
-        # (marketing_manager_id or user_id = them), regardless of
-        # is_manager, since this is a personal "what can I check into"
-        # list rather than an oversight/reporting view. One row per
-        # institution, with whichever live (checked-in, not yet
+        # "My Institutions" - only institutions the officer has actively
+        # planned to visit today (via the quick "Plan" button on the
+        # Institutions list/form, or the full Visit Planning flow) - NOT
+        # their entire assigned territory. With 30+ institutions typically
+        # assigned, listing all of them here would swamp the dashboard;
+        # this only shows what's actually queued up for today. One row per
+        # planned institution, with whichever live (checked-in, not yet
         # completed) visit exists for it, if any, so the UI can show
         # Check In or Check Out per institution without a second call.
-        my_institutions = Institution.search(
-            ['|', ('marketing_manager_id', '=', uid), ('user_id', '=', uid)], order='name')
-        live_by_institution = {}
-        for visit in self.env['otm.b2b.visit.record'].search([
-            ('institution_id', 'in', my_institutions.ids),
-            ('checkin_time', '!=', False),
-            ('checkout_time', '=', False),
-            ('state', 'not in', ('cancelled', 'completed')),
-        ]):
-            live_by_institution[visit.institution_id.id] = visit
-        my_institutions_list = [{
-            'id': inst.id,
-            'name': inst.name,
-            'tier': inst.tier_id.name or '',
-            'district': district_labels.get(inst.district, ''),
-            'live_visit_id': live_by_institution[inst.id].id if inst.id in live_by_institution else False,
-            'live_visit_portal_url': (
-                live_by_institution[inst.id].portal_url if inst.id in live_by_institution else False),
-        } for inst in my_institutions]
+        today_plans = self.env['otm.b2b.visit.plan'].search([
+            ('user_id', '=', uid),
+            ('visit_date', '=', today),
+            ('state', 'in', ('draft', 'planned', 'in_progress')),
+        ])
+        my_institutions_list = []
+        for plan in today_plans.sorted(key=lambda p: p.institution_id.name):
+            visit = plan.visit_record_id
+            is_live = bool(
+                visit and visit.checkin_time and not visit.checkout_time
+                and visit.state not in ('cancelled', 'completed')
+            )
+            my_institutions_list.append({
+                'id': plan.institution_id.id,
+                'plan_id': plan.id,
+                'name': plan.institution_id.name,
+                'tier': plan.institution_id.tier_id.name or '',
+                'district': district_labels.get(plan.institution_id.district, ''),
+                'live_visit_id': visit.id if is_live else False,
+                'live_visit_portal_url': visit.portal_url if is_live else False,
+            })
 
         upcoming_visit_list = [{
             'id': plan.id,
@@ -484,44 +523,3 @@ class OtmB2bInstitution(models.Model):
             'my_institutions': my_institutions_list,
         }
 
-    @api.model
-    def action_quick_check_in(self, institution_id):
-        """Simplified check-in: no Visit Plan needed, no form shown - pick
-        an institution from "My Institutions" on the dashboard, tap Check
-        In, done. Creates the Visit Record directly with check-in time
-        stamped now. The only form in this whole flow appears later, at
-        Check Out, via the existing Complete Visit portal page."""
-        institution = self.browse(institution_id)
-        if not institution.exists():
-            raise ValidationError(_('Institution not found.'))
-
-        already_live = self.env['otm.b2b.visit.record'].search_count([
-            ('institution_id', '=', institution.id),
-            ('user_id', '=', self.env.uid),
-            ('checkin_time', '!=', False),
-            ('checkout_time', '=', False),
-            ('state', 'not in', ('cancelled', 'completed')),
-        ])
-        if already_live:
-            raise ValidationError(_('You are already checked in at %s.', institution.name))
-
-        visit = self.env['otm.b2b.visit.record'].create({
-            'institution_id': institution.id,
-            'user_id': self.env.uid,
-            'visit_date': fields.Date.context_today(self),
-            'company_id': institution.company_id.id,
-            'checkin_time': fields.Datetime.now(),
-        })
-
-        user = self.env.user
-        if user.otm_telegram_connected:
-            user._otm_telegram_send(
-                f"Checked in at {institution.name}.\n"
-                f"Fill in the visit details here when you're done: {visit.portal_url}"
-            )
-
-        return {
-            'institution': institution.name,
-            'visit_id': visit.id,
-            'portal_url': visit.portal_url,
-        }

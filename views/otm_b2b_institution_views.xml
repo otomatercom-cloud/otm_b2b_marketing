@@ -8,6 +8,8 @@
         <field name="arch" type="xml">
             <form string="Institution">
                 <header>
+                    <button name="action_plan_visit_quick" type="object" string="Plan Visit for Today"
+                            class="btn-primary"/>
                     <field name="status" widget="statusbar" statusbar_visible="new,active,inactive,blacklisted"/>
                 </header>
                 <sheet>
@@ -195,6 +197,8 @@
                        decoration-success="status == 'active'"
                        decoration-info="status == 'new'"
                        decoration-danger="status == 'blacklisted'"/>
+                <button name="action_plan_visit_quick" type="object" string="Plan"
+                        class="btn-sm btn-primary" icon="fa-calendar-plus-o"/>
             </list>
         </field>
     </record>

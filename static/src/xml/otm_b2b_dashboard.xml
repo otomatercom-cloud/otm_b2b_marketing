@@ -205,7 +205,7 @@
                             </div>
                         </div>
                         <button t-if="!inst.live_visit_id" class="o_otm_b2b_checkin_btn"
-                                t-on-click="() => this.quickCheckIn(inst.id)">Check In</button>
+                                t-on-click="() => this.checkIn(inst.plan_id)">Check In</button>
                         <button t-else="" class="o_otm_b2b_checkin_btn"
                                 t-on-click="() => this.checkOut({ id: inst.live_visit_id, portal_url: inst.live_visit_portal_url, institution: inst.name })">
                             Check Out

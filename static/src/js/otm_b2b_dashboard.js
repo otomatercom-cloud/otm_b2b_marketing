@@ -108,12 +108,6 @@ export class OtmB2bDashboard extends Component {
         await this.loadDashboard();
     }
 
-    async quickCheckIn(institutionId) {
-        const result = await this.orm.call("otm.b2b.institution", "action_quick_check_in", [institutionId]);
-        this.notification.add(`Checked in at ${result.institution}.`, { type: "success" });
-        await this.loadDashboard();
-    }
-
     async checkOut(visit) {
         await this.orm.call("otm.b2b.visit.record", "action_check_out", [visit.id]);
 
