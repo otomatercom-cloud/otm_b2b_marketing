@@ -9,9 +9,11 @@
                     <p class="o_otm_b2b_org_label">Logic School Of Management</p>
                 </div>
                 <div t-if="!state.loading">
-                    <span t-if="state.telegramConnected" class="o_otm_b2b_telegram_badge o_otm_b2b_telegram_connected">
+                    <button t-if="state.telegramConnected"
+                            class="o_otm_b2b_telegram_badge o_otm_b2b_telegram_connected"
+                            t-on-click="disconnectTelegram" title="Click to disconnect">
                         <i class="fa fa-paper-plane"/> Telegram connected
-                    </span>
+                    </button>
                     <button t-else="" class="o_otm_b2b_telegram_badge o_otm_b2b_telegram_connect"
                             t-on-click="connectTelegram">
                         <i class="fa fa-paper-plane"/> Connect Telegram
@@ -184,6 +186,32 @@
                             <p t-if="!state.byDistrict.length" class="text-muted mb-0">No data yet.</p>
                         </div>
                     </div>
+                </div>
+
+                <div class="o_otm_b2b_panel mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="mb-0">My Institutions</h4>
+                        <a href="#" class="o_otm_b2b_view_all" t-on-click.prevent="openInstitutions">View all</a>
+                    </div>
+                    <div class="o_otm_b2b_visit_row" t-foreach="state.myInstitutions" t-as="inst" t-key="inst.id">
+                        <div class="o_otm_b2b_visit_avatar" t-att-class="inst.live_visit_id ? 'o_otm_b2b_visit_avatar_live' : ''">
+                            <t t-esc="inst.name ? inst.name.slice(0,2).toUpperCase() : '--'"/>
+                        </div>
+                        <div class="o_otm_b2b_visit_info">
+                            <div class="o_otm_b2b_visit_name"><t t-esc="inst.name"/></div>
+                            <div class="o_otm_b2b_visit_meta">
+                                <t t-if="inst.tier"><t t-esc="inst.tier"/></t>
+                                <t t-if="inst.district"> · <t t-esc="inst.district"/></t>
+                            </div>
+                        </div>
+                        <button t-if="!inst.live_visit_id" class="o_otm_b2b_checkin_btn"
+                                t-on-click="() => this.quickCheckIn(inst.id)">Check In</button>
+                        <button t-else="" class="o_otm_b2b_checkin_btn"
+                                t-on-click="() => this.checkOut({ id: inst.live_visit_id, portal_url: inst.live_visit_portal_url, institution: inst.name })">
+                            Check Out
+                        </button>
+                    </div>
+                    <p t-if="!state.myInstitutions.length" class="text-muted mb-0">No institutions assigned to you yet.</p>
                 </div>
 
                 <div class="o_otm_b2b_panel mt-3">

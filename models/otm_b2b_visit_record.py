@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import uuid
+from datetime import timedelta
 
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
@@ -73,6 +74,9 @@ class OtmB2bVisitRecord(models.Model):
     access_token = fields.Char(string='Access Token', copy=False, readonly=True,
                                 default=lambda self: uuid.uuid4().hex)
     portal_url = fields.Char(string='Portal Link', compute='_compute_portal_url')
+    telegram_not_submitted_reminder_sent = fields.Boolean(
+        string='Not-Submitted Reminder Sent', copy=False, default=False,
+        help='Internal flag so the "forgot to submit" nudge only fires once per visit.')
 
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Visit Number must be unique per company.'),
@@ -111,6 +115,25 @@ class OtmB2bVisitRecord(models.Model):
             if vals.get('name', _('New')) == _('New'):
                 vals['name'] = self.env['ir.sequence'].next_by_code('otm.b2b.visit.record') or _('New')
         return super().create(vals_list)
+
+    def write(self, vals):
+        # Snapshot who's newly becoming 'completed' in this write BEFORE
+        # applying it, so the confirmation fires exactly once no matter
+        # which of the three completion paths triggered it (backend
+        # button, the Complete Visit wizard, or the public portal form) -
+        # a single choke point instead of three separate call sites that
+        # could drift out of sync with each other.
+        newly_completed = self.browse()
+        if vals.get('state') == 'completed':
+            newly_completed = self.filtered(lambda v: v.state != 'completed')
+        result = super().write(vals)
+        for visit in newly_completed:
+            if visit.user_id.otm_telegram_connected:
+                text = self.env['otm.b2b.telegram.template']._render(
+                    'visit_completed', institution=visit.institution_id.name)
+                if text:
+                    visit.user_id._otm_telegram_send(text)
+        return result
 
     def action_check_in(self):
         self.write({'checkin_time': fields.Datetime.now()})
@@ -157,6 +180,31 @@ class OtmB2bVisitRecord(models.Model):
             'domain': [('visit_id', '=', self.id)],
             'context': {'default_visit_id': self.id, 'default_institution_id': self.institution_id.id},
         }
+
+    @api.model
+    def _cron_send_visit_not_submitted_reminders(self):
+        """Scheduled action (runs hourly): nudge an officer on Telegram if
+        they checked in but haven't submitted (completed) the visit after
+        the configured threshold - the "forgot to submit" reminder. The
+        threshold is set on the Telegram Settings wizard, not hardcoded.
+        Each visit is only nudged once (telegram_not_submitted_reminder_sent)."""
+        threshold_hours = float(self.env['ir.config_parameter'].sudo().get_param(
+            'otm_b2b_marketing.telegram_not_submitted_reminder_hours', '4.0') or 4.0)
+        cutoff = fields.Datetime.now() - timedelta(hours=threshold_hours)
+        overdue = self.search([
+            ('checkin_time', '!=', False),
+            ('checkin_time', '<=', cutoff),
+            ('state', 'not in', ('completed', 'cancelled')),
+            ('telegram_not_submitted_reminder_sent', '=', False),
+        ])
+        for visit in overdue:
+            if visit.user_id.otm_telegram_connected:
+                text = self.env['otm.b2b.telegram.template']._render(
+                    'visit_not_submitted', institution=visit.institution_id.name,
+                    hours=int(threshold_hours))
+                if text:
+                    visit.user_id._otm_telegram_send(text)
+            visit.telegram_not_submitted_reminder_sent = True
 
     def unlink(self):
         for rec in self:

@@ -36,6 +36,7 @@ export class OtmB2bDashboard extends Component {
             liveVisits: [],
             todayCompleted: [],
             territoryPerformance: [],
+            myInstitutions: [],
             isManager: true,
             userName: "",
             telegramConnected: false,
@@ -60,6 +61,7 @@ export class OtmB2bDashboard extends Component {
         this.state.liveVisits = data.live_visit_list;
         this.state.todayCompleted = data.today_completed_list;
         this.state.territoryPerformance = data.territory_performance;
+        this.state.myInstitutions = data.my_institutions;
         this.state.isManager = data.is_manager;
         this.state.userName = data.user_name;
         this.state.telegramConnected = data.telegram_connected;
@@ -84,6 +86,14 @@ export class OtmB2bDashboard extends Component {
         }
     }
 
+    async disconnectTelegram() {
+        await this.orm.call("res.users", "action_disconnect_telegram_self", []);
+        this.notification.add("Telegram disconnected. You'll no longer receive messages here.", {
+            type: "info",
+        });
+        await this.loadDashboard();
+    }
+
     _withBarPercent(rows) {
         const max = rows.length ? Math.max(...rows.map((r) => r.count)) : 0;
         return rows.map((r) => ({
@@ -94,23 +104,13 @@ export class OtmB2bDashboard extends Component {
 
     async checkIn(planId) {
         const result = await this.orm.call("otm.b2b.visit.plan", "action_dashboard_check_in", [planId]);
+        this.notification.add(`Checked in at ${result.institution}.`, { type: "success" });
+        await this.loadDashboard();
+    }
 
-        if (result.portal_url) {
-            window.open(result.portal_url, "_blank");
-            if (navigator.clipboard) {
-                try {
-                    await navigator.clipboard.writeText(result.portal_url);
-                } catch (e) {
-                    // Clipboard permission can be denied silently in some
-                    // browsers/webviews - the link still opened above.
-                }
-            }
-        }
-
-        this.notification.add(`Checked in at ${result.institution}. Portal form opened in a new tab.`, {
-            type: "success",
-        });
-
+    async quickCheckIn(institutionId) {
+        const result = await this.orm.call("otm.b2b.institution", "action_quick_check_in", [institutionId]);
+        this.notification.add(`Checked in at ${result.institution}.`, { type: "success" });
         await this.loadDashboard();
     }
 

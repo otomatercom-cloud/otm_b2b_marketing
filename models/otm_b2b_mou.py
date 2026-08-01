@@ -45,6 +45,15 @@ class OtmB2bMou(models.Model):
 
     def action_sign(self):
         self.write({'state': 'signed', 'signed_date': fields.Date.context_today(self)})
+        for mou in self:
+            text = self.env['otm.b2b.telegram.template']._render(
+                'mou_signed', institution=mou.institution_id.name,
+                agreement_number=mou.agreement_number or _('N/A'))
+            if text:
+                self.env['res.users']._otm_telegram_notify_heads(text)
+                manager = mou.institution_id.marketing_manager_id
+                if manager.otm_telegram_connected:
+                    manager._otm_telegram_send(text)
 
     def action_reject(self):
         self.write({'state': 'rejected'})
@@ -73,8 +82,10 @@ class OtmB2bMou(models.Model):
                 user_id=mou.institution_id.marketing_manager_id.id or self.env.uid,
             )
             manager = mou.institution_id.marketing_manager_id
-            if manager.otm_telegram_connected:
-                manager._otm_telegram_send(
-                    f"MOU with {mou.institution_id.name} expires on {mou.expiry_date}. "
-                    f"Time to start the renewal discussion."
-                )
+            text = self.env['otm.b2b.telegram.template']._render(
+                'mou_expiry', institution=mou.institution_id.name,
+                date=fields.Date.to_string(mou.expiry_date))
+            if text:
+                if manager.otm_telegram_connected:
+                    manager._otm_telegram_send(text)
+                self.env['res.users']._otm_telegram_notify_heads(text)

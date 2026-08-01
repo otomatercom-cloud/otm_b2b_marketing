@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="telegram_template_visit_planned" model="otm.b2b.telegram.template">
+        <field name="code">visit_planned</field>
+        <field name="name">Visit Planned</field>
+        <field name="placeholders_help">{institution}, {date}</field>
+        <field name="body">Visit planned: {institution} on {date}.</field>
+    </record>
+
+    <record id="telegram_template_visit_reminder_today" model="otm.b2b.telegram.template">
+        <field name="code">visit_reminder_today</field>
+        <field name="name">Today's Visit Reminder</field>
+        <field name="placeholders_help">{institution}, {date}, {label}</field>
+        <field name="body">Reminder: visit to {institution} planned for {label} ({date}).</field>
+    </record>
+
+    <record id="telegram_template_visit_not_submitted" model="otm.b2b.telegram.template">
+        <field name="code">visit_not_submitted</field>
+        <field name="name">Visit Not Submitted Reminder</field>
+        <field name="placeholders_help">{institution}, {hours}</field>
+        <field name="body">You checked in at {institution} {hours} hours ago and haven't submitted the visit yet. Please log the activity type and remarks.</field>
+    </record>
+
+    <record id="telegram_template_visit_completed" model="otm.b2b.telegram.template">
+        <field name="code">visit_completed</field>
+        <field name="name">Visit Completed Confirmation</field>
+        <field name="placeholders_help">{institution}</field>
+        <field name="body">Visit to {institution} recorded successfully. Thank you!</field>
+    </record>
+
+    <record id="telegram_template_mou_expiry" model="otm.b2b.telegram.template">
+        <field name="code">mou_expiry</field>
+        <field name="name">MOU Expiry Reminder</field>
+        <field name="placeholders_help">{institution}, {date}</field>
+        <field name="body">MOU with {institution} expires on {date}. Time to start the renewal discussion.</field>
+    </record>
+
+    <record id="telegram_template_mou_signed" model="otm.b2b.telegram.template">
+        <field name="code">mou_signed</field>
+        <field name="name">MOU Signed Notification</field>
+        <field name="placeholders_help">{institution}, {agreement_number}</field>
+        <field name="body">MOU signed with {institution} (Agreement {agreement_number}).</field>
+    </record>
+
+</odoo>

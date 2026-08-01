@@ -48,7 +48,7 @@ class ResUsers(models.Model):
         bot_username = self.env['ir.config_parameter'].sudo().get_param('otm_b2b_marketing.telegram_bot_username')
         for user in self:
             user.otm_telegram_deep_link = (
-                f"https://telegram.me/{bot_username}?start={user.otm_telegram_link_token}"
+                f"https://t.me/{bot_username}?start={user.otm_telegram_link_token}"
                 if bot_username and user.otm_telegram_link_token else False
             )
 
@@ -61,6 +61,24 @@ class ResUsers(models.Model):
                 'otm_telegram_link_token': uuid.uuid4().hex,
                 'otm_telegram_chat_id': False,
             })
+
+    def action_disconnect_telegram(self):
+        """Clear the stored chat_id only, keep the same link token so the
+        officer can reconnect later without needing a brand new link.
+        _otm_telegram_send() checks otm_telegram_chat_id before every
+        single send, so the moment this is cleared, ALL notifications to
+        this person stop immediately - reminders, check-in/out
+        confirmations, MOU alerts, everything - with no separate
+        per-notification-type flag to also remember to turn off."""
+        for user in self:
+            user.write({'otm_telegram_chat_id': False})
+
+    @api.model
+    def action_disconnect_telegram_self(self):
+        """Convenience wrapper so callers (like the dashboard widget)
+        that only know "the current user", not an explicit id, can still
+        trigger a disconnect via a plain @api.model RPC call."""
+        self.env.user.action_disconnect_telegram()
 
     def action_send_telegram_test(self):
         self.ensure_one()
@@ -79,6 +97,20 @@ class ResUsers(models.Model):
         if not self.otm_telegram_chat_id:
             return False
         return _otm_telegram_api_send(self.env, self.otm_telegram_chat_id, text)
+
+    @api.model
+    def _otm_telegram_notify_heads(self, text):
+        """Send a Telegram message to every user holding the Marketing
+        Head group, automatically - no per-record configuration needed.
+        Membership is read live from the group each time, so promoting or
+        removing someone from Marketing Head immediately changes who gets
+        these without touching this module at all."""
+        head_group = self.env.ref('otm_b2b_marketing.group_otm_b2b_marketing_head', raise_if_not_found=False)
+        if not head_group:
+            return
+        for head in head_group.user_ids:
+            if head.otm_telegram_connected:
+                head._otm_telegram_send(text)
 
 
 def _otm_telegram_api_send(env, chat_id, text):
@@ -105,3 +137,51 @@ def _otm_telegram_api_send(env, chat_id, text):
     except requests.RequestException as exc:
         _logger.warning('otm_b2b_marketing: Telegram sendMessage error: %s', exc)
         return False
+
+
+class OtmB2bTelegramTemplate(models.Model):
+    """Editable message text for each notification event, so the wording
+    can be changed from Configuration without touching code. Placeholders
+    are plain Python str.format() fields - each event documents which
+    ones it fills in (see the 'placeholders' help text and the seed data
+    in data/otm_b2b_telegram_template_data.xml)."""
+    _name = 'otm.b2b.telegram.template'
+    _description = 'B2B Telegram Message Template'
+    _order = 'code'
+
+    code = fields.Selection([
+        ('visit_planned', 'Visit Planned (sent to the officer on Confirm)'),
+        ('visit_reminder_today', "Today's Visit Reminder"),
+        ('visit_not_submitted', "Visit Not Submitted Reminder"),
+        ('visit_completed', 'Visit Completed Confirmation'),
+        ('mou_expiry', 'MOU Expiry Reminder'),
+        ('mou_signed', 'MOU Signed Notification (to Marketing Head)'),
+    ], string='Event', required=True)
+    name = fields.Char(string='Name', required=True)
+    body = fields.Text(string='Message Template', required=True)
+    placeholders_help = fields.Char(string='Available Placeholders', readonly=True)
+    active = fields.Boolean(string='Active', default=True)
+
+    _sql_constraints = [
+        ('code_uniq', 'unique(code)', 'Only one template is allowed per event.'),
+    ]
+
+    @api.model
+    def _render(self, code, **context):
+        """Look up the active template for this event and fill in the
+        placeholders. Falls back to the raw (unfilled) template text if a
+        placeholder is missing, rather than raising and blocking whatever
+        business flow triggered the send - a typo in an admin-edited
+        template should never break check-in/check-out/reminders."""
+        template = self.sudo().search([('code', '=', code), ('active', '=', True)], limit=1)
+        if not template:
+            return None
+        try:
+            return template.body.format(**context)
+        except (KeyError, IndexError, ValueError):
+            _logger.warning(
+                'otm_b2b_marketing: Telegram template "%s" has a placeholder that doesn\'t '
+                'match what was provided (%s) - sending the raw template text instead.',
+                code, list(context.keys())
+            )
+            return template.body

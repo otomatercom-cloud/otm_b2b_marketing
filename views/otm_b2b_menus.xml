@@ -84,4 +84,8 @@
               action="action_otm_b2b_telegram_settings_wizard" sequence="80"
               groups="otm_b2b_marketing.group_otm_b2b_marketing_head"/>
 
+    <menuitem id="menu_otm_b2b_telegram_template" name="Telegram Templates" parent="menu_otm_b2b_configuration"
+              action="action_otm_b2b_telegram_template" sequence="90"
+              groups="otm_b2b_marketing.group_otm_b2b_marketing_head"/>
+
 </odoo>

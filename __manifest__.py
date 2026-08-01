@@ -39,6 +39,7 @@ Features
         'data/otm_b2b_institution_type_data.xml',
         'data/otm_b2b_activity_type_data.xml',
         'data/otm_b2b_masters_data.xml',
+        'data/otm_b2b_telegram_template_data.xml',
         'data/otm_b2b_cron_data.xml',
         # wizard
         'wizard/otm_b2b_assign_manager_wizard_views.xml',
@@ -49,6 +50,7 @@ Features
         'views/otm_b2b_activity_type_views.xml',
         'views/otm_b2b_tag_views.xml',
         'views/otm_b2b_masters_views.xml',
+        'views/otm_b2b_telegram_template_views.xml',
         'views/otm_b2b_institution_views.xml',
         'views/otm_b2b_visit_plan_views.xml',
         'views/otm_b2b_visit_record_views.xml',

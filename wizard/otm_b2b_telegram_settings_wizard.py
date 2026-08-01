@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import uuid
+from datetime import datetime, timedelta
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
@@ -26,6 +27,13 @@ class OtmB2bTelegramSettingsWizard(models.TransientModel):
     bot_token = fields.Char(
         string='Bot Token',
         help="From @BotFather on Telegram. Stored as a system parameter, never shown in views/logs.")
+    reminder_hour = fields.Float(
+        string="Daily Reminder Time", default=9.0, widget='float_time',
+        help="What time each day the Visit Planned / Today's Visit reminders go out.")
+    not_submitted_reminder_hours = fields.Float(
+        string='Nudge After (Hours)', default=4.0,
+        help="If an officer checks in and hasn't submitted the visit after this many hours, "
+             "send a one-time reminder nudge. Checked hourly.")
     webhook_status = fields.Char(string='Webhook Status', readonly=True)
 
     @api.model
@@ -34,6 +42,9 @@ class OtmB2bTelegramSettingsWizard(models.TransientModel):
         params = self.env['ir.config_parameter'].sudo()
         res['bot_username'] = params.get_param('otm_b2b_marketing.telegram_bot_username', '')
         res['bot_token'] = params.get_param('otm_b2b_marketing.telegram_bot_token', '')
+        res['reminder_hour'] = float(params.get_param('otm_b2b_marketing.telegram_reminder_hour', '9.0') or 9.0)
+        res['not_submitted_reminder_hours'] = float(params.get_param(
+            'otm_b2b_marketing.telegram_not_submitted_reminder_hours', '4.0') or 4.0)
         return res
 
     def action_save(self):
@@ -41,7 +52,29 @@ class OtmB2bTelegramSettingsWizard(models.TransientModel):
         params = self.env['ir.config_parameter'].sudo()
         params.set_param('otm_b2b_marketing.telegram_bot_username', self.bot_username or '')
         params.set_param('otm_b2b_marketing.telegram_bot_token', self.bot_token or '')
+        params.set_param('otm_b2b_marketing.telegram_reminder_hour', str(self.reminder_hour or 9.0))
+        params.set_param(
+            'otm_b2b_marketing.telegram_not_submitted_reminder_hours',
+            str(self.not_submitted_reminder_hours or 4.0))
+        self._apply_reminder_hour_to_cron()
         return {'type': 'ir.actions.act_window_close'}
+
+    def _apply_reminder_hour_to_cron(self):
+        """The "Daily Reminder Time" field is a friendly single place to
+        set this instead of asking the admin to go find and edit the
+        cron's own nextcall under Settings > Technical - but under the
+        hood it's just updating that same real ir.cron record, not a
+        separate scheduling mechanism."""
+        cron = self.env.ref('otm_b2b_marketing.cron_otm_b2b_visit_reminders', raise_if_not_found=False)
+        if not cron:
+            return
+        hour = int(self.reminder_hour or 9)
+        minute = int(round((self.reminder_hour or 9) % 1 * 60))
+        now = fields.Datetime.now()
+        next_call = now.replace(hour=hour % 24, minute=minute, second=0, microsecond=0)
+        if next_call <= now:
+            next_call += timedelta(days=1)
+        cron.sudo().write({'nextcall': next_call})
 
     def action_save_and_set_webhook(self):
         self.ensure_one()

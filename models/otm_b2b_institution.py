@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
 from odoo.tools.date_utils import start_of
 
 
@@ -335,6 +336,33 @@ class OtmB2bInstitution(models.Model):
             key=lambda row: row['count'], reverse=True,
         )[:6]
 
+        # "My Institutions" - always the current user's own institutions
+        # (marketing_manager_id or user_id = them), regardless of
+        # is_manager, since this is a personal "what can I check into"
+        # list rather than an oversight/reporting view. One row per
+        # institution, with whichever live (checked-in, not yet
+        # completed) visit exists for it, if any, so the UI can show
+        # Check In or Check Out per institution without a second call.
+        my_institutions = Institution.search(
+            ['|', ('marketing_manager_id', '=', uid), ('user_id', '=', uid)], order='name')
+        live_by_institution = {}
+        for visit in self.env['otm.b2b.visit.record'].search([
+            ('institution_id', 'in', my_institutions.ids),
+            ('checkin_time', '!=', False),
+            ('checkout_time', '=', False),
+            ('state', 'not in', ('cancelled', 'completed')),
+        ]):
+            live_by_institution[visit.institution_id.id] = visit
+        my_institutions_list = [{
+            'id': inst.id,
+            'name': inst.name,
+            'tier': inst.tier_id.name or '',
+            'district': district_labels.get(inst.district, ''),
+            'live_visit_id': live_by_institution[inst.id].id if inst.id in live_by_institution else False,
+            'live_visit_portal_url': (
+                live_by_institution[inst.id].portal_url if inst.id in live_by_institution else False),
+        } for inst in my_institutions]
+
         upcoming_visit_list = [{
             'id': plan.id,
             'institution': plan.institution_id.name,
@@ -453,4 +481,47 @@ class OtmB2bInstitution(models.Model):
             'live_visit_list': live_visit_list,
             'today_completed_list': today_completed_list,
             'territory_performance': territory_performance,
+            'my_institutions': my_institutions_list,
+        }
+
+    @api.model
+    def action_quick_check_in(self, institution_id):
+        """Simplified check-in: no Visit Plan needed, no form shown - pick
+        an institution from "My Institutions" on the dashboard, tap Check
+        In, done. Creates the Visit Record directly with check-in time
+        stamped now. The only form in this whole flow appears later, at
+        Check Out, via the existing Complete Visit portal page."""
+        institution = self.browse(institution_id)
+        if not institution.exists():
+            raise ValidationError(_('Institution not found.'))
+
+        already_live = self.env['otm.b2b.visit.record'].search_count([
+            ('institution_id', '=', institution.id),
+            ('user_id', '=', self.env.uid),
+            ('checkin_time', '!=', False),
+            ('checkout_time', '=', False),
+            ('state', 'not in', ('cancelled', 'completed')),
+        ])
+        if already_live:
+            raise ValidationError(_('You are already checked in at %s.', institution.name))
+
+        visit = self.env['otm.b2b.visit.record'].create({
+            'institution_id': institution.id,
+            'user_id': self.env.uid,
+            'visit_date': fields.Date.context_today(self),
+            'company_id': institution.company_id.id,
+            'checkin_time': fields.Datetime.now(),
+        })
+
+        user = self.env.user
+        if user.otm_telegram_connected:
+            user._otm_telegram_send(
+                f"Checked in at {institution.name}.\n"
+                f"Fill in the visit details here when you're done: {visit.portal_url}"
+            )
+
+        return {
+            'institution': institution.name,
+            'visit_id': visit.id,
+            'portal_url': visit.portal_url,
         }

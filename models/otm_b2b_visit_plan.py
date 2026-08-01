@@ -45,6 +45,13 @@ class OtmB2bVisitPlan(models.Model):
 
     def action_confirm_plan(self):
         self.write({'state': 'planned'})
+        for plan in self:
+            if plan.user_id.otm_telegram_connected:
+                text = self.env['otm.b2b.telegram.template']._render(
+                    'visit_planned', institution=plan.institution_id.name,
+                    date=fields.Date.to_string(plan.visit_date))
+                if text:
+                    plan.user_id._otm_telegram_send(text)
 
     def action_cancel_plan(self):
         self.write({'state': 'cancelled'})
@@ -75,10 +82,11 @@ class OtmB2bVisitPlan(models.Model):
                 user_id=plan.user_id.id,
             )
             if plan.user_id.otm_telegram_connected:
-                plan.user_id._otm_telegram_send(
-                    f"Reminder: visit to {plan.institution_id.name} planned for {label.lower()} "
-                    f"({plan.visit_date})."
-                )
+                text = self.env['otm.b2b.telegram.template']._render(
+                    'visit_reminder_today', institution=plan.institution_id.name,
+                    date=fields.Date.to_string(plan.visit_date), label=label.lower())
+                if text:
+                    plan.user_id._otm_telegram_send(text)
 
         followups = self.env['otm.b2b.visit.record'].search([
             ('next_followup_date', '=', today),
