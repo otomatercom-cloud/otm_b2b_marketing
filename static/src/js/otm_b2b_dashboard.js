@@ -37,6 +37,7 @@ export class OtmB2bDashboard extends Component {
             todayCompleted: [],
             territoryPerformance: [],
             myInstitutions: [],
+            mySeminars: [],
             isManager: true,
             userName: "",
             telegramConnected: false,
@@ -62,6 +63,7 @@ export class OtmB2bDashboard extends Component {
         this.state.todayCompleted = data.today_completed_list;
         this.state.territoryPerformance = data.territory_performance;
         this.state.myInstitutions = data.my_institutions;
+        this.state.mySeminars = data.my_seminars;
         this.state.isManager = data.is_manager;
         this.state.userName = data.user_name;
         this.state.telegramConnected = data.telegram_connected;
@@ -124,6 +126,38 @@ export class OtmB2bDashboard extends Component {
         await this.loadDashboard();
     }
 
+    async checkInSeminar(planId) {
+        const result = await this.orm.call("otm.b2b.seminar.plan", "action_dashboard_check_in", [planId]);
+        this.notification.add(`Checked in for seminar at ${result.institution}.`, { type: "success" });
+        await this.loadDashboard();
+    }
+
+    async checkOutSeminar(seminar) {
+        await this.orm.call("otm.b2b.seminar", "action_check_out", [seminar.id]);
+
+        if (seminar.portal_url) {
+            window.open(seminar.portal_url, "_blank");
+            this.notification.add(
+                `Checked out of the seminar at ${seminar.institution}. Complete the update in the new tab.`,
+                { type: "success" }
+            );
+        } else {
+            this.notification.add("Checked out.", { type: "success" });
+        }
+
+        await this.loadDashboard();
+    }
+
+    openSeminarRecord(seminarId) {
+        this.action.doAction({
+            type: "ir.actions.act_window",
+            res_model: "otm.b2b.seminar",
+            res_id: seminarId,
+            view_mode: "form",
+            views: [[false, "form"]],
+        });
+    }
+
     openVisitRecord(visitId) {
         this.action.doAction({
             type: "ir.actions.act_window",
@@ -140,6 +174,10 @@ export class OtmB2bDashboard extends Component {
 
     openVisitPlans() {
         this.action.doAction("otm_b2b_marketing.action_otm_b2b_visit_plan");
+    }
+
+    openSeminars() {
+        this.action.doAction("otm_b2b_marketing.action_otm_b2b_seminar_plan");
     }
 
     openLeads() {

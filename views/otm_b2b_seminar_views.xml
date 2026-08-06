@@ -6,6 +6,13 @@
         <field name="model">otm.b2b.seminar</field>
         <field name="arch" type="xml">
             <form string="Seminar">
+                <header>
+                    <button name="action_check_out" type="object" string="Check Out"
+                            class="btn-primary" invisible="not checkin_time or checkout_time"/>
+                    <button name="action_open_complete_wizard" type="object" string="Complete Seminar"
+                            class="btn-primary" invisible="state == 'completed'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,completed"/>
+                </header>
                 <sheet>
                     <div class="oe_title">
                         <h1><field name="topic" placeholder="Seminar Topic"/></h1>
@@ -14,16 +21,25 @@
                         <group>
                             <field name="institution_id" options="{'no_create': True}"/>
                             <field name="visit_id"/>
+                            <field name="seminar_plan_id" readonly="1" invisible="not seminar_plan_id"/>
                             <field name="seminar_date"/>
                             <field name="speaker"/>
                         </group>
                         <group>
+                            <field name="checkin_time"/>
+                            <field name="checkout_time"/>
                             <field name="student_count"/>
                             <field name="faculty_count"/>
                             <field name="duration" widget="float_time"/>
                             <field name="interested_students"/>
                             <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="portal_url" widget="url" readonly="1"
+                                   string="Mobile update link" invisible="not portal_url"/>
                         </group>
+                    </group>
+                    <group>
+                        <field name="category_ids" widget="many2many_tags"
+                               placeholder="Class/course categories covered..."/>
                     </group>
                     <notebook>
                         <page string="Feedback &amp; Outcome" name="feedback">
@@ -45,13 +61,15 @@
         <field name="name">otm.b2b.seminar.list</field>
         <field name="model">otm.b2b.seminar</field>
         <field name="arch" type="xml">
-            <list string="Seminars">
+            <list string="Seminars" decoration-success="state == 'completed'" decoration-muted="state == 'cancelled'">
                 <field name="seminar_date"/>
                 <field name="institution_id"/>
                 <field name="topic"/>
+                <field name="category_ids" widget="many2many_tags" optional="show"/>
                 <field name="speaker"/>
                 <field name="student_count"/>
                 <field name="faculty_count"/>
+                <field name="state" widget="badge"/>
             </list>
         </field>
     </record>
@@ -64,9 +82,12 @@
                 <field name="topic"/>
                 <field name="institution_id"/>
                 <field name="speaker"/>
+                <field name="category_ids"/>
+                <filter string="Completed" name="filter_completed" domain="[('state', '=', 'completed')]"/>
                 <group>
                     <filter string="Institution" name="groupby_institution" context="{'group_by': 'institution_id'}"/>
                     <filter string="Seminar Date" name="groupby_date" context="{'group_by': 'seminar_date'}"/>
+                    <filter string="Status" name="groupby_state" context="{'group_by': 'state'}"/>
                 </group>
             </search>
         </field>

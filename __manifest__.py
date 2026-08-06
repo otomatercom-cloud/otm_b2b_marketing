@@ -17,7 +17,9 @@ Features
 * Institution database with full contact and academic-strength profile
 * Visit planning and visit record tracking with GPS check-in/check-out
 * Lead collection during institutional visits
-* Seminar and event management
+* Seminar and event management, with a Book Seminar / Check In / Check Out
+  flow mirroring the visit lifecycle, including a mobile portal form with
+  multi-select class/course categories
 * MOU (Memorandum of Understanding) lifecycle tracking
 * Telegram notifications - officers self-connect via a personal deep link,
   no chat IDs entered manually anywhere
@@ -39,22 +41,27 @@ Features
         'data/otm_b2b_institution_type_data.xml',
         'data/otm_b2b_activity_type_data.xml',
         'data/otm_b2b_masters_data.xml',
+        'data/otm_b2b_seminar_category_data.xml',
         'data/otm_b2b_telegram_template_data.xml',
         'data/otm_b2b_cron_data.xml',
         # wizard
         'wizard/otm_b2b_assign_manager_wizard_views.xml',
         'wizard/otm_b2b_visit_complete_wizard_views.xml',
         'wizard/otm_b2b_telegram_settings_wizard_views.xml',
+        'wizard/otm_b2b_seminar_book_wizard_views.xml',
+        'wizard/otm_b2b_seminar_complete_wizard_views.xml',
         # views
         'views/otm_b2b_institution_type_views.xml',
         'views/otm_b2b_activity_type_views.xml',
         'views/otm_b2b_tag_views.xml',
         'views/otm_b2b_masters_views.xml',
+        'views/otm_b2b_seminar_category_views.xml',
         'views/otm_b2b_telegram_template_views.xml',
         'views/otm_b2b_institution_views.xml',
         'views/otm_b2b_visit_plan_views.xml',
         'views/otm_b2b_visit_record_views.xml',
         'views/otm_b2b_lead_views.xml',
+        'views/otm_b2b_seminar_plan_views.xml',
         'views/otm_b2b_seminar_views.xml',
         'views/otm_b2b_mou_views.xml',
         'views/otm_b2b_dashboard_views.xml',

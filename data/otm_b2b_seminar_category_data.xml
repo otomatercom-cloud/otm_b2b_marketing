@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="seminar_category_plus1_commerce" model="otm.b2b.seminar.category">
+        <field name="name">Plus 1 Commerce</field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="seminar_category_plus1_science" model="otm.b2b.seminar.category">
+        <field name="name">Plus 1 Science</field>
+        <field name="sequence">20</field>
+    </record>
+    <record id="seminar_category_plus1_humanities" model="otm.b2b.seminar.category">
+        <field name="name">Plus 1 Humanities</field>
+        <field name="sequence">30</field>
+    </record>
+    <record id="seminar_category_plus2_commerce" model="otm.b2b.seminar.category">
+        <field name="name">Plus 2 Commerce</field>
+        <field name="sequence">40</field>
+    </record>
+    <record id="seminar_category_plus2_science" model="otm.b2b.seminar.category">
+        <field name="name">Plus 2 Science</field>
+        <field name="sequence">50</field>
+    </record>
+    <record id="seminar_category_plus2_humanities" model="otm.b2b.seminar.category">
+        <field name="name">Plus 2 Humanities</field>
+        <field name="sequence">60</field>
+    </record>
+    <record id="seminar_category_bcom_1" model="otm.b2b.seminar.category">
+        <field name="name">B.Com 1st Year</field>
+        <field name="sequence">70</field>
+    </record>
+    <record id="seminar_category_bcom_2" model="otm.b2b.seminar.category">
+        <field name="name">B.Com 2nd Year</field>
+        <field name="sequence">80</field>
+    </record>
+    <record id="seminar_category_bcom_3" model="otm.b2b.seminar.category">
+        <field name="name">B.Com 3rd Year</field>
+        <field name="sequence">90</field>
+    </record>
+    <record id="seminar_category_bba_1" model="otm.b2b.seminar.category">
+        <field name="name">BBA 1st Year</field>
+        <field name="sequence">100</field>
+    </record>
+    <record id="seminar_category_bba_2" model="otm.b2b.seminar.category">
+        <field name="name">BBA 2nd Year</field>
+        <field name="sequence">110</field>
+    </record>
+    <record id="seminar_category_bba_3" model="otm.b2b.seminar.category">
+        <field name="name">BBA 3rd Year</field>
+        <field name="sequence">120</field>
+    </record>
+
+</odoo>

@@ -11,6 +11,8 @@ from . import otm_b2b_institution_contact
 from . import otm_b2b_visit_plan
 from . import otm_b2b_visit_record
 from . import otm_b2b_lead
+from . import otm_b2b_seminar_category
 from . import otm_b2b_seminar
+from . import otm_b2b_seminar_plan
 from . import otm_b2b_mou
 from . import otm_b2b_telegram

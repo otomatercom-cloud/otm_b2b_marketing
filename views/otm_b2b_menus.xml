@@ -24,6 +24,9 @@
     <menuitem id="menu_otm_b2b_lead" name="Leads Collected" parent="menu_otm_b2b_marketing_root"
               action="action_otm_b2b_lead" sequence="60"/>
 
+    <menuitem id="menu_otm_b2b_seminar_plan" name="Seminar Booking" parent="menu_otm_b2b_marketing_root"
+              action="action_otm_b2b_seminar_plan" sequence="65"/>
+
     <menuitem id="menu_otm_b2b_seminar" name="Seminar Management" parent="menu_otm_b2b_marketing_root"
               action="action_otm_b2b_seminar" sequence="70"/>
 
@@ -79,6 +82,9 @@
 
     <menuitem id="menu_otm_b2b_mou_type" name="MOU Types" parent="menu_otm_b2b_configuration"
               action="action_otm_b2b_mou_type" sequence="70"/>
+
+    <menuitem id="menu_otm_b2b_seminar_category" name="Seminar Categories" parent="menu_otm_b2b_configuration"
+              action="action_otm_b2b_seminar_category" sequence="75"/>
 
     <menuitem id="menu_otm_b2b_telegram_settings" name="Telegram Settings" parent="menu_otm_b2b_configuration"
               action="action_otm_b2b_telegram_settings_wizard" sequence="80"

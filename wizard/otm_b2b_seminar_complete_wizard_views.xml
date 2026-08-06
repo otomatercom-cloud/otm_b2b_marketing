@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_otm_b2b_seminar_complete_wizard_form" model="ir.ui.view">
+        <field name="name">otm.b2b.seminar.complete.wizard.form</field>
+        <field name="model">otm.b2b.seminar.complete.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Complete Seminar">
+                <field name="seminar_plan_id" invisible="1"/>
+                <field name="seminar_id" invisible="1"/>
+                <group>
+                    <field name="institution_id" readonly="1"/>
+                    <field name="topic"/>
+                    <field name="category_ids" widget="many2many_tags"/>
+                    <field name="speaker"/>
+                    <field name="student_count"/>
+                    <field name="faculty_count"/>
+                    <field name="interested_students"/>
+                    <field name="feedback"/>
+                    <field name="outcome"/>
+                    <field name="portal_url" widget="url" readonly="1" invisible="not portal_url"
+                           string="Share this link for a mobile update"/>
+                </group>
+                <footer>
+                    <button name="action_complete" type="object" string="Mark Seminar Done" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_otm_b2b_seminar_complete_wizard" model="ir.actions.act_window">
+        <field name="name">Complete Seminar</field>
+        <field name="res_model">otm.b2b.seminar.complete.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

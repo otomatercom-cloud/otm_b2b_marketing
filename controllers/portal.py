@@ -71,3 +71,63 @@ class OtmB2bPortalController(http.Controller):
             'submitted': True,
         }
         return request.render('otm_b2b_marketing.portal_visit_complete_form', values)
+
+    def _get_seminar(self, seminar_id, token):
+        seminar = request.env['otm.b2b.seminar'].sudo().browse(seminar_id)
+        if not seminar.exists() or not token or seminar.access_token != token:
+            return None
+        return seminar
+
+    @http.route('/b2b/seminar/<int:seminar_id>/<string:token>', type='http', auth='public', methods=['GET'])
+    def seminar_complete_form(self, seminar_id, token, **kwargs):
+        seminar = self._get_seminar(seminar_id, token)
+        if not seminar:
+            return request.not_found()
+        categories = request.env['otm.b2b.seminar.category'].sudo().search([])
+        values = {
+            'seminar': seminar,
+            'categories': categories,
+            'submitted': seminar.state == 'completed',
+        }
+        return request.render('otm_b2b_marketing.portal_seminar_complete_form', values)
+
+    @http.route('/b2b/seminar/<int:seminar_id>/<string:token>/submit', type='http', auth='public', methods=['POST'])
+    def seminar_complete_submit(self, seminar_id, token, **post):
+        seminar = self._get_seminar(seminar_id, token)
+        if not seminar:
+            return request.not_found()
+
+        if seminar.state != 'completed':
+            now = fields.Datetime.now()
+            # Checkboxes with the same name submit multiple values - only
+            # available via the raw form, not the **post kwargs (which
+            # collapses repeats to the last one).
+            category_ids = [int(i) for i in request.httprequest.form.getlist('category_ids') if i]
+            vals = {
+                'topic': post.get('topic') or '',
+                'category_ids': [(6, 0, category_ids)],
+                'speaker': post.get('speaker') or '',
+                'student_count': int(post.get('student_count') or 0),
+                'faculty_count': int(post.get('faculty_count') or 0),
+                'interested_students': int(post.get('interested_students') or 0),
+                'feedback': post.get('feedback') or '',
+                'outcome': post.get('outcome') or '',
+                'state': 'completed',
+                'checkout_time': seminar.checkout_time or now,
+            }
+            if not seminar.checkin_time:
+                vals['checkin_time'] = now
+            seminar.sudo().write(vals)
+
+            if seminar.seminar_plan_id and seminar.seminar_plan_id.state != 'completed':
+                seminar.seminar_plan_id.sudo().write({'state': 'completed'})
+        # else: already completed - locked link resubmission, skip the
+        # write entirely, same guarantee as the visit portal form.
+
+        categories = request.env['otm.b2b.seminar.category'].sudo().search([])
+        values = {
+            'seminar': seminar,
+            'categories': categories,
+            'submitted': True,
+        }
+        return request.render('otm_b2b_marketing.portal_seminar_complete_form', values)

@@ -239,6 +239,20 @@ class OtmB2bInstitution(models.Model):
     # ---------------------------------------------------------------
     # Smart button actions
     # ---------------------------------------------------------------
+    def action_open_book_seminar_wizard(self):
+        """Opens the small "Book Seminar" popup (institution pre-filled,
+        just pick the date), unlike Plan Visit which is instant with no
+        popup - seminars are more often scheduled ahead of time."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Book Seminar'),
+            'res_model': 'otm.b2b.seminar.book.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_institution_id': self.id},
+        }
+
     def action_plan_visit_quick(self):
         """One click from the Institutions list/form: plan a visit for
         today, skipping the Draft step and the full Visit Planning form
@@ -402,6 +416,32 @@ class OtmB2bInstitution(models.Model):
                 'live_visit_portal_url': visit.portal_url if is_live else False,
             })
 
+        # "My Seminars" - same idea as "My Institutions" but for booked
+        # seminars due today (a seminar booked for a future date simply
+        # appears here once that date arrives, since this is queried live
+        # each time the dashboard loads).
+        today_seminar_plans = self.env['otm.b2b.seminar.plan'].search([
+            ('user_id', '=', uid),
+            ('seminar_date', '=', today),
+            ('state', 'in', ('draft', 'planned', 'in_progress')),
+        ])
+        my_seminars_list = []
+        for plan in today_seminar_plans.sorted(key=lambda p: p.institution_id.name):
+            seminar = plan.seminar_id
+            is_live = bool(
+                seminar and seminar.checkin_time and not seminar.checkout_time
+                and seminar.state != 'cancelled'
+            )
+            my_seminars_list.append({
+                'id': plan.institution_id.id,
+                'plan_id': plan.id,
+                'name': plan.institution_id.name,
+                'tier': plan.institution_id.tier_id.name or '',
+                'district': district_labels.get(plan.institution_id.district, ''),
+                'live_seminar_id': seminar.id if is_live else False,
+                'live_seminar_portal_url': seminar.portal_url if is_live else False,
+            })
+
         upcoming_visit_list = [{
             'id': plan.id,
             'institution': plan.institution_id.name,
@@ -521,5 +561,6 @@ class OtmB2bInstitution(models.Model):
             'today_completed_list': today_completed_list,
             'territory_performance': territory_performance,
             'my_institutions': my_institutions_list,
+            'my_seminars': my_seminars_list,
         }
 

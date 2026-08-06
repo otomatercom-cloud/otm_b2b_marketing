@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_otm_b2b_seminar_book_wizard_form" model="ir.ui.view">
+        <field name="name">otm.b2b.seminar.book.wizard.form</field>
+        <field name="model">otm.b2b.seminar.book.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Book Seminar">
+                <group>
+                    <field name="institution_id" readonly="1"/>
+                    <field name="seminar_date"/>
+                </group>
+                <footer>
+                    <button name="action_confirm" type="object" string="Book Seminar" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

@@ -62,4 +62,78 @@
 </html>
     </template>
 
+    <template id="portal_seminar_complete_form" name="B2B Seminar - Mobile Update">
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Seminar update - Logic School Of Management</title>
+    <style>
+        body { font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background:#f5f4f2; margin:0; padding:0; color:#2b2b2b; }
+        .o_b2b_wrap { max-width:480px; margin:0 auto; padding:24px 20px; }
+        .o_b2b_card { background:#ffffff; border-radius:12px; border:1px solid #e0e0e0; padding:20px; }
+        .o_b2b_title { font-size:18px; font-weight:600; margin:0 0 4px; }
+        .o_b2b_sub { font-size:13px; color:#6c757d; margin:0 0 20px; }
+        label { display:block; font-size:13px; font-weight:600; margin:16px 0 6px; }
+        select, textarea, input[type=text], input[type=number] {
+            width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid #d0d0d0;
+            border-radius:8px; font-size:15px; background:#fff;
+        }
+        textarea { min-height:90px; resize:vertical; }
+        .o_b2b_checks { border:1px solid #d0d0d0; border-radius:8px; padding:10px 12px; max-height:220px; overflow-y:auto; }
+        .o_b2b_check_row { display:flex; align-items:center; gap:8px; padding:6px 0; font-size:14px; }
+        .o_b2b_check_row input { width:auto; }
+        button { width:100%; margin-top:24px; padding:12px; border:none; border-radius:8px;
+                 background:#714B67; color:#ffffff; font-size:15px; font-weight:600; cursor:pointer; }
+        .o_b2b_done { text-align:center; padding:24px 0; }
+        .o_b2b_done_icon { font-size:40px; color:#28a745; margin-bottom:8px; }
+    </style>
+</head>
+<body>
+    <div class="o_b2b_wrap">
+        <div class="o_b2b_card">
+            <t t-if="submitted">
+                <div class="o_b2b_done">
+                    <div class="o_b2b_done_icon">&#10004;</div>
+                    <p class="o_b2b_title">Seminar update recorded</p>
+                    <p class="o_b2b_sub">Thanks - the seminar at <t t-esc="seminar.institution_id.name"/> has been marked done. This link is now locked and can't be used to update it again.</p>
+                </div>
+            </t>
+            <t t-else="">
+                <p class="o_b2b_title"><t t-esc="seminar.institution_id.name"/></p>
+                <p class="o_b2b_sub">Seminar on <t t-esc="seminar.seminar_date"/></p>
+                <form t-attf-action="/b2b/seminar/#{seminar.id}/#{seminar.access_token}/submit" method="post">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <label for="topic">Topic</label>
+                    <input type="text" name="topic" id="topic" placeholder="Seminar topic"/>
+                    <label>Categories covered (select all that apply)</label>
+                    <div class="o_b2b_checks">
+                        <t t-foreach="categories" t-as="cat">
+                            <div class="o_b2b_check_row">
+                                <input type="checkbox" name="category_ids" t-att-value="cat.id" t-att-id="'cat_%s' % cat.id"/>
+                                <label t-att-for="'cat_%s' % cat.id" style="margin:0;"><t t-esc="cat.name"/></label>
+                            </div>
+                        </t>
+                    </div>
+                    <label for="speaker">Speaker</label>
+                    <input type="text" name="speaker" id="speaker" placeholder="Speaker name"/>
+                    <label for="student_count">Number of students</label>
+                    <input type="number" name="student_count" id="student_count" min="0"/>
+                    <label for="faculty_count">Number of faculty</label>
+                    <input type="number" name="faculty_count" id="faculty_count" min="0"/>
+                    <label for="interested_students">Interested students</label>
+                    <input type="number" name="interested_students" id="interested_students" min="0"/>
+                    <label for="feedback">Feedback</label>
+                    <textarea name="feedback" id="feedback" placeholder="How did it go..."></textarea>
+                    <label for="outcome">Outcome</label>
+                    <textarea name="outcome" id="outcome" placeholder="Next steps..."></textarea>
+                    <button type="submit">Mark seminar done</button>
+                </form>
+            </t>
+        </div>
+    </div>
+</body>
+</html>
+    </template>
+
 </odoo>

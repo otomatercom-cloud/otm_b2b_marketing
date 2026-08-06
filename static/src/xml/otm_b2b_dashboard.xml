@@ -216,6 +216,32 @@
 
                 <div class="o_otm_b2b_panel mt-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="mb-0">My Seminars</h4>
+                        <a href="#" class="o_otm_b2b_view_all" t-on-click.prevent="openSeminars">View all</a>
+                    </div>
+                    <div class="o_otm_b2b_visit_row" t-foreach="state.mySeminars" t-as="sem" t-key="sem.id">
+                        <div class="o_otm_b2b_visit_avatar" t-att-class="sem.live_seminar_id ? 'o_otm_b2b_visit_avatar_live' : ''">
+                            <t t-esc="sem.name ? sem.name.slice(0,2).toUpperCase() : '--'"/>
+                        </div>
+                        <div class="o_otm_b2b_visit_info">
+                            <div class="o_otm_b2b_visit_name"><t t-esc="sem.name"/></div>
+                            <div class="o_otm_b2b_visit_meta">
+                                <t t-if="sem.tier"><t t-esc="sem.tier"/></t>
+                                <t t-if="sem.district"> · <t t-esc="sem.district"/></t>
+                            </div>
+                        </div>
+                        <button t-if="!sem.live_seminar_id" class="o_otm_b2b_checkin_btn"
+                                t-on-click="() => this.checkInSeminar(sem.plan_id)">Check In</button>
+                        <button t-else="" class="o_otm_b2b_checkin_btn"
+                                t-on-click="() => this.checkOutSeminar({ id: sem.live_seminar_id, portal_url: sem.live_seminar_portal_url, institution: sem.name })">
+                            Check Out
+                        </button>
+                    </div>
+                    <p t-if="!state.mySeminars.length" class="text-muted mb-0">No seminars booked for today.</p>
+                </div>
+
+                <div class="o_otm_b2b_panel mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
                         <h4 class="mb-0">
                             <span class="o_otm_b2b_live_dot"/> Live visits
                         </h4>
