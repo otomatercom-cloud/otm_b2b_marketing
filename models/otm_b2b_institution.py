@@ -22,6 +22,18 @@ class OtmB2bInstitution(models.Model):
     institution_type_id = fields.Many2one(
         'otm.b2b.institution.type', string='Institution Type',
         required=True, tracking=True)
+    institution_category = fields.Selection([
+        ('non_autonomous', 'Non Autonomous'),
+        ('autonomous', 'Autonomous'),
+        ('cbse', 'CBSE'),
+        ('govt', 'Govt'),
+        ('aided', 'Aided'),
+        ('deemed', 'Deemed'),
+        ('self_finance', 'Self Finance'),
+        ('icse', 'ICSE'),
+        ('un_aided', 'Un-Aided'),
+        ('group_inst', 'Group Inst'),
+    ], string='Institution Category', tracking=True)
     university_id = fields.Many2one('otm.b2b.university', string='University', tracking=True)
     zone_id = fields.Many2one('otm.b2b.zone', string='Zone', tracking=True)
     tier_id = fields.Many2one('otm.b2b.tier', string='Category / Tier', tracking=True)
@@ -89,7 +101,13 @@ class OtmB2bInstitution(models.Model):
     commerce_strength = fields.Integer(string='Commerce Strength')
     science_strength = fields.Integer(string='Science Strength')
     humanities_strength = fields.Integer(string='Humanities Strength')
-    placement_strength = fields.Integer(string='Placement Strength')
+    placement_strength = fields.Selection([
+        ('poor', 'Poor'),
+        ('low', 'Low'),
+        ('average', 'Average'),
+        ('good', 'Good'),
+        ('best', 'Best'),
+    ], string='Placement Strength')
     courses_offered = fields.Text(string='Courses Offered')
 
     # ---------------------------------------------------------------

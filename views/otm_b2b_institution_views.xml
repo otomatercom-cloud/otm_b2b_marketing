@@ -41,6 +41,7 @@
                         <group string="Classification">
                             <field name="code" readonly="1"/>
                             <field name="institution_type_id"/>
+                            <field name="institution_category"/>
                             <field name="university_id"/>
                             <field name="tier_id"/>
                             <field name="zone_id"/>
@@ -184,6 +185,7 @@
                 <field name="code"/>
                 <field name="name"/>
                 <field name="institution_type_id"/>
+                <field name="institution_category" optional="hide"/>
                 <field name="university_id" optional="hide"/>
                 <field name="tier_id" optional="show"/>
                 <field name="zone_id" optional="hide"/>
@@ -253,6 +255,7 @@
                 <field name="name"/>
                 <field name="code"/>
                 <field name="institution_type_id"/>
+                <field name="institution_category"/>
                 <field name="university_id"/>
                 <field name="zone_id"/>
                 <field name="tier_id"/>
@@ -276,6 +279,7 @@
                         domain="['|', ('marketing_manager_id', '=', uid), ('user_id', '=', uid)]"/>
                 <group>
                     <filter string="Institution Type" name="groupby_type" context="{'group_by': 'institution_type_id'}"/>
+                    <filter string="Institution Category" name="groupby_category" context="{'group_by': 'institution_category'}"/>
                     <filter string="University" name="groupby_university" context="{'group_by': 'university_id'}"/>
                     <filter string="Zone" name="groupby_zone" context="{'group_by': 'zone_id'}"/>
                     <filter string="Category / Tier" name="groupby_tier" context="{'group_by': 'tier_id'}"/>
