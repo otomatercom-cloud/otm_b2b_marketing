@@ -53,7 +53,7 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Address &amp; Contacts" name="address">
+                        <page string="Address" name="address">
                             <group>
                                 <group string="Address">
                                     <field name="street"/>
@@ -64,30 +64,41 @@
                                     <field name="state_id"/>
                                     <field name="country_id"/>
                                     <field name="zip"/>
-                                    <label for="partner_latitude" string="Coordinates"/>
+                                </group>
+                                <group string="Coordinates">
+                                    <label for="partner_latitude" string="Latitude / Longitude"/>
                                     <div class="o_row">
                                         <field name="partner_latitude"/>
                                         <field name="partner_longitude"/>
                                     </div>
-                                </group>
-                                <group string="Key Contacts">
-                                    <field name="decision_maker"/>
-                                    <field name="principal_name"/>
-                                    <field name="principal_mobile"/>
-                                    <field name="vice_principal_name"/>
-                                    <field name="hod_name"/>
-                                    <field name="hod_mobile"/>
-                                    <field name="management_contact_name"/>
-                                    <field name="placement_officer_name"/>
-                                    <field name="admission_officer_name"/>
-                                    <field name="counsellor_name"/>
-                                    <field name="supporting_staff_name"/>
-                                    <field name="supporting_staff_mobile"/>
                                     <field name="phone"/>
                                     <field name="email" widget="email"/>
                                     <field name="website" widget="url"/>
                                 </group>
                             </group>
+                        </page>
+                        <page string="Contacts" name="contacts">
+                            <group col="3">
+                                <group string="Leadership">
+                                    <field name="decision_maker"/>
+                                    <field name="principal_name"/>
+                                    <field name="principal_mobile"/>
+                                    <field name="vice_principal_name"/>
+                                </group>
+                                <group string="Department Contacts">
+                                    <field name="hod_name"/>
+                                    <field name="hod_mobile"/>
+                                    <field name="placement_officer_name"/>
+                                    <field name="admission_officer_name"/>
+                                    <field name="counsellor_name"/>
+                                </group>
+                                <group string="Other Contacts">
+                                    <field name="management_contact_name"/>
+                                    <field name="supporting_staff_name"/>
+                                    <field name="supporting_staff_mobile"/>
+                                </group>
+                            </group>
+                            <separator string="Additional Contact Persons"/>
                             <field name="contact_ids">
                                 <list editable="bottom">
                                     <field name="sequence" widget="handle"/>
@@ -101,41 +112,49 @@
                             </field>
                         </page>
                         <page string="Academic Strength" name="strength">
-                            <group>
-                                <group>
+                            <group col="3">
+                                <group string="Overall">
                                     <field name="student_strength"/>
+                                    <field name="ug_strength"/>
+                                    <field name="pg_strength"/>
+                                </group>
+                                <group string="By Class / Year">
                                     <field name="plus_two_strength"/>
                                     <field name="final_year_strength"/>
                                     <field name="second_year_strength"/>
                                     <field name="first_year_strength"/>
                                 </group>
-                                <group>
-                                    <field name="ug_strength"/>
-                                    <field name="pg_strength"/>
+                                <group string="By Stream">
                                     <field name="commerce_strength"/>
                                     <field name="science_strength"/>
                                     <field name="humanities_strength"/>
                                     <field name="placement_strength"/>
                                 </group>
                             </group>
-                            <field name="courses_offered" placeholder="List of courses offered..."/>
+                            <separator string="Courses Offered"/>
+                            <field name="courses_offered" nolabel="1" placeholder="List of courses offered..."/>
                         </page>
-                        <page string="Visit Summary" name="visit_summary">
-                            <group>
-                                <group>
+                        <page string="Visit &amp; MOU Summary" name="summary">
+                            <group col="3">
+                                <group string="Visit Activity">
                                     <field name="total_visits"/>
                                     <field name="first_visit_date"/>
                                     <field name="last_visit_date"/>
-                                </group>
-                                <group>
                                     <field name="days_since_last_visit"/>
                                     <field name="upcoming_visit_date"/>
                                 </group>
-                            </group>
-                            <group string="Latest Visit">
-                                <field name="last_marketing_activity_id" readonly="1"/>
-                                <field name="last_visit_status" readonly="1"/>
-                                <field name="last_visit_remarks" readonly="1"/>
+                                <group string="Latest Visit">
+                                    <field name="last_marketing_activity_id" readonly="1"/>
+                                    <field name="last_visit_status" readonly="1"/>
+                                    <field name="last_visit_remarks" readonly="1"/>
+                                </group>
+                                <group string="MOU">
+                                    <field name="mou_type_id" readonly="1"/>
+                                    <field name="mou_status" readonly="1"/>
+                                    <field name="mou_signed_date" readonly="1"/>
+                                    <field name="mou_valid_till" readonly="1"/>
+                                    <field name="mou_renewal_date" readonly="1"/>
+                                </group>
                             </group>
                             <separator string="Visit Timeline"/>
                             <field name="visit_record_ids" readonly="1">
@@ -152,21 +171,8 @@
                                 </list>
                             </field>
                         </page>
-                        <page string="MOU Overview" name="mou_overview">
-                            <group>
-                                <group>
-                                    <field name="mou_type_id" readonly="1"/>
-                                    <field name="mou_status" readonly="1"/>
-                                </group>
-                                <group>
-                                    <field name="mou_signed_date" readonly="1"/>
-                                    <field name="mou_valid_till" readonly="1"/>
-                                    <field name="mou_renewal_date" readonly="1"/>
-                                </group>
-                            </group>
-                        </page>
-                        <page string="Status &amp; Remarks" name="status">
-                            <field name="remarks" placeholder="Internal remarks..."/>
+                        <page string="Remarks" name="status">
+                            <field name="remarks" nolabel="1" placeholder="Internal remarks..."/>
                         </page>
                     </notebook>
                 </sheet>
