@@ -192,6 +192,16 @@ export class OtmB2bDashboard extends Component {
         });
     }
 
+    openSeminarPlanRecord(planId) {
+        this.action.doAction({
+            type: "ir.actions.act_window",
+            res_model: "otm.b2b.seminar.plan",
+            res_id: planId,
+            view_mode: "form",
+            views: [[false, "form"]],
+        });
+    }
+
     openVisitRecord(visitId) {
         this.action.doAction({
             type: "ir.actions.act_window",

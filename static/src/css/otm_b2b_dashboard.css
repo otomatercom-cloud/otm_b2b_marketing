@@ -177,6 +177,10 @@
     background-color: #faf8fa;
 }
 
+.o_otm_b2b_clickable_row {
+    cursor: pointer;
+}
+
 .o_otm_b2b_visit_row {
     display: flex;
     align-items: center;

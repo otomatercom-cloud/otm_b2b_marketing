@@ -49,5 +49,21 @@
         <field name="name">BBA 3rd Year</field>
         <field name="sequence">120</field>
     </record>
+    <record id="seminar_category_mba_1" model="otm.b2b.seminar.category">
+        <field name="name">MBA 1st Year</field>
+        <field name="sequence">130</field>
+    </record>
+    <record id="seminar_category_mba_final" model="otm.b2b.seminar.category">
+        <field name="name">MBA Final Year</field>
+        <field name="sequence">140</field>
+    </record>
+    <record id="seminar_category_mcom_1" model="otm.b2b.seminar.category">
+        <field name="name">MCOM First Year</field>
+        <field name="sequence">150</field>
+    </record>
+    <record id="seminar_category_mcom_final" model="otm.b2b.seminar.category">
+        <field name="name">MCOM Final Year</field>
+        <field name="sequence">160</field>
+    </record>
 
 </odoo>

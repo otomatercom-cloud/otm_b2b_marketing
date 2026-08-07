@@ -484,12 +484,14 @@ class OtmB2bInstitution(models.Model):
             all_plans = self.env['otm.b2b.seminar.plan'].search([
                 ('state', 'in', ('draft', 'planned', 'in_progress')),
             ], order='seminar_date')
+            seminar_plan_state_labels = dict(all_plans._fields['state'].selection)
             all_seminars_planned_list = [{
+                'plan_id': plan.id,
                 'institution': plan.institution_id.name,
                 'executive': plan.user_id.name,
                 'district': district_labels.get(plan.institution_id.district, ''),
                 'seminar_date': fields.Date.to_string(plan.seminar_date),
-                'state': plan.state,
+                'state': seminar_plan_state_labels.get(plan.state, plan.state),
             } for plan in all_plans]
 
         upcoming_visit_list = [{

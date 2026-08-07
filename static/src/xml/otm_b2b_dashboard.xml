@@ -167,7 +167,8 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr t-foreach="state.allSeminarsPlanned" t-as="row" t-key="row_index">
+                                <tr t-foreach="state.allSeminarsPlanned" t-as="row" t-key="row_index"
+                                    class="o_otm_b2b_clickable_row" t-on-click="() => this.openSeminarPlanRecord(row.plan_id)">
                                     <td><t t-esc="row.institution"/></td>
                                     <td><t t-esc="row.executive"/></td>
                                     <td><t t-esc="row.district"/></td>
