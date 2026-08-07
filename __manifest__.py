@@ -47,6 +47,7 @@ Features
         # wizard
         'wizard/otm_b2b_assign_manager_wizard_views.xml',
         'wizard/otm_b2b_visit_complete_wizard_views.xml',
+        'wizard/otm_b2b_visit_plan_book_wizard_views.xml',
         'wizard/otm_b2b_telegram_settings_wizard_views.xml',
         'wizard/otm_b2b_seminar_book_wizard_views.xml',
         'wizard/otm_b2b_seminar_complete_wizard_views.xml',

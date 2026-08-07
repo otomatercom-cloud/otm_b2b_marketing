@@ -153,6 +153,33 @@
                     <p t-if="!state.territoryPerformance.length" class="text-muted mb-0">No territory managers with assigned institutions yet.</p>
                 </div>
 
+                <div class="o_otm_b2b_panel mt-3" t-if="state.isManager">
+                    <h4>All Planned Seminars</h4>
+                    <div class="o_otm_b2b_table_wrap">
+                        <table class="o_otm_b2b_perf_table">
+                            <thead>
+                                <tr>
+                                    <th>Institution</th>
+                                    <th>Officer</th>
+                                    <th>District</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="state.allSeminarsPlanned" t-as="row" t-key="row_index">
+                                    <td><t t-esc="row.institution"/></td>
+                                    <td><t t-esc="row.executive"/></td>
+                                    <td><t t-esc="row.district"/></td>
+                                    <td><t t-esc="row.seminar_date"/></td>
+                                    <td><t t-esc="row.state"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p t-if="!state.allSeminarsPlanned.length" class="text-muted mb-0">No seminars planned across the team yet.</p>
+                </div>
+
                 <div class="o_otm_b2b_charts_row mt-4">
                     <div class="o_otm_b2b_panel">
                         <h4>Institution type distribution</h4>

@@ -119,14 +119,8 @@
                     <input type="text" name="speaker" id="speaker" placeholder="Speaker name"/>
                     <label for="student_count">Number of students</label>
                     <input type="number" name="student_count" id="student_count" min="0"/>
-                    <label for="faculty_count">Number of faculty</label>
-                    <input type="number" name="faculty_count" id="faculty_count" min="0"/>
-                    <label for="interested_students">Interested students</label>
-                    <input type="number" name="interested_students" id="interested_students" min="0"/>
-                    <label for="feedback">Feedback</label>
-                    <textarea name="feedback" id="feedback" placeholder="How did it go..."></textarea>
-                    <label for="outcome">Outcome</label>
-                    <textarea name="outcome" id="outcome" placeholder="Next steps..."></textarea>
+                    <label for="outcome">Calling Pitch</label>
+                    <textarea name="outcome" id="outcome" placeholder="What pitch was made..."></textarea>
                     <button type="submit">Mark seminar done</button>
                 </form>
             </t>

@@ -271,6 +271,20 @@ class OtmB2bInstitution(models.Model):
             'context': {'default_institution_id': self.id},
         }
 
+    def action_open_plan_visit_future_wizard(self):
+        """Opens the small "Plan Visit for Future" popup (institution
+        pre-filled, pick any date) - the date-picker counterpart to the
+        instant "Plan Visit for Today" button, for scheduling ahead."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Plan Visit for Future'),
+            'res_model': 'otm.b2b.visit.plan.book.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_institution_id': self.id},
+        }
+
     def action_plan_visit_quick(self):
         """One click from the Institutions list/form: plan a visit for
         today, skipping the Draft step and the full Visit Planning form
@@ -460,6 +474,24 @@ class OtmB2bInstitution(models.Model):
                 'live_seminar_portal_url': seminar.portal_url if is_live else False,
             })
 
+        # Marketing Head/Manager oversight: every officer's planned
+        # seminars (not just today's, not just their own) so leadership
+        # can see the whole team's pipeline at a glance. Read-only list -
+        # no Check In/Out here, those stay personal actions on "My
+        # Seminars" for whoever the plan is actually assigned to.
+        all_seminars_planned_list = []
+        if is_manager:
+            all_plans = self.env['otm.b2b.seminar.plan'].search([
+                ('state', 'in', ('draft', 'planned', 'in_progress')),
+            ], order='seminar_date')
+            all_seminars_planned_list = [{
+                'institution': plan.institution_id.name,
+                'executive': plan.user_id.name,
+                'district': district_labels.get(plan.institution_id.district, ''),
+                'seminar_date': fields.Date.to_string(plan.seminar_date),
+                'state': plan.state,
+            } for plan in all_plans]
+
         upcoming_visit_list = [{
             'id': plan.id,
             'institution': plan.institution_id.name,
@@ -580,5 +612,6 @@ class OtmB2bInstitution(models.Model):
             'territory_performance': territory_performance,
             'my_institutions': my_institutions_list,
             'my_seminars': my_seminars_list,
+            'all_seminars_planned': all_seminars_planned_list,
         }
 

@@ -38,6 +38,7 @@ export class OtmB2bDashboard extends Component {
             territoryPerformance: [],
             myInstitutions: [],
             mySeminars: [],
+            allSeminarsPlanned: [],
             isManager: true,
             userName: "",
             telegramConnected: false,
@@ -64,6 +65,7 @@ export class OtmB2bDashboard extends Component {
         this.state.territoryPerformance = data.territory_performance;
         this.state.myInstitutions = data.my_institutions;
         this.state.mySeminars = data.my_seminars;
+        this.state.allSeminarsPlanned = data.all_seminars_planned;
         this.state.isManager = data.is_manager;
         this.state.userName = data.user_name;
         this.state.telegramConnected = data.telegram_connected;

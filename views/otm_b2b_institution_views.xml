@@ -10,6 +10,7 @@
                 <header>
                     <button name="action_plan_visit_quick" type="object" string="Plan Visit for Today"
                             class="btn-primary"/>
+                    <button name="action_open_plan_visit_future_wizard" type="object" string="Plan Visit for Future"/>
                     <button name="action_open_book_seminar_wizard" type="object" string="Book Seminar"/>
                     <field name="status" widget="statusbar" statusbar_visible="new,active,inactive,blacklisted"/>
                 </header>
@@ -208,6 +209,8 @@
                        decoration-danger="status == 'blacklisted'"/>
                 <button name="action_plan_visit_quick" type="object" string="Plan"
                         class="btn-sm btn-primary" icon="fa-calendar-plus-o"/>
+                <button name="action_open_plan_visit_future_wizard" type="object" string="Plan Future"
+                        class="btn-sm" icon="fa-calendar-o"/>
                 <button name="action_open_book_seminar_wizard" type="object" string="Seminar"
                         class="btn-sm" icon="fa-graduation-cap"/>
             </list>
