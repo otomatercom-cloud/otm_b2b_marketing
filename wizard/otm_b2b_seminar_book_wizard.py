@@ -39,6 +39,11 @@ class OtmB2bSeminarBookWizard(models.TransientModel):
                     'message': _('A seminar is already booked at %s on %s.',
                                   self.institution_id.name, self.seminar_date),
                     'type': 'warning',
+                    # display_notification alone only shows a toast - it
+                    # does NOT close this popup on its own. Chaining a
+                    # 'next' act_window_close is the standard way to do
+                    # both: show the message, then close the dialog.
+                    'next': {'type': 'ir.actions.act_window_close'},
                 },
             }
 
@@ -56,5 +61,6 @@ class OtmB2bSeminarBookWizard(models.TransientModel):
                 'title': _('Booked'),
                 'message': _('Seminar booked at %s for %s.', self.institution_id.name, self.seminar_date),
                 'type': 'success',
+                'next': {'type': 'ir.actions.act_window_close'},
             },
         }

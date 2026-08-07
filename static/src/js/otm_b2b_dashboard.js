@@ -104,8 +104,29 @@ export class OtmB2bDashboard extends Component {
         }));
     }
 
+    _getLocation() {
+        // Best-effort GPS capture - never blocks check-in if the browser
+        // has no geolocation support, the user denies permission, or it
+        // times out. Resolves to {latitude, longitude} or null.
+        return new Promise((resolve) => {
+            if (!navigator.geolocation) {
+                resolve(null);
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                (pos) => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+                () => resolve(null),
+                { timeout: 8000, maximumAge: 60000 }
+            );
+        });
+    }
+
     async checkIn(planId) {
-        const result = await this.orm.call("otm.b2b.visit.plan", "action_dashboard_check_in", [planId]);
+        const loc = await this._getLocation();
+        const result = await this.orm.call("otm.b2b.visit.plan", "action_dashboard_check_in", [planId], {
+            latitude: loc ? loc.latitude : null,
+            longitude: loc ? loc.longitude : null,
+        });
         this.notification.add(`Checked in at ${result.institution}.`, { type: "success" });
         await this.loadDashboard();
     }

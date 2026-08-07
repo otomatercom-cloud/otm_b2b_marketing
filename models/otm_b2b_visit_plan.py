@@ -124,20 +124,24 @@ class OtmB2bVisitPlan(models.Model):
             'context': context,
         }
 
-    def action_check_in(self):
+    def action_check_in(self, latitude=None, longitude=None):
         """Officer has arrived at the institution: create the Visit
         Record, stamp check-in time, and move the plan to 'Checked In'.
         The visit is completed later via Check Out / the Complete Visit
         wizard, either from here or from the Visit Record itself."""
         self.ensure_one()
-        visit = self.env['otm.b2b.visit.record'].create({
+        vals = {
             'institution_id': self.institution_id.id,
             'visit_plan_id': self.id,
             'user_id': self.user_id.id,
             'visit_date': fields.Date.context_today(self),
             'company_id': self.company_id.id,
             'checkin_time': fields.Datetime.now(),
-        })
+        }
+        if latitude is not None and longitude is not None:
+            vals['gps_latitude'] = latitude
+            vals['gps_longitude'] = longitude
+        visit = self.env['otm.b2b.visit.record'].create(vals)
         self.write({'state': 'in_progress', 'visit_record_id': visit.id})
         return {
             'type': 'ir.actions.act_window',
@@ -146,12 +150,12 @@ class OtmB2bVisitPlan(models.Model):
             'res_id': visit.id,
         }
 
-    def action_dashboard_check_in(self):
+    def action_dashboard_check_in(self, latitude=None, longitude=None):
         """Same check-in as action_check_in, but returns plain data
         instead of an act_window so the Dashboard widget can show the
         portal link immediately without navigating away."""
         self.ensure_one()
-        self.action_check_in()
+        self.action_check_in(latitude=latitude, longitude=longitude)
         visit = self.visit_record_id
         if self.user_id.otm_telegram_connected:
             self.user_id._otm_telegram_send(
