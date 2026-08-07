@@ -50,6 +50,8 @@
                                 <field name="gps_latitude"/>
                                 <field name="gps_longitude"/>
                             </div>
+                            <field name="map_url" widget="url" readonly="1" string="View on Map"
+                                   invisible="not map_url"/>
                             <field name="portal_url" widget="url" readonly="1"
                                    string="Mobile update link" invisible="not portal_url"/>
                         </group>
@@ -106,6 +108,7 @@
                 <field name="user_id"/>
                 <field name="marketing_activity_type_id"/>
                 <field name="duration" widget="float_time"/>
+                <field name="map_url" widget="url" string="Map" optional="hide"/>
                 <field name="next_followup_date"/>
                 <field name="state" widget="badge"/>
             </list>

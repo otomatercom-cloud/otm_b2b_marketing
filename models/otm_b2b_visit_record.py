@@ -31,6 +31,7 @@ class OtmB2bVisitRecord(models.Model):
 
     gps_latitude = fields.Float(string='GPS Latitude', digits=(16, 6))
     gps_longitude = fields.Float(string='GPS Longitude', digits=(16, 6))
+    map_url = fields.Char(string='Map Link', compute='_compute_map_url')
 
     state = fields.Selection([
         ('draft', 'Draft'),
@@ -94,6 +95,13 @@ class OtmB2bVisitRecord(models.Model):
     def _compute_lead_count(self):
         for rec in self:
             rec.lead_count = len(rec.lead_ids)
+
+    def _compute_map_url(self):
+        for rec in self:
+            rec.map_url = (
+                f"https://www.google.com/maps?q={rec.gps_latitude},{rec.gps_longitude}"
+                if rec.gps_latitude or rec.gps_longitude else False
+            )
 
     def _compute_portal_url(self):
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
