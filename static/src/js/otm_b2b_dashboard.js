@@ -105,10 +105,21 @@ export class OtmB2bDashboard extends Component {
     }
 
     _getLocation() {
-        // Best-effort GPS capture - never blocks check-in if the browser
-        // has no geolocation support, the user denies permission, or it
-        // times out. Resolves to {latitude, longitude} or null.
+        // Best-effort GPS capture - never blocks check-in if there's no
+        // location available. Two sources, in priority order:
+        // 1. window.otmB2BLocation - set by a native app wrapper (e.g. a
+        //    Kodular WebViewer) via RunJavaScript, using the phone's own
+        //    Location Sensor. Stock Android WebViews often don't support
+        //    navigator.geolocation at all (no permission plumbing without
+        //    a custom WebChromeClient), so a wrapper app feeding real GPS
+        //    in directly is the reliable path for that case.
+        // 2. navigator.geolocation - the normal browser API, used when
+        //    running in an actual browser (not a bare WebView).
         return new Promise((resolve) => {
+            if (window.otmB2BLocation && window.otmB2BLocation.latitude) {
+                resolve(window.otmB2BLocation);
+                return;
+            }
             if (!navigator.geolocation) {
                 resolve(null);
                 return;

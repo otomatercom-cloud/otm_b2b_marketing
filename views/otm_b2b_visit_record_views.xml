@@ -45,13 +45,15 @@
                             <field name="checkin_time"/>
                             <field name="checkout_time"/>
                             <field name="duration" widget="float_time"/>
-                            <label for="gps_latitude" string="GPS Coordinates"/>
-                            <div class="o_row">
+                            <label for="gps_latitude" string="GPS Coordinates"
+                                   groups="otm_b2b_marketing.group_otm_b2b_marketing_head"/>
+                            <div class="o_row" groups="otm_b2b_marketing.group_otm_b2b_marketing_head">
                                 <field name="gps_latitude"/>
                                 <field name="gps_longitude"/>
                             </div>
                             <field name="map_url" widget="url" readonly="1" string="View on Map"
-                                   invisible="not map_url"/>
+                                   invisible="not map_url"
+                                   groups="otm_b2b_marketing.group_otm_b2b_marketing_head"/>
                             <field name="portal_url" widget="url" readonly="1"
                                    string="Mobile update link" invisible="not portal_url"/>
                         </group>
@@ -108,7 +110,8 @@
                 <field name="user_id"/>
                 <field name="marketing_activity_type_id"/>
                 <field name="duration" widget="float_time"/>
-                <field name="map_url" widget="url" string="Map" optional="hide"/>
+                <field name="map_url" widget="url" string="Map" optional="hide"
+                       groups="otm_b2b_marketing.group_otm_b2b_marketing_head"/>
                 <field name="next_followup_date"/>
                 <field name="state" widget="badge"/>
             </list>
