@@ -40,6 +40,7 @@
                             <field name="user_id"/>
                             <field name="visit_date"/>
                             <field name="marketing_activity_type_id"/>
+                            <field name="contact_person"/>
                         </group>
                         <group>
                             <field name="checkin_time"/>

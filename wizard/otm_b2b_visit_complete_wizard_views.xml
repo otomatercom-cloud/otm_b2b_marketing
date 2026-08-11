@@ -11,6 +11,7 @@
                 <group>
                     <field name="institution_id" readonly="1"/>
                     <field name="marketing_activity_type_id"/>
+                    <field name="contact_person"/>
                     <field name="remarks"/>
                     <field name="next_action"/>
                     <field name="next_followup_date"/>

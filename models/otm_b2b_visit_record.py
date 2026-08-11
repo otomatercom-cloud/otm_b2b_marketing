@@ -43,6 +43,7 @@ class OtmB2bVisitRecord(models.Model):
     marketing_activity_type_id = fields.Many2one(
         'otm.b2b.activity.type', string='Activity Type', tracking=True)
     remarks = fields.Text(string='Remarks')
+    contact_person = fields.Char(string='Contact Person', help='Who at the institution was met during this visit.')
     discussion_summary = fields.Text(string='Discussion Summary')
     next_followup_date = fields.Date(string='Next Followup Date', tracking=True)
     next_action = fields.Char(string='Next Action')

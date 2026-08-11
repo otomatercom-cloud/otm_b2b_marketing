@@ -47,6 +47,8 @@
                             <option t-att-value="at.id"><t t-esc="at.name"/></option>
                         </t>
                     </select>
+                    <label for="contact_person">Contact person</label>
+                    <input type="text" name="contact_person" id="contact_person" placeholder="Who did you meet..."/>
                     <label for="remarks">Remarks</label>
                     <textarea name="remarks" id="remarks" required="required" placeholder="What was discussed..."></textarea>
                     <label for="next_action">Next action</label>

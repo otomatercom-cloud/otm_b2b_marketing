@@ -42,6 +42,7 @@ class OtmB2bPortalController(http.Controller):
         if visit.state != 'completed':
             now = fields.Datetime.now()
             vals = {
+                'contact_person': post.get('contact_person') or '',
                 'remarks': post.get('remarks') or '',
                 'next_action': post.get('next_action') or '',
                 'state': 'completed',

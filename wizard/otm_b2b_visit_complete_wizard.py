@@ -14,6 +14,7 @@ class OtmB2bVisitCompleteWizard(models.TransientModel):
     institution_id = fields.Many2one('otm.b2b.institution', string='Institution', readonly=True)
     marketing_activity_type_id = fields.Many2one(
         'otm.b2b.activity.type', string='Activity Type', required=True)
+    contact_person = fields.Char(string='Contact Person', help='Who at the institution was met during this visit.')
     remarks = fields.Text(string='Remarks', required=True)
     next_action = fields.Char(string='Next Action')
     next_followup_date = fields.Date(string='Next Followup Date')
@@ -42,6 +43,7 @@ class OtmB2bVisitCompleteWizard(models.TransientModel):
             visit = self.visit_record_id
             vals = {
                 'marketing_activity_type_id': self.marketing_activity_type_id.id,
+                'contact_person': self.contact_person,
                 'remarks': self.remarks,
                 'next_action': self.next_action,
                 'next_followup_date': self.next_followup_date,
@@ -62,6 +64,7 @@ class OtmB2bVisitCompleteWizard(models.TransientModel):
                 'visit_date': fields.Date.context_today(self),
                 'company_id': plan.company_id.id,
                 'marketing_activity_type_id': self.marketing_activity_type_id.id,
+                'contact_person': self.contact_person,
                 'remarks': self.remarks,
                 'next_action': self.next_action,
                 'next_followup_date': self.next_followup_date,
