@@ -16,6 +16,16 @@ class OtmB2bPortalController(http.Controller):
             return None
         return visit
 
+    def _get_dashboard_url(self):
+        """Direct link to the B2B Marketing dashboard itself, not just
+        the generic Odoo apps home screen - built from the action's
+        actual database id via its xmlid, so it stays correct no matter
+        which database this is deployed to (never hardcode the numeric
+        action id, that's assigned per-database and isn't portable)."""
+        action = request.env.ref('otm_b2b_marketing.action_otm_b2b_dashboard', raise_if_not_found=False)
+        action = action.sudo() if action else action
+        return f'/odoo/action-{action.id}' if action else '/odoo'
+
     @http.route('/b2b/visit/<int:visit_id>/<string:token>', type='http', auth='public', methods=['GET'])
     def visit_complete_form(self, visit_id, token, **kwargs):
         visit = self._get_visit(visit_id, token)
@@ -30,6 +40,7 @@ class OtmB2bPortalController(http.Controller):
             'visit': visit,
             'activity_types': activity_types,
             'submitted': visit.state == 'completed',
+            'dashboard_url': self._get_dashboard_url(),
         }
         return request.render('otm_b2b_marketing.portal_visit_complete_form', values)
 
@@ -70,6 +81,7 @@ class OtmB2bPortalController(http.Controller):
             'visit': visit,
             'activity_types': activity_types,
             'submitted': True,
+            'dashboard_url': self._get_dashboard_url(),
         }
         return request.render('otm_b2b_marketing.portal_visit_complete_form', values)
 
@@ -89,6 +101,7 @@ class OtmB2bPortalController(http.Controller):
             'seminar': seminar,
             'categories': categories,
             'submitted': seminar.state == 'completed',
+            'dashboard_url': self._get_dashboard_url(),
         }
         return request.render('otm_b2b_marketing.portal_seminar_complete_form', values)
 
@@ -130,5 +143,6 @@ class OtmB2bPortalController(http.Controller):
             'seminar': seminar,
             'categories': categories,
             'submitted': True,
+            'dashboard_url': self._get_dashboard_url(),
         }
         return request.render('otm_b2b_marketing.portal_seminar_complete_form', values)
