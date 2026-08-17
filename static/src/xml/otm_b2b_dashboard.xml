@@ -221,7 +221,8 @@
                         <h4 class="mb-0">My Institutions</h4>
                         <a href="#" class="o_otm_b2b_view_all" t-on-click.prevent="openInstitutions">View all</a>
                     </div>
-                    <div class="o_otm_b2b_visit_row" t-foreach="state.myInstitutions" t-as="inst" t-key="inst.id">
+                    <div class="o_otm_b2b_visit_row o_otm_b2b_row_clickable" t-foreach="state.myInstitutions" t-as="inst" t-key="inst.id"
+                         t-on-click="() => this.openInstitutionRecord(inst.id)">
                         <div class="o_otm_b2b_visit_avatar" t-att-class="inst.live_visit_id ? 'o_otm_b2b_visit_avatar_live' : ''">
                             <t t-esc="inst.name ? inst.name.slice(0,2).toUpperCase() : '--'"/>
                         </div>
@@ -233,9 +234,9 @@
                             </div>
                         </div>
                         <button t-if="!inst.live_visit_id" class="o_otm_b2b_checkin_btn"
-                                t-on-click="() => this.checkIn(inst.plan_id)">Check In</button>
+                                t-on-click="(ev) => { ev.stopPropagation(); this.checkIn(inst.plan_id); }">Check In</button>
                         <button t-else="" class="o_otm_b2b_checkin_btn"
-                                t-on-click="() => this.checkOut({ id: inst.live_visit_id, portal_url: inst.live_visit_portal_url, institution: inst.name })">
+                                t-on-click="(ev) => { ev.stopPropagation(); this.checkOut({ id: inst.live_visit_id, portal_url: inst.live_visit_portal_url, institution: inst.name }); }">
                             Check Out
                         </button>
                     </div>
@@ -274,7 +275,8 @@
                             <span class="o_otm_b2b_live_dot"/> Live visits
                         </h4>
                     </div>
-                    <div class="o_otm_b2b_visit_row" t-foreach="state.liveVisits" t-as="visit" t-key="visit_index">
+                    <div class="o_otm_b2b_visit_row o_otm_b2b_row_clickable" t-foreach="state.liveVisits" t-as="visit" t-key="visit_index"
+                         t-on-click="() => this.openInstitutionRecord(visit.institution_id)">
                         <div class="o_otm_b2b_visit_avatar o_otm_b2b_visit_avatar_live">
                             <t t-esc="visit.executive ? visit.executive.slice(0,2).toUpperCase() : '--'"/>
                         </div>
@@ -286,7 +288,7 @@
                             </div>
                         </div>
                         <span class="o_otm_b2b_visit_date">Since <t t-esc="visit.checkin_time"/></span>
-                        <button class="o_otm_b2b_checkin_btn" t-on-click="() => this.checkOut(visit)">Check Out</button>
+                        <button class="o_otm_b2b_checkin_btn" t-on-click="(ev) => { ev.stopPropagation(); this.checkOut(visit); }">Check Out</button>
                     </div>
                     <p t-if="!state.liveVisits.length" class="text-muted mb-0">No one is checked in right now.</p>
                 </div>

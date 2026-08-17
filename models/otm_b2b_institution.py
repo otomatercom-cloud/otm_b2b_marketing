@@ -513,6 +513,7 @@ class OtmB2bInstitution(models.Model):
         live_visit_list = [{
             'id': v.id,
             'institution': v.institution_id.name,
+            'institution_id': v.institution_id.id,
             'executive': v.user_id.name,
             'district': district_labels.get(v.institution_id.district, ''),
             'checkin_time': fields.Datetime.to_string(v.checkin_time) if v.checkin_time else '',

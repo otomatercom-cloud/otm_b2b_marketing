@@ -189,6 +189,14 @@
     border-top: 1px solid #eeeeee;
 }
 
+.o_otm_b2b_row_clickable {
+    cursor: pointer;
+}
+
+.o_otm_b2b_row_clickable:hover {
+    background-color: #faf8fa;
+}
+
 .o_otm_b2b_visit_row:first-of-type {
     border-top: none;
 }

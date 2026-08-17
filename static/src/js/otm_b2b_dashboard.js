@@ -242,6 +242,16 @@ export class OtmB2bDashboard extends Component {
         });
     }
 
+    openInstitutionRecord(institutionId) {
+        this.action.doAction({
+            type: "ir.actions.act_window",
+            res_model: "otm.b2b.institution",
+            res_id: institutionId,
+            view_mode: "form",
+            views: [[false, "form"]],
+        });
+    }
+
     openInstitutions() {
         this.action.doAction("otm_b2b_marketing.action_otm_b2b_institution");
     }
