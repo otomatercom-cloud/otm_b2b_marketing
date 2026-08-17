@@ -23,7 +23,11 @@
                  background:#714B67; color:#ffffff; font-size:15px; font-weight:600; cursor:pointer; }
         .o_b2b_done { text-align:center; padding:24px 0; }
         .o_b2b_done_icon { font-size:40px; color:#28a745; margin-bottom:8px; }
-        .o_b2b_done a { color:#714B67; font-weight:600; }
+        .o_b2b_done_btn {
+            display:block; width:100%; box-sizing:border-box; margin-top:24px; padding:12px;
+            border-radius:8px; background:#714B67; color:#ffffff; font-size:15px; font-weight:600;
+            text-decoration:none; text-align:center;
+        }
     </style>
 </head>
 <body>
@@ -34,11 +38,8 @@
                     <div class="o_b2b_done_icon">&#10004;</div>
                     <p class="o_b2b_title">Visit update recorded</p>
                     <p class="o_b2b_sub">Thanks - the visit to <t t-esc="visit.institution_id.name"/> has been marked done. This link is now locked and can't be used to update the visit again.</p>
-                    <button type="button" onclick="window.close()">Done</button>
-                    <p class="o_b2b_sub" style="margin-top:14px;">
-                        If this doesn't close on its own, you can close the tab yourself, or
-                        <a href="/odoo">tap here to go to the dashboard</a>.
-                    </p>
+                    <a href="/odoo" class="o_b2b_done_btn">Go to Dashboard</a>
+                    <p class="o_b2b_sub" style="margin-top:12px;">Or just close this tab.</p>
                 </div>
             </t>
             <t t-else="">
@@ -95,7 +96,11 @@
                  background:#714B67; color:#ffffff; font-size:15px; font-weight:600; cursor:pointer; }
         .o_b2b_done { text-align:center; padding:24px 0; }
         .o_b2b_done_icon { font-size:40px; color:#28a745; margin-bottom:8px; }
-        .o_b2b_done a { color:#714B67; font-weight:600; }
+        .o_b2b_done_btn {
+            display:block; width:100%; box-sizing:border-box; margin-top:24px; padding:12px;
+            border-radius:8px; background:#714B67; color:#ffffff; font-size:15px; font-weight:600;
+            text-decoration:none; text-align:center;
+        }
     </style>
 </head>
 <body>
@@ -106,11 +111,8 @@
                     <div class="o_b2b_done_icon">&#10004;</div>
                     <p class="o_b2b_title">Seminar update recorded</p>
                     <p class="o_b2b_sub">Thanks - the seminar at <t t-esc="seminar.institution_id.name"/> has been marked done. This link is now locked and can't be used to update it again.</p>
-                    <button type="button" onclick="window.close()">Done</button>
-                    <p class="o_b2b_sub" style="margin-top:14px;">
-                        If this doesn't close on its own, you can close the tab yourself, or
-                        <a href="/odoo">tap here to go to the dashboard</a>.
-                    </p>
+                    <a href="/odoo" class="o_b2b_done_btn">Go to Dashboard</a>
+                    <p class="o_b2b_sub" style="margin-top:12px;">Or just close this tab.</p>
                 </div>
             </t>
             <t t-else="">
