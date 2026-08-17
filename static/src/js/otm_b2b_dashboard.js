@@ -107,8 +107,9 @@ export class OtmB2bDashboard extends Component {
     }
 
     _getLocation() {
-        // Best-effort GPS capture - never blocks check-in if there's no
-        // location available. Two sources, in priority order:
+        // Best-effort GPS capture - never blocks check-in/check-out if
+        // there's no location available, but tries hard to actually get
+        // one first. Two sources, in priority order:
         // 1. window.otmB2BLocation - set by a native app wrapper (e.g. a
         //    Kodular WebViewer) via RunJavaScript, using the phone's own
         //    Location Sensor. Stock Android WebViews often don't support
@@ -117,7 +118,24 @@ export class OtmB2bDashboard extends Component {
         //    in directly is the reliable path for that case.
         // 2. navigator.geolocation - the normal browser API, used when
         //    running in an actual browser (not a bare WebView).
-        return new Promise((resolve) => {
+        //
+        // For (2): campus buildings are exactly the kind of place a GPS
+        // fix is slow to acquire (indoors, surrounded by concrete/steel).
+        // A short timeout with default (low) accuracy mode fails there
+        // often - enableHighAccuracy actually asks for the device's GPS
+        // chip rather than a fast network-based estimate, a longer
+        // timeout gives it room to actually get a fix, and one retry
+        // covers the case where the first attempt just missed a
+        // momentarily weak signal.
+        const tryOnce = (options) => new Promise((resolve) => {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+                () => resolve(null),
+                options
+            );
+        });
+
+        return new Promise(async (resolve) => {
             if (window.otmB2BLocation && window.otmB2BLocation.latitude) {
                 resolve(window.otmB2BLocation);
                 return;
@@ -126,11 +144,12 @@ export class OtmB2bDashboard extends Component {
                 resolve(null);
                 return;
             }
-            navigator.geolocation.getCurrentPosition(
-                (pos) => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
-                () => resolve(null),
-                { timeout: 8000, maximumAge: 60000 }
-            );
+            const options = { enableHighAccuracy: true, timeout: 20000, maximumAge: 30000 };
+            let loc = await tryOnce(options);
+            if (!loc) {
+                loc = await tryOnce(options);
+            }
+            resolve(loc);
         });
     }
 
@@ -145,7 +164,11 @@ export class OtmB2bDashboard extends Component {
     }
 
     async checkOut(visit) {
-        await this.orm.call("otm.b2b.visit.record", "action_check_out", [visit.id]);
+        const loc = await this._getLocation();
+        await this.orm.call("otm.b2b.visit.record", "action_check_out", [visit.id], {
+            latitude: loc ? loc.latitude : null,
+            longitude: loc ? loc.longitude : null,
+        });
 
         if (visit.portal_url) {
             window.open(visit.portal_url, "_blank");

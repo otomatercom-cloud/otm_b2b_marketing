@@ -154,9 +154,17 @@ class OtmB2bVisitRecord(models.Model):
     def action_check_in(self):
         self.write({'checkin_time': fields.Datetime.now()})
 
-    def action_check_out(self):
-        self.write({'checkout_time': fields.Datetime.now()})
+    def action_check_out(self, latitude=None, longitude=None):
+        vals = {'checkout_time': fields.Datetime.now()}
+        self.write(vals)
         for visit in self:
+            # Fallback capture: check-in's GPS attempt is the primary one
+            # (most relevant to "where did the visit happen"), but if that
+            # failed to get a fix (weak indoor signal etc.), check-out is
+            # a second chance rather than leaving the visit with nothing.
+            if (not visit.gps_latitude and not visit.gps_longitude
+                    and latitude is not None and longitude is not None):
+                visit.write({'gps_latitude': latitude, 'gps_longitude': longitude})
             if visit.user_id.otm_telegram_connected:
                 visit.user_id._otm_telegram_send(
                     f"Checked out of {visit.institution_id.name}.\n"
