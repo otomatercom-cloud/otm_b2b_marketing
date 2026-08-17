@@ -109,7 +109,14 @@ export class OtmB2bDashboard extends Component {
     _getLocation() {
         // Best-effort GPS capture - never blocks check-in/check-out if
         // there's no location available, but tries hard to actually get
-        // one first. Two sources, in priority order:
+        // one first, AND reports back WHY it failed rather than just
+        // silently returning nothing. That "why" is what's been missing
+        // this whole time - "not captured" alone can mean permission
+        // denied, no GPS fix in time, or the API being unavailable, and
+        // those need completely different fixes. Returns
+        // { location: {latitude, longitude} | null, error: string | null }.
+        //
+        // Two sources, in priority order:
         // 1. window.otmB2BLocation - set by a native app wrapper (e.g. a
         //    Kodular WebViewer) via RunJavaScript, using the phone's own
         //    Location Sensor. Stock Android WebViews often don't support
@@ -118,57 +125,57 @@ export class OtmB2bDashboard extends Component {
         //    in directly is the reliable path for that case.
         // 2. navigator.geolocation - the normal browser API, used when
         //    running in an actual browser (not a bare WebView).
-        //
-        // For (2): campus buildings are exactly the kind of place a GPS
-        // fix is slow to acquire (indoors, surrounded by concrete/steel).
-        // A short timeout with default (low) accuracy mode fails there
-        // often - enableHighAccuracy actually asks for the device's GPS
-        // chip rather than a fast network-based estimate, a longer
-        // timeout gives it room to actually get a fix, and one retry
-        // covers the case where the first attempt just missed a
-        // momentarily weak signal.
+        const ERROR_NAMES = { 1: "Permission denied", 2: "Position unavailable", 3: "Timed out" };
+
         const tryOnce = (options) => new Promise((resolve) => {
             navigator.geolocation.getCurrentPosition(
-                (pos) => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
-                () => resolve(null),
+                (pos) => resolve({ location: { latitude: pos.coords.latitude, longitude: pos.coords.longitude }, error: null }),
+                (err) => resolve({ location: null, error: ERROR_NAMES[err.code] || err.message || "Unknown error" }),
                 options
             );
         });
 
         return new Promise(async (resolve) => {
             if (window.otmB2BLocation && window.otmB2BLocation.latitude) {
-                resolve(window.otmB2BLocation);
+                resolve({ location: window.otmB2BLocation, error: null });
                 return;
             }
             if (!navigator.geolocation) {
-                resolve(null);
+                resolve({ location: null, error: "Geolocation not available in this browser/app" });
                 return;
             }
             const options = { enableHighAccuracy: true, timeout: 20000, maximumAge: 30000 };
-            let loc = await tryOnce(options);
-            if (!loc) {
-                loc = await tryOnce(options);
+            let result = await tryOnce(options);
+            if (!result.location) {
+                result = await tryOnce(options);
             }
-            resolve(loc);
+            resolve(result);
         });
     }
 
     async checkIn(planId) {
-        const loc = await this._getLocation();
+        const { location, error } = await this._getLocation();
         const result = await this.orm.call("otm.b2b.visit.plan", "action_dashboard_check_in", [planId], {
-            latitude: loc ? loc.latitude : null,
-            longitude: loc ? loc.longitude : null,
+            latitude: location ? location.latitude : null,
+            longitude: location ? location.longitude : null,
         });
-        this.notification.add(`Checked in at ${result.institution}.`, { type: "success" });
+        const suffix = location ? "" : ` (location not captured: ${error})`;
+        this.notification.add(`Checked in at ${result.institution}.${suffix}`, {
+            type: location ? "success" : "warning",
+        });
         await this.loadDashboard();
     }
 
     async checkOut(visit) {
-        const loc = await this._getLocation();
+        const { location, error } = await this._getLocation();
         await this.orm.call("otm.b2b.visit.record", "action_check_out", [visit.id], {
-            latitude: loc ? loc.latitude : null,
-            longitude: loc ? loc.longitude : null,
+            latitude: location ? location.latitude : null,
+            longitude: location ? location.longitude : null,
         });
+
+        if (!location) {
+            this.notification.add(`Location not captured: ${error}`, { type: "warning" });
+        }
 
         if (visit.portal_url) {
             window.open(visit.portal_url, "_blank");
