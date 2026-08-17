@@ -64,6 +64,13 @@ class OtmB2bVisitRecord(models.Model):
 
     lead_ids = fields.One2many('otm.b2b.lead', 'visit_id', string='Leads Collected')
     lead_count = fields.Integer(string='Lead Count', compute='_compute_lead_count')
+    leads_collected_count = fields.Integer(
+        string='Leads Collected (Count)',
+        help='A plain manually-entered number of leads collected on this visit - for '
+             'when you have an aggregate count but not individual Lead records to link '
+             '(e.g. historical data import, or a quick log without full lead details). '
+             'This is separate from Lead Count above, which counts actual linked Lead '
+             'records under "Leads Collected".')
 
     company_id = fields.Many2one(
         'res.company', string='Company', required=True,

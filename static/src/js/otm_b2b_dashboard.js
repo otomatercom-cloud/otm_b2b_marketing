@@ -216,6 +216,18 @@ export class OtmB2bDashboard extends Component {
         this.action.doAction("otm_b2b_marketing.action_otm_b2b_institution");
     }
 
+    openFiltered(model, name, domain, context) {
+        this.action.doAction({
+            type: "ir.actions.act_window",
+            name: name,
+            res_model: model,
+            view_mode: "list,form",
+            views: [[false, "list"], [false, "form"]],
+            domain: domain || [],
+            context: context || {},
+        });
+    }
+
     openVisitPlans() {
         this.action.doAction("otm_b2b_marketing.action_otm_b2b_visit_plan");
     }
