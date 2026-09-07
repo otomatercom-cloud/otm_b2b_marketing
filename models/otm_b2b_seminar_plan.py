@@ -60,18 +60,22 @@ class OtmB2bSeminarPlan(models.Model):
             'context': context,
         }
 
-    def action_check_in(self):
+    def action_check_in(self, latitude=None, longitude=None):
         """Seminar is starting: create the Seminar record, stamp
         check-in time, move the plan to 'Checked In'. Completed later
         via Check Out / the Complete Seminar wizard."""
         self.ensure_one()
-        seminar = self.env['otm.b2b.seminar'].create({
+        vals = {
             'institution_id': self.institution_id.id,
             'seminar_plan_id': self.id,
             'seminar_date': self.seminar_date,
             'company_id': self.company_id.id,
             'checkin_time': fields.Datetime.now(),
-        })
+        }
+        if latitude is not None and longitude is not None:
+            vals['gps_latitude'] = latitude
+            vals['gps_longitude'] = longitude
+        seminar = self.env['otm.b2b.seminar'].create(vals)
         self.write({'state': 'in_progress', 'seminar_id': seminar.id})
         return {
             'type': 'ir.actions.act_window',
@@ -80,12 +84,12 @@ class OtmB2bSeminarPlan(models.Model):
             'res_id': seminar.id,
         }
 
-    def action_dashboard_check_in(self):
+    def action_dashboard_check_in(self, latitude=None, longitude=None):
         """Same check-in as action_check_in, but returns plain data
         instead of an act_window so the Dashboard widget can show the
         portal link immediately without navigating away."""
         self.ensure_one()
-        self.action_check_in()
+        self.action_check_in(latitude=latitude, longitude=longitude)
         seminar = self.seminar_id
         if self.user_id.otm_telegram_connected:
             self.user_id._otm_telegram_send(

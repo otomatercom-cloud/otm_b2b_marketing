@@ -33,6 +33,21 @@
                             <field name="duration" widget="float_time"/>
                             <field name="interested_students"/>
                             <field name="company_id" groups="base.group_multi_company"/>
+                            <label for="gps_latitude" string="GPS Coordinates"
+                                   groups="otm_b2b_marketing.group_otm_b2b_marketing_head"
+                                   invisible="not gps_latitude and not gps_longitude"/>
+                            <div class="o_row" groups="otm_b2b_marketing.group_otm_b2b_marketing_head"
+                                 invisible="not gps_latitude and not gps_longitude">
+                                <field name="gps_latitude"/>
+                                <field name="gps_longitude"/>
+                            </div>
+                            <field name="map_url" widget="url" readonly="1" string="View on Map"
+                                   invisible="not map_url"
+                                   groups="otm_b2b_marketing.group_otm_b2b_marketing_head"/>
+                            <div class="text-muted" groups="otm_b2b_marketing.group_otm_b2b_marketing_head"
+                                 invisible="gps_latitude or gps_longitude">
+                                Location not captured for this seminar.
+                            </div>
                             <field name="portal_url" widget="url" readonly="1"
                                    string="Mobile update link" invisible="not portal_url"/>
                         </group>

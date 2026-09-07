@@ -40,6 +40,9 @@ class OtmB2bSeminar(models.Model):
 
     checkin_time = fields.Datetime(string='Check In Time')
     checkout_time = fields.Datetime(string='Check Out Time')
+    gps_latitude = fields.Float(string='GPS Latitude', digits=(16, 6))
+    gps_longitude = fields.Float(string='GPS Longitude', digits=(16, 6))
+    map_url = fields.Char(string='Map Link', compute='_compute_map_url')
     state = fields.Selection([
         ('draft', 'Draft'),
         ('completed', 'Completed'),
@@ -75,8 +78,19 @@ class OtmB2bSeminar(models.Model):
                 )
         return result
 
-    def action_check_out(self):
+    def _compute_map_url(self):
+        for rec in self:
+            rec.map_url = (
+                f"https://www.google.com/maps?q={rec.gps_latitude},{rec.gps_longitude}"
+                if rec.gps_latitude or rec.gps_longitude else False
+            )
+
+    def action_check_out(self, latitude=None, longitude=None):
         self.write({'checkout_time': fields.Datetime.now()})
+        for seminar in self:
+            if (not seminar.gps_latitude and not seminar.gps_longitude
+                    and latitude is not None and longitude is not None):
+                seminar.write({'gps_latitude': latitude, 'gps_longitude': longitude})
 
     def action_open_complete_wizard(self):
         self.ensure_one()

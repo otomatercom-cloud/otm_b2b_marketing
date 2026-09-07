@@ -22,10 +22,8 @@ export class OtmB2bDashboard extends Component {
                 pending_visits: 0,
                 live_visits: 0,
                 today_completed: 0,
-                institutions_assigned: 0,
                 total_institutions: 0,
                 new_institutions: 0,
-                inactive_institutions: 0,
                 leads_collected: 0,
                 seminars_conducted: 0,
                 mou_signed: 0,
@@ -155,14 +153,19 @@ export class OtmB2bDashboard extends Component {
 
     async checkIn(planId) {
         const { location, error } = await this._getLocation();
+        if (!location) {
+            this.notification.add(
+                `Check-in requires location access. ${error}. Please enable location for this site ` +
+                `and try again.`,
+                { type: "danger", sticky: true }
+            );
+            return;
+        }
         const result = await this.orm.call("otm.b2b.visit.plan", "action_dashboard_check_in", [planId], {
-            latitude: location ? location.latitude : null,
-            longitude: location ? location.longitude : null,
+            latitude: location.latitude,
+            longitude: location.longitude,
         });
-        const suffix = location ? "" : ` (location not captured: ${error})`;
-        this.notification.add(`Checked in at ${result.institution}.${suffix}`, {
-            type: location ? "success" : "warning",
-        });
+        this.notification.add(`Checked in at ${result.institution}.`, { type: "success" });
         await this.loadDashboard();
     }
 
@@ -191,13 +194,33 @@ export class OtmB2bDashboard extends Component {
     }
 
     async checkInSeminar(planId) {
-        const result = await this.orm.call("otm.b2b.seminar.plan", "action_dashboard_check_in", [planId]);
+        const { location, error } = await this._getLocation();
+        if (!location) {
+            this.notification.add(
+                `Check-in requires location access. ${error}. Please enable location for this site ` +
+                `and try again.`,
+                { type: "danger", sticky: true }
+            );
+            return;
+        }
+        const result = await this.orm.call("otm.b2b.seminar.plan", "action_dashboard_check_in", [planId], {
+            latitude: location.latitude,
+            longitude: location.longitude,
+        });
         this.notification.add(`Checked in for seminar at ${result.institution}.`, { type: "success" });
         await this.loadDashboard();
     }
 
     async checkOutSeminar(seminar) {
-        await this.orm.call("otm.b2b.seminar", "action_check_out", [seminar.id]);
+        const { location, error } = await this._getLocation();
+        await this.orm.call("otm.b2b.seminar", "action_check_out", [seminar.id], {
+            latitude: location ? location.latitude : null,
+            longitude: location ? location.longitude : null,
+        });
+
+        if (!location) {
+            this.notification.add(`Location not captured: ${error}`, { type: "warning" });
+        }
 
         if (seminar.portal_url) {
             window.open(seminar.portal_url, "_blank");
@@ -266,6 +289,26 @@ export class OtmB2bDashboard extends Component {
             domain: domain || [],
             context: context || {},
         });
+    }
+
+    async openNearbyInstitutions() {
+        const { location, error } = await this._getLocation();
+        if (!location) {
+            this.notification.add(`Couldn't get your location: ${error}`, { type: "warning" });
+            return;
+        }
+        const result = await this.orm.call("otm.b2b.institution", "action_find_nearby", [
+            location.latitude, location.longitude, 20,
+        ]);
+        if (!result.count) {
+            this.notification.add("No institutions with GPS data found within 20km of you.", { type: "info" });
+            return;
+        }
+        // Institution list already has a Total Visits column, so "how
+        // many times visited" is right there without building a
+        // separate view - just filter it down to the nearby set,
+        // already sorted nearest-first by the backend.
+        this.openFiltered("otm.b2b.institution", `Institutions Within 20km (${result.count})`, [["id", "in", result.ids]]);
     }
 
     openVisitPlans() {

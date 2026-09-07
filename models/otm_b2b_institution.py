@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import math
+
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.tools.date_utils import start_of
@@ -284,6 +286,43 @@ class OtmB2bInstitution(models.Model):
             'target': 'new',
             'context': {'default_institution_id': self.id},
         }
+
+    @api.model
+    def action_find_nearby(self, latitude, longitude, radius_km=20):
+        """Institutions with GPS coordinates set, within radius_km of the
+        given point (great-circle/Haversine distance), sorted nearest
+        first. Returns just ids + distance - the caller opens them in
+        the standard Institution list view, which already has a Total
+        Visits column, so "how many times visited" doesn't need
+        duplicating here.
+
+        search() already applies this model's normal record rules for
+        the calling user (an Executive only searches their own
+        institutions, Manager/Head search everyone's), so this
+        automatically respects the same access scoping as the rest of
+        the dashboard without any extra filtering here."""
+        institutions = self.search([
+            ('partner_latitude', '!=', 0.0),
+            ('partner_longitude', '!=', 0.0),
+        ])
+        if not institutions:
+            return {'ids': [], 'count': 0}
+
+        earth_radius_km = 6371.0
+        lat1 = math.radians(latitude)
+        results = []
+        for inst in institutions:
+            lat2 = math.radians(inst.partner_latitude)
+            dlat = math.radians(inst.partner_latitude - latitude)
+            dlon = math.radians(inst.partner_longitude - longitude)
+            a = (math.sin(dlat / 2) ** 2
+                 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2)
+            distance_km = earth_radius_km * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+            if distance_km <= radius_km:
+                results.append((distance_km, inst.id))
+
+        results.sort(key=lambda r: r[0])
+        return {'ids': [r[1] for r in results], 'count': len(results)}
 
     def action_plan_visit_quick(self):
         """One click from the Institutions list/form: plan a visit for
@@ -598,11 +637,8 @@ class OtmB2bInstitution(models.Model):
                 'pending_visits': pending_visits,
                 'live_visits': len(live_visits),
                 'today_completed': len(today_completed_visits),
-                'institutions_assigned': Institution.search_count(
-                    ['|', ('marketing_manager_id', '=', uid), ('user_id', '=', uid)]),
                 'total_institutions': len(institutions),
                 'new_institutions': len(institutions.filtered(lambda i: i.status == 'new')),
-                'inactive_institutions': len(institutions.filtered(lambda i: i.status == 'inactive')),
                 'leads_collected': self.env['otm.b2b.lead'].search_count(lead_domain),
                 'seminars_conducted': self.env['otm.b2b.seminar'].search_count(seminar_domain),
                 'mou_signed': self.env['otm.b2b.mou'].search_count(mou_domain + [('state', '=', 'signed')]),

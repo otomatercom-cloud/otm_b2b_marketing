@@ -73,17 +73,17 @@
                     </div>
                     <div class="o_otm_b2b_kpi_card" t-on-click="openInstitutions">
                         <div class="o_otm_b2b_kpi_top">
-                            <span class="o_otm_b2b_kpi_label">Institutions assigned</span>
-                            <i class="fa fa-building o_otm_b2b_kpi_icon"/>
-                        </div>
-                        <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.institutions_assigned"/></div>
-                    </div>
-                    <div class="o_otm_b2b_kpi_card" t-on-click="openInstitutions">
-                        <div class="o_otm_b2b_kpi_top">
                             <span class="o_otm_b2b_kpi_label">Total institutions</span>
                             <i class="fa fa-university o_otm_b2b_kpi_icon"/>
                         </div>
                         <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.total_institutions"/></div>
+                    </div>
+                    <div class="o_otm_b2b_kpi_card" t-on-click="openNearbyInstitutions">
+                        <div class="o_otm_b2b_kpi_top">
+                            <span class="o_otm_b2b_kpi_label">Within 20km</span>
+                            <i class="fa fa-map-marker o_otm_b2b_kpi_icon"/>
+                        </div>
+                        <div class="o_otm_b2b_kpi_value">Find</div>
                     </div>
                     <div class="o_otm_b2b_kpi_card" t-on-click="() => this.openFiltered('otm.b2b.institution', 'New Institutions', [['status', '=', 'new']])">
                         <div class="o_otm_b2b_kpi_top">
@@ -91,13 +91,6 @@
                             <i class="fa fa-star-o o_otm_b2b_kpi_icon"/>
                         </div>
                         <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.new_institutions"/></div>
-                    </div>
-                    <div class="o_otm_b2b_kpi_card" t-on-click="() => this.openFiltered('otm.b2b.institution', 'Inactive Institutions', [['status', '=', 'inactive']])">
-                        <div class="o_otm_b2b_kpi_top">
-                            <span class="o_otm_b2b_kpi_label">Inactive institutions</span>
-                            <i class="fa fa-ban o_otm_b2b_kpi_icon"/>
-                        </div>
-                        <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.inactive_institutions"/></div>
                     </div>
                     <div class="o_otm_b2b_kpi_card" t-on-click="openLeads">
                         <div class="o_otm_b2b_kpi_top">
