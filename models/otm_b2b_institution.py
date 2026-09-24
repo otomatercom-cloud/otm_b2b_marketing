@@ -702,7 +702,15 @@ class OtmB2bInstitution(models.Model):
                 'live_visits': len(live_visits),
                 'today_completed': len(today_completed_visits),
                 'total_institutions': len(institutions),
-                'leads_collected': self.env['otm.b2b.lead'].search_count(lead_domain),
+                # "Leads Collected" = actual otm.b2b.lead records PLUS the
+                # "Number of Students" logged on each seminar - a seminar's
+                # interested/attending students are leads too, but usually
+                # only get their headcount noted on the seminar itself
+                # rather than one otm.b2b.lead record per student.
+                'leads_collected': (
+                    self.env['otm.b2b.lead'].search_count(lead_domain)
+                    + sum(self.env['otm.b2b.seminar'].search(seminar_domain).mapped('student_count'))
+                ),
                 'seminars_conducted': self.env['otm.b2b.seminar'].search_count(seminar_domain),
                 'mou_signed': self.env['otm.b2b.mou'].search_count(mou_domain + [('state', '=', 'signed')]),
             },
