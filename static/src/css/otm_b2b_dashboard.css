@@ -9,6 +9,20 @@
     margin: 0;
 }
 
+.o_otm_b2b_exec_filter select {
+    min-width: 220px;
+}
+
+@media (max-width: 782px) {
+    .o_otm_b2b_exec_filter {
+        width: 100%;
+        margin-top: 8px;
+    }
+    .o_otm_b2b_exec_filter select {
+        width: 100%;
+    }
+}
+
 .o_otm_b2b_org_label {
     font-size: 13px;
     color: #6c757d;

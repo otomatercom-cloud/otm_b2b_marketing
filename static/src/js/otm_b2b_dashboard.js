@@ -23,7 +23,6 @@ export class OtmB2bDashboard extends Component {
                 live_visits: 0,
                 today_completed: 0,
                 total_institutions: 0,
-                new_institutions: 0,
                 leads_collected: 0,
                 seminars_conducted: 0,
                 mou_signed: 0,
@@ -37,6 +36,10 @@ export class OtmB2bDashboard extends Component {
             myInstitutions: [],
             mySeminars: [],
             allSeminarsPlanned: [],
+            availableExecutives: [],
+            selectedExecutiveId: false,
+            viewingOther: false,
+            viewingExecutiveName: false,
             isManager: true,
             userName: "",
             telegramConnected: false,
@@ -50,10 +53,14 @@ export class OtmB2bDashboard extends Component {
     async loadDashboard() {
         this.state.loading = true;
         // All scoping (Marketing Executive sees only their own institutions
-        // and visits; Manager/Head see everything) happens server-side in
-        // get_dashboard_data() so the access logic lives in one place and
-        // isn't duplicated - or allowed to drift - in the client.
-        const data = await this.orm.call("otm.b2b.institution", "get_dashboard_data", []);
+        // and visits; Manager/Head see everything, or - if a manager has
+        // picked one executive from the dropdown - just that executive's
+        // data) happens server-side in get_dashboard_data() so the access
+        // logic lives in one place and isn't duplicated - or allowed to
+        // drift - in the client.
+        const data = await this.orm.call("otm.b2b.institution", "get_dashboard_data", [
+            this.state.selectedExecutiveId || false,
+        ]);
         Object.assign(this.state.cards, data.cards);
         this.state.byType = this._withBarPercent(data.by_type);
         this.state.byDistrict = this._withBarPercent(data.by_district);
@@ -64,11 +71,41 @@ export class OtmB2bDashboard extends Component {
         this.state.myInstitutions = data.my_institutions;
         this.state.mySeminars = data.my_seminars;
         this.state.allSeminarsPlanned = data.all_seminars_planned;
+        this.state.availableExecutives = data.available_executives;
+        this.state.viewingOther = data.viewing_other;
+        this.state.viewingExecutiveName = data.viewing_executive_name;
         this.state.isManager = data.is_manager;
         this.state.userName = data.user_name;
         this.state.telegramConnected = data.telegram_connected;
         this.state.telegramDeepLink = data.telegram_deep_link;
         this.state.loading = false;
+    }
+
+    onExecutiveFilterChange(ev) {
+        const value = ev.target.value;
+        this.state.selectedExecutiveId = value ? parseInt(value, 10) : false;
+        this.loadDashboard();
+    }
+
+    // Domain leaf(s) scoping a click-through list to the currently
+    // selected executive, if any - so drilling into a KPI card while
+    // filtered stays filtered, instead of dumping the full team's
+    // records. Returns [] (no extra filter) when no executive is picked.
+    _execDomain(field) {
+        if (!this.state.selectedExecutiveId) {
+            return [];
+        }
+        return [[field, "=", this.state.selectedExecutiveId]];
+    }
+
+    _institutionExecDomain() {
+        if (!this.state.selectedExecutiveId) {
+            return [];
+        }
+        return ["|",
+            ["marketing_manager_id", "=", this.state.selectedExecutiveId],
+            ["user_id", "=", this.state.selectedExecutiveId],
+        ];
     }
 
     connectTelegram() {
@@ -276,7 +313,11 @@ export class OtmB2bDashboard extends Component {
     }
 
     openInstitutions() {
-        this.action.doAction("otm_b2b_marketing.action_otm_b2b_institution");
+        // "New" institutions are hidden from the dashboard everywhere,
+        // including this click-through, and stays scoped to whichever
+        // executive is currently selected in the filter (if any).
+        const domain = [["status", "!=", "new"], ...this._institutionExecDomain()];
+        this.openFiltered("otm.b2b.institution", "Institutions", domain);
     }
 
     openFiltered(model, name, domain, context) {
@@ -312,19 +353,37 @@ export class OtmB2bDashboard extends Component {
     }
 
     openVisitPlans() {
-        this.action.doAction("otm_b2b_marketing.action_otm_b2b_visit_plan");
+        this.openFiltered("otm.b2b.visit.plan", "Visit Planning", this._execDomain("user_id"));
     }
 
     openSeminars() {
-        this.action.doAction("otm_b2b_marketing.action_otm_b2b_seminar_plan");
+        this.openFiltered("otm.b2b.seminar.plan", "Seminar Booking", this._execDomain("user_id"));
     }
 
     openLeads() {
-        this.action.doAction("otm_b2b_marketing.action_otm_b2b_lead");
+        this.openFiltered("otm.b2b.lead", "Leads Collected", this._execInstitutionLinkedDomain());
     }
 
     openMou() {
-        this.action.doAction("otm_b2b_marketing.action_otm_b2b_mou");
+        this.openFiltered("otm.b2b.mou", "MOU Management", this._execInstitutionLinkedDomain());
+    }
+
+    openSeminarsConducted() {
+        this.openFiltered("otm.b2b.seminar", "Seminar Management", this._execInstitutionLinkedDomain());
+    }
+
+    // Same idea as _institutionExecDomain(), for models that don't carry
+    // a direct user_id but link to Institution (Lead/Seminar/MOU) - filter
+    // through institution_id.marketing_manager_id / institution_id.user_id
+    // instead, matching the ir.rule scoping used for these models.
+    _execInstitutionLinkedDomain() {
+        if (!this.state.selectedExecutiveId) {
+            return [];
+        }
+        return ["|",
+            ["institution_id.marketing_manager_id", "=", this.state.selectedExecutiveId],
+            ["institution_id.user_id", "=", this.state.selectedExecutiveId],
+        ];
     }
 }
 

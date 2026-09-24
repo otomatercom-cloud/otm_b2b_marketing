@@ -20,10 +20,22 @@
                     </button>
                 </div>
             </div>
-            <p class="o_otm_b2b_scope_label" t-if="!state.loading">
-                <t t-if="state.isManager">Showing all Marketing data</t>
-                <t t-else="">Showing your data, <t t-esc="state.userName"/></t>
-            </p>
+            <div class="d-flex justify-content-between align-items-center flex-wrap" t-if="!state.loading">
+                <p class="o_otm_b2b_scope_label mb-0">
+                    <t t-if="state.isManager and state.viewingOther">Showing data for <t t-esc="state.viewingExecutiveName"/></t>
+                    <t t-elif="state.isManager">Showing all Marketing data</t>
+                    <t t-else="">Showing your data, <t t-esc="state.userName"/></t>
+                </p>
+                <div t-if="state.isManager and state.availableExecutives.length" class="o_otm_b2b_exec_filter">
+                    <select class="form-select form-select-sm" t-on-change="onExecutiveFilterChange">
+                        <option value="">All Marketing Executives</option>
+                        <option t-foreach="state.availableExecutives" t-as="exec" t-key="exec.id"
+                                t-att-value="exec.id" t-att-selected="state.selectedExecutiveId === exec.id">
+                            <t t-esc="exec.name"/>
+                        </option>
+                    </select>
+                </div>
+            </div>
 
             <div t-if="state.loading" class="text-muted mt-3">Loading dashboard...</div>
 
@@ -85,13 +97,6 @@
                         </div>
                         <div class="o_otm_b2b_kpi_value">Find</div>
                     </div>
-                    <div class="o_otm_b2b_kpi_card" t-on-click="() => this.openFiltered('otm.b2b.institution', 'New Institutions', [['status', '=', 'new']])">
-                        <div class="o_otm_b2b_kpi_top">
-                            <span class="o_otm_b2b_kpi_label">New institutions</span>
-                            <i class="fa fa-star-o o_otm_b2b_kpi_icon"/>
-                        </div>
-                        <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.new_institutions"/></div>
-                    </div>
                     <div class="o_otm_b2b_kpi_card" t-on-click="openLeads">
                         <div class="o_otm_b2b_kpi_top">
                             <span class="o_otm_b2b_kpi_label">Leads collected</span>
@@ -99,7 +104,7 @@
                         </div>
                         <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.leads_collected"/></div>
                     </div>
-                    <div class="o_otm_b2b_kpi_card" t-on-click="() => this.action.doAction('otm_b2b_marketing.action_otm_b2b_seminar')">
+                    <div class="o_otm_b2b_kpi_card" t-on-click="openSeminarsConducted">
                         <div class="o_otm_b2b_kpi_top">
                             <span class="o_otm_b2b_kpi_label">Seminars conducted</span>
                             <i class="fa fa-graduation-cap o_otm_b2b_kpi_icon"/>
@@ -115,7 +120,7 @@
                     </div>
                 </div>
 
-                <div class="o_otm_b2b_panel mt-4" t-if="state.isManager">
+                <div class="o_otm_b2b_panel mt-4" t-if="state.isManager and !state.viewingOther">
                     <h4>Territory Manager Performance</h4>
                     <div class="o_otm_b2b_table_wrap">
                         <table class="o_otm_b2b_perf_table">
@@ -146,7 +151,7 @@
                     <p t-if="!state.territoryPerformance.length" class="text-muted mb-0">No territory managers with assigned institutions yet.</p>
                 </div>
 
-                <div class="o_otm_b2b_panel mt-3" t-if="state.isManager">
+                <div class="o_otm_b2b_panel mt-3" t-if="state.isManager and !state.viewingOther">
                     <h4>All Planned Seminars</h4>
                     <div class="o_otm_b2b_table_wrap">
                         <table class="o_otm_b2b_perf_table">
@@ -226,9 +231,9 @@
                                 <t t-if="inst.district"> · <t t-esc="inst.district"/></t>
                             </div>
                         </div>
-                        <button t-if="!inst.live_visit_id" class="o_otm_b2b_checkin_btn"
+                        <button t-if="!state.viewingOther and !inst.live_visit_id" class="o_otm_b2b_checkin_btn"
                                 t-on-click="(ev) => { ev.stopPropagation(); this.checkIn(inst.plan_id); }">Check In</button>
-                        <button t-else="" class="o_otm_b2b_checkin_btn"
+                        <button t-elif="!state.viewingOther" class="o_otm_b2b_checkin_btn"
                                 t-on-click="(ev) => { ev.stopPropagation(); this.checkOut({ id: inst.live_visit_id, portal_url: inst.live_visit_portal_url, institution: inst.name }); }">
                             Check Out
                         </button>
@@ -252,9 +257,9 @@
                                 <t t-if="sem.district"> · <t t-esc="sem.district"/></t>
                             </div>
                         </div>
-                        <button t-if="!sem.live_seminar_id" class="o_otm_b2b_checkin_btn"
+                        <button t-if="!state.viewingOther and !sem.live_seminar_id" class="o_otm_b2b_checkin_btn"
                                 t-on-click="() => this.checkInSeminar(sem.plan_id)">Check In</button>
-                        <button t-else="" class="o_otm_b2b_checkin_btn"
+                        <button t-elif="!state.viewingOther" class="o_otm_b2b_checkin_btn"
                                 t-on-click="() => this.checkOutSeminar({ id: sem.live_seminar_id, portal_url: sem.live_seminar_portal_url, institution: sem.name })">
                             Check Out
                         </button>
@@ -281,7 +286,7 @@
                             </div>
                         </div>
                         <span class="o_otm_b2b_visit_date">Since <t t-esc="visit.checkin_time"/></span>
-                        <button class="o_otm_b2b_checkin_btn" t-on-click="(ev) => { ev.stopPropagation(); this.checkOut(visit); }">Check Out</button>
+                        <button t-if="!state.viewingOther" class="o_otm_b2b_checkin_btn" t-on-click="(ev) => { ev.stopPropagation(); this.checkOut(visit); }">Check Out</button>
                     </div>
                     <p t-if="!state.liveVisits.length" class="text-muted mb-0">No one is checked in right now.</p>
                 </div>
@@ -326,7 +331,7 @@
                             </div>
                         </div>
                         <span class="o_otm_b2b_visit_date"><t t-esc="visit.visit_date"/></span>
-                        <button class="o_otm_b2b_checkin_btn" t-on-click="() => this.checkIn(visit.id)">Check In</button>
+                        <button t-if="!state.viewingOther" class="o_otm_b2b_checkin_btn" t-on-click="() => this.checkIn(visit.id)">Check In</button>
                     </div>
                     <p t-if="!state.upcomingVisits.length" class="text-muted mb-0">No upcoming visits planned.</p>
                 </div>

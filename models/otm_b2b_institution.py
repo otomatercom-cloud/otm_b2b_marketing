@@ -304,6 +304,7 @@ class OtmB2bInstitution(models.Model):
         institutions = self.search([
             ('partner_latitude', '!=', 0.0),
             ('partner_longitude', '!=', 0.0),
+            ('status', '!=', 'new'),
         ])
         if not institutions:
             return {'ids': [], 'count': 0}
@@ -406,32 +407,68 @@ class OtmB2bInstitution(models.Model):
     # Dashboard data (server-side scoping)
     # ---------------------------------------------------------------
     @api.model
-    def get_dashboard_data(self):
+    def get_dashboard_data(self, executive_id=None):
         """Return every number the OWL dashboard needs, already scoped to
         the current user: a Marketing Executive only ever sees their own
         institutions/visits/leads here, matching the ir.rule restrictions
-        already enforced elsewhere. Marketing Manager/Head see everything.
-        Keeping this logic server-side (rather than duplicated per-call in
-        JS) is both more secure and immune to client ORM API churn."""
+        already enforced elsewhere. Marketing Manager/Head see everything,
+        unless they've picked one executive from the dashboard filter
+        (executive_id), in which case every section below is scoped down
+        to that one person's data instead - same shape as an executive's
+        own view, just chosen by the manager rather than implied by login.
+
+        "New" status institutions are excluded everywhere on this
+        dashboard (counts, breakdowns, lists) - the full Institutions app
+        list is unaffected, this only hides them from the dashboard."""
         is_manager = self.env.user.has_group('otm_b2b_marketing.group_otm_b2b_marketing_manager')
         uid = self.env.uid
         today = fields.Date.context_today(self)
 
-        institution_domain = []
+        executive_group = self.env.ref(
+            'otm_b2b_marketing.group_otm_b2b_marketing_executive', raise_if_not_found=False)
+        manager_group = self.env.ref(
+            'otm_b2b_marketing.group_otm_b2b_marketing_manager', raise_if_not_found=False)
+        available_executives = []
+        if is_manager and executive_group:
+            manager_user_ids = set(manager_group.user_ids.ids) if manager_group else set()
+            # Only individual field officers, not managers/heads (who also
+            # carry this group via implied_ids) - the dropdown is for
+            # drilling into one executive's territory, not another lead.
+            field_execs = executive_group.user_ids.filtered(
+                lambda u: u.id not in manager_user_ids and u.active)
+            available_executives = [
+                {'id': u.id, 'name': u.name} for u in field_execs.sorted(key=lambda u: u.name)
+            ]
+
+        target_uid = uid
+        viewing_other = False
+        viewing_executive_name = False
+        if is_manager and executive_id:
+            valid_ids = {e['id'] for e in available_executives}
+            if executive_id in valid_ids:
+                target_uid = executive_id
+                viewing_other = True
+                target_user = self.env['res.users'].browse(target_uid)
+                viewing_executive_name = target_user.name
+
+        scope_to_target = (not is_manager) or viewing_other
+
+        # Hide "New" institutions from every dashboard number/list below.
+        institution_domain = [('status', '!=', 'new')]
         visit_plan_domain = []
         visit_record_domain = []
-        if not is_manager:
-            institution_domain = ['|', ('marketing_manager_id', '=', uid), ('user_id', '=', uid)]
-            visit_plan_domain = [('user_id', '=', uid)]
-            visit_record_domain = [('user_id', '=', uid)]
+        if scope_to_target:
+            institution_domain += ['|', ('marketing_manager_id', '=', target_uid), ('user_id', '=', target_uid)]
+            visit_plan_domain = [('user_id', '=', target_uid)]
+            visit_record_domain = [('user_id', '=', target_uid)]
 
         Institution = self.env['otm.b2b.institution']
         institutions = Institution.search(institution_domain)
         institution_ids = institutions.ids
 
-        lead_domain = [('institution_id', 'in', institution_ids)] if not is_manager else []
-        seminar_domain = [('institution_id', 'in', institution_ids)] if not is_manager else []
-        mou_domain = [('institution_id', 'in', institution_ids)] if not is_manager else []
+        lead_domain = [('institution_id', 'in', institution_ids)] if scope_to_target else []
+        seminar_domain = [('institution_id', 'in', institution_ids)] if scope_to_target else []
+        mou_domain = [('institution_id', 'in', institution_ids)] if scope_to_target else []
 
         visit_plans = self.env['otm.b2b.visit.plan'].search(visit_plan_domain)
         today_visits = len(visit_plans.filtered(lambda p: p.visit_date == today))
@@ -466,7 +503,7 @@ class OtmB2bInstitution(models.Model):
         # completed) visit exists for it, if any, so the UI can show
         # Check In or Check Out per institution without a second call.
         today_plans = self.env['otm.b2b.visit.plan'].search([
-            ('user_id', '=', uid),
+            ('user_id', '=', target_uid),
             ('visit_date', '=', today),
             ('state', 'in', ('draft', 'planned', 'in_progress')),
         ])
@@ -492,7 +529,7 @@ class OtmB2bInstitution(models.Model):
         # appears here once that date arrives, since this is queried live
         # each time the dashboard loads).
         today_seminar_plans = self.env['otm.b2b.seminar.plan'].search([
-            ('user_id', '=', uid),
+            ('user_id', '=', target_uid),
             ('seminar_date', '=', today),
             ('state', 'in', ('draft', 'planned', 'in_progress')),
         ])
@@ -519,7 +556,7 @@ class OtmB2bInstitution(models.Model):
         # no Check In/Out here, those stay personal actions on "My
         # Seminars" for whoever the plan is actually assigned to.
         all_seminars_planned_list = []
-        if is_manager:
+        if is_manager and not viewing_other:
             all_plans = self.env['otm.b2b.seminar.plan'].search([
                 ('state', 'in', ('draft', 'planned', 'in_progress')),
             ], order='seminar_date')
@@ -575,11 +612,9 @@ class OtmB2bInstitution(models.Model):
         # Territory Manager performance leaderboard - manager/head only,
         # matching every other manager-only scoping in this method.
         territory_performance = []
-        if is_manager:
+        if is_manager and not viewing_other:
             week_start = start_of(today, 'week')
             month_start = start_of(today, 'month')
-            executive_group = self.env.ref(
-                'otm_b2b_marketing.group_otm_b2b_marketing_executive', raise_if_not_found=False)
             managers = executive_group.user_ids if executive_group else self.env['res.users']
             Seminar = self.env['otm.b2b.seminar']
             Mou = self.env['otm.b2b.mou']
@@ -630,6 +665,9 @@ class OtmB2bInstitution(models.Model):
             'user_name': self.env.user.name,
             'telegram_connected': self.env.user.otm_telegram_connected,
             'telegram_deep_link': self.env.user.otm_telegram_deep_link,
+            'available_executives': available_executives,
+            'viewing_other': viewing_other,
+            'viewing_executive_name': viewing_executive_name,
             'cards': {
                 'today_visits': today_visits,
                 'upcoming_visits': len(upcoming_plans),
@@ -638,7 +676,6 @@ class OtmB2bInstitution(models.Model):
                 'live_visits': len(live_visits),
                 'today_completed': len(today_completed_visits),
                 'total_institutions': len(institutions),
-                'new_institutions': len(institutions.filtered(lambda i: i.status == 'new')),
                 'leads_collected': self.env['otm.b2b.lead'].search_count(lead_domain),
                 'seminars_conducted': self.env['otm.b2b.seminar'].search_count(seminar_domain),
                 'mou_signed': self.env['otm.b2b.mou'].search_count(mou_domain + [('state', '=', 'signed')]),
