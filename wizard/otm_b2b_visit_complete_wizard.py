@@ -14,7 +14,10 @@ class OtmB2bVisitCompleteWizard(models.TransientModel):
     institution_id = fields.Many2one('otm.b2b.institution', string='Institution', readonly=True)
     marketing_activity_type_id = fields.Many2one(
         'otm.b2b.activity.type', string='Activity Type', required=True)
-    contact_person = fields.Char(string='Contact Person', help='Who at the institution was met during this visit.')
+    contact_ids = fields.Many2many(
+        'otm.b2b.institution.contact', string='Contacts Met',
+        help='Contact persons met during this visit. New contacts added here are '
+             'saved to the institution\'s contact directory for future visits too.')
     remarks = fields.Text(string='Remarks', required=True)
     next_action = fields.Char(string='Next Action')
     next_followup_date = fields.Date(string='Next Followup Date')
@@ -33,6 +36,8 @@ class OtmB2bVisitCompleteWizard(models.TransientModel):
             visit = self.env['otm.b2b.visit.record'].browse(visit_record_id)
             res['institution_id'] = visit.institution_id.id
             res['portal_url'] = visit.portal_url
+            if visit.contact_ids:
+                res['contact_ids'] = [(6, 0, visit.contact_ids.ids)]
         return res
 
     def action_complete(self):
@@ -43,7 +48,7 @@ class OtmB2bVisitCompleteWizard(models.TransientModel):
             visit = self.visit_record_id
             vals = {
                 'marketing_activity_type_id': self.marketing_activity_type_id.id,
-                'contact_person': self.contact_person,
+                'contact_ids': [(6, 0, self.contact_ids.ids)],
                 'remarks': self.remarks,
                 'next_action': self.next_action,
                 'next_followup_date': self.next_followup_date,
@@ -64,7 +69,7 @@ class OtmB2bVisitCompleteWizard(models.TransientModel):
                 'visit_date': fields.Date.context_today(self),
                 'company_id': plan.company_id.id,
                 'marketing_activity_type_id': self.marketing_activity_type_id.id,
-                'contact_person': self.contact_person,
+                'contact_ids': [(6, 0, self.contact_ids.ids)],
                 'remarks': self.remarks,
                 'next_action': self.next_action,
                 'next_followup_date': self.next_followup_date,

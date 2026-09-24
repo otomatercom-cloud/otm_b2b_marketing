@@ -7,10 +7,12 @@
         <field name="arch" type="xml">
             <form string="Visit Record">
                 <header>
-                    <button name="action_check_in" type="object" string="Check In"
-                            class="btn-primary" invisible="checkin_time or state != 'draft'"/>
-                    <button name="action_check_out" type="object" string="Check Out"
-                            invisible="not checkin_time or checkout_time"/>
+                    <!-- Check In / Check Out live on the Dashboard only, on purpose:
+                         that's the only place GPS location is actually captured (the
+                         Dashboard's JS asks the browser/app for a location fix before
+                         calling these methods). Plain buttons here, or free-typing
+                         checkin_time/checkout_time below, would let a visit be logged
+                         with no location at all - see the readonly note below too. -->
                     <button name="action_open_complete_wizard" type="object" string="Complete Visit"
                             class="btn-primary" invisible="state not in ('draft', 'partially_completed')"/>
                     <button name="action_mark_completed" type="object" string="Mark Completed"
@@ -40,12 +42,28 @@
                             <field name="user_id"/>
                             <field name="visit_date"/>
                             <field name="marketing_activity_type_id"/>
-                            <field name="contact_person"/>
+                            <!-- Picked from the institution's own contact directory - a
+                                 contact logged on an earlier visit shows up again here on
+                                 the next one instead of being retyped. "Create" opens the
+                                 full form (name/designation/mobile/email) instead of a
+                                 name-only quick-create, so a brand-new contact's mobile
+                                 number is captured too, not just their name. -->
+                            <field name="contact_ids" widget="many2many_tags"
+                                   domain="[('institution_id', '=', institution_id)]"
+                                   context="{'default_institution_id': institution_id}"
+                                   options="{'no_quick_create': True}"/>
                             <field name="leads_collected_count"/>
                         </group>
                         <group>
-                            <field name="checkin_time"/>
-                            <field name="checkout_time"/>
+                            <!-- readonly on purpose: these are only ever meant to be
+                                 stamped by the Dashboard's Check In / Check Out (which
+                                 captures GPS at the same moment), never free-typed here -
+                                 a hand-typed time with no location is indistinguishable
+                                 from a real visit once saved. Marketing Manager/Head can
+                                 still correct a wrong time via Settings > Technical if a
+                                 genuine data-entry fix is ever needed. -->
+                            <field name="checkin_time" readonly="1"/>
+                            <field name="checkout_time" readonly="1"/>
                             <field name="duration" widget="float_time"/>
                             <label for="gps_latitude" string="GPS Coordinates"
                                    groups="otm_b2b_marketing.group_otm_b2b_marketing_head"

@@ -19,6 +19,12 @@
             border-radius:8px; font-size:15px; background:#fff;
         }
         textarea { min-height:90px; resize:vertical; }
+        .o_b2b_checks { border:1px solid #d0d0d0; border-radius:8px; padding:10px 12px; max-height:220px; overflow-y:auto; }
+        .o_b2b_check_row { display:flex; align-items:center; gap:8px; padding:6px 0; font-size:14px; }
+        .o_b2b_check_row input { width:auto; }
+        .o_b2b_new_contact_row { display:flex; gap:8px; margin-bottom:8px; }
+        .o_b2b_new_contact_row input { width:50%; }
+        .o_b2b_add_link { display:inline-block; margin-top:2px; font-size:13px; color:#714B67; font-weight:600; text-decoration:none; }
         button { width:100%; margin-top:24px; padding:12px; border:none; border-radius:8px;
                  background:#714B67; color:#ffffff; font-size:15px; font-weight:600; cursor:pointer; }
         .o_b2b_done { text-align:center; padding:24px 0; }
@@ -54,8 +60,25 @@
                             <option t-att-value="at.id"><t t-esc="at.name"/></option>
                         </t>
                     </select>
-                    <label for="contact_person">Contact person</label>
-                    <input type="text" name="contact_person" id="contact_person" placeholder="Who did you meet..."/>
+                    <label t-if="existing_contacts">Contacts met before (select any that apply)</label>
+                    <div class="o_b2b_checks" t-if="existing_contacts">
+                        <t t-foreach="existing_contacts" t-as="c">
+                            <div class="o_b2b_check_row">
+                                <input type="checkbox" name="contact_ids" t-att-value="c.id" t-att-id="'contact_%s' % c.id"/>
+                                <label t-att-for="'contact_%s' % c.id" style="margin:0;">
+                                    <t t-esc="c.name"/><t t-if="c.mobile"> · <t t-esc="c.mobile"/></t>
+                                </label>
+                            </div>
+                        </t>
+                    </div>
+                    <label>Add new contact(s) met</label>
+                    <div id="o_b2b_new_contacts">
+                        <div class="o_b2b_new_contact_row">
+                            <input type="text" name="new_contact_name" placeholder="Name"/>
+                            <input type="text" name="new_contact_mobile" placeholder="Mobile number"/>
+                        </div>
+                    </div>
+                    <a href="#" id="o_b2b_add_contact_row" class="o_b2b_add_link">+ Add another contact</a>
                     <label for="remarks">Remarks</label>
                     <textarea name="remarks" id="remarks" required="required" placeholder="What was discussed..."></textarea>
                     <label for="next_action">Next action</label>
@@ -67,6 +90,31 @@
             </t>
         </div>
     </div>
+    <script>
+    <![CDATA[
+    document.addEventListener('DOMContentLoaded', function () {
+        var addBtn = document.getElementById('o_b2b_add_contact_row');
+        var container = document.getElementById('o_b2b_new_contacts');
+        if (!addBtn || !container) { return; }
+        addBtn.addEventListener('click', function (ev) {
+            ev.preventDefault();
+            var row = document.createElement('div');
+            row.className = 'o_b2b_new_contact_row';
+            var nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.name = 'new_contact_name';
+            nameInput.placeholder = 'Name';
+            var mobileInput = document.createElement('input');
+            mobileInput.type = 'text';
+            mobileInput.name = 'new_contact_mobile';
+            mobileInput.placeholder = 'Mobile number';
+            row.appendChild(nameInput);
+            row.appendChild(mobileInput);
+            container.appendChild(row);
+        });
+    });
+    ]]>
+    </script>
 </body>
 </html>
     </template>

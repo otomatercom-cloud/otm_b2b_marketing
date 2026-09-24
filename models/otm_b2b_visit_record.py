@@ -43,7 +43,23 @@ class OtmB2bVisitRecord(models.Model):
     marketing_activity_type_id = fields.Many2one(
         'otm.b2b.activity.type', string='Activity Type', tracking=True)
     remarks = fields.Text(string='Remarks')
-    contact_person = fields.Char(string='Contact Person', help='Who at the institution was met during this visit.')
+    # Who was actually met on this visit - picked from the institution's own
+    # contact directory (otm.b2b.institution.contact) rather than free-typed,
+    # so a contact logged on one visit shows up again as a pickable option on
+    # every later visit to the same institution instead of being retyped (and
+    # possibly misspelled/duplicated) each time.
+    contact_ids = fields.Many2many(
+        'otm.b2b.institution.contact', string='Contacts Met',
+        help='Contact persons met during this visit. New contacts added here are '
+             'saved to the institution\'s contact directory for future visits too.')
+    # Kept as a plain-text, stored *summary* of contact_ids (comma-joined
+    # names) purely so anything that still reads/searches the old free-typed
+    # "Contact Person" text field (list views, exports, reports) keeps
+    # working. Never write to this directly anymore - set contact_ids and
+    # this recomputes itself.
+    contact_person = fields.Char(
+        string='Contact Person', compute='_compute_contact_person', store=True,
+        help='Auto-filled from Contacts Met above.')
     discussion_summary = fields.Text(string='Discussion Summary')
     next_followup_date = fields.Date(string='Next Followup Date', tracking=True)
     next_action = fields.Char(string='Next Action')
@@ -103,6 +119,18 @@ class OtmB2bVisitRecord(models.Model):
     def _compute_lead_count(self):
         for rec in self:
             rec.lead_count = len(rec.lead_ids)
+
+    @api.depends('contact_ids.name')
+    def _compute_contact_person(self):
+        # sudo() here on purpose (see ODOO19_RULES.md #21): this visit
+        # record is already scoped to whoever owns it, so reading the
+        # linked contacts' names for this plain-text summary is legitimate
+        # even if the institution they're filed under was reassigned away
+        # from this user after the visit - otherwise this compute would
+        # throw AccessError the moment that happens, same failure shape as
+        # the dashboard bug fixed earlier today.
+        for rec in self:
+            rec.contact_person = ', '.join(rec.contact_ids.sudo().mapped('name'))
 
     def _compute_map_url(self):
         for rec in self:

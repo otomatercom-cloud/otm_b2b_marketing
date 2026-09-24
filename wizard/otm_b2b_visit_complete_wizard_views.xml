@@ -11,7 +11,10 @@
                 <group>
                     <field name="institution_id" readonly="1"/>
                     <field name="marketing_activity_type_id"/>
-                    <field name="contact_person"/>
+                    <field name="contact_ids" widget="many2many_tags"
+                           domain="[('institution_id', '=', institution_id)]"
+                           context="{'default_institution_id': institution_id}"
+                           options="{'no_quick_create': True}"/>
                     <field name="remarks"/>
                     <field name="next_action"/>
                     <field name="next_followup_date"/>

@@ -7,8 +7,9 @@
         <field name="arch" type="xml">
             <form string="Seminar">
                 <header>
-                    <button name="action_check_out" type="object" string="Check Out"
-                            class="btn-primary" invisible="not checkin_time or checkout_time"/>
+                    <!-- No backend "Check Out" button here on purpose - see
+                         otm_b2b_visit_record_views.xml for why: only the Dashboard
+                         captures GPS location on check-out. -->
                     <button name="action_open_complete_wizard" type="object" string="Complete Seminar"
                             class="btn-primary" invisible="state == 'completed'"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,completed"/>
@@ -26,8 +27,11 @@
                             <field name="speaker"/>
                         </group>
                         <group>
-                            <field name="checkin_time"/>
-                            <field name="checkout_time"/>
+                            <!-- readonly on purpose - see otm_b2b_visit_record_views.xml:
+                                 only the Dashboard's Check In / Check Out should ever
+                                 stamp these, so location is always captured alongside. -->
+                            <field name="checkin_time" readonly="1"/>
+                            <field name="checkout_time" readonly="1"/>
                             <field name="student_count"/>
                             <field name="faculty_count"/>
                             <field name="duration" widget="float_time"/>

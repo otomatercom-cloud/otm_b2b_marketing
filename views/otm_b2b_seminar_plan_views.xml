@@ -9,8 +9,9 @@
                 <header>
                     <button name="action_confirm_plan" type="object" string="Confirm"
                             class="btn-primary" invisible="state != 'draft'"/>
-                    <button name="action_check_in" type="object" string="Check In"
-                            class="btn-primary" invisible="state != 'planned'"/>
+                    <!-- No backend "Check In" button here on purpose - see
+                         otm_b2b_visit_plan_views.xml for why: only the Dashboard
+                         captures GPS location on check-in. -->
                     <button name="action_open_complete_wizard" type="object" string="Complete Seminar"
                             class="btn-primary" invisible="state not in ('draft', 'planned', 'in_progress')"/>
                     <button name="action_cancel_plan" type="object" string="Cancel"

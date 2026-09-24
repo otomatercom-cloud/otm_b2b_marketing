@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from itertools import zip_longest
+
 from odoo import http, fields
 from odoo.http import request
 
@@ -26,12 +28,60 @@ class OtmB2bPortalController(http.Controller):
         action = action.sudo() if action else action
         return f'/odoo/action-{action.id}' if action else '/odoo'
 
+    def _find_or_create_contact(self, institution, name, mobile):
+        """Dedupe against the institution's existing contact directory
+        (contact_ids on otm.b2b.institution) before creating a new one - by
+        mobile number first (most reliable), falling back to a
+        case-insensitive name match, so re-checking the same person's name
+        on a second visit (instead of ticking the checkbox for them)
+        doesn't pile up duplicate contact records. Returns a recordset of
+        one otm.b2b.institution.contact, existing or newly created."""
+        Contact = request.env['otm.b2b.institution.contact'].sudo()
+        name = (name or '').strip()
+        mobile = (mobile or '').strip()
+        if not name:
+            return Contact.browse()
+        existing = institution.contact_ids
+        match = Contact.browse()
+        if mobile:
+            match = existing.filtered(lambda c: c.mobile and c.mobile.strip() == mobile)
+        if not match:
+            match = existing.filtered(lambda c: c.name.strip().lower() == name.lower())
+        if match:
+            return match[:1]
+        return Contact.create({
+            'institution_id': institution.id,
+            'name': name,
+            'mobile': mobile,
+        })
+
+    def _parse_contact_ids(self, institution):
+        """Combines (a) existing institution contacts ticked via checkbox
+        and (b) newly typed name/mobile pairs (repeatable rows added by the
+        page's own JS) into one list of otm.b2b.institution.contact ids to
+        write onto the visit. New contacts are saved onto the institution's
+        contact directory as they're created, so they show up as pickable
+        options on this same institution's next visit too."""
+        selected_ids = [int(i) for i in request.httprequest.form.getlist('contact_ids') if i]
+        new_names = request.httprequest.form.getlist('new_contact_name')
+        new_mobiles = request.httprequest.form.getlist('new_contact_mobile')
+        contact_ids = set(selected_ids)
+        for name, mobile in zip_longest(new_names, new_mobiles, fillvalue=''):
+            contact = self._find_or_create_contact(institution, name, mobile)
+            if contact:
+                contact_ids.add(contact.id)
+        return list(contact_ids)
+
     @http.route('/b2b/visit/<int:visit_id>/<string:token>', type='http', auth='public', methods=['GET'])
     def visit_complete_form(self, visit_id, token, **kwargs):
         visit = self._get_visit(visit_id, token)
         if not visit:
             return request.not_found()
         activity_types = request.env['otm.b2b.activity.type'].sudo().search([])
+        # Existing contacts already on file for this institution (from this
+        # or any earlier visit) - shown as a pick list so a repeat visit
+        # doesn't require retyping someone who's already been logged.
+        existing_contacts = visit.institution_id.sudo().contact_ids.sorted('name')
         # Once a visit is completed the link is locked: re-opening it (or
         # re-POSTing to it) always shows the read-only confirmation screen,
         # never the editable form again, so a submitted update can't be
@@ -39,6 +89,7 @@ class OtmB2bPortalController(http.Controller):
         values = {
             'visit': visit,
             'activity_types': activity_types,
+            'existing_contacts': existing_contacts,
             'submitted': visit.state == 'completed',
             'dashboard_url': self._get_dashboard_url(),
         }
@@ -52,8 +103,9 @@ class OtmB2bPortalController(http.Controller):
 
         if visit.state != 'completed':
             now = fields.Datetime.now()
+            contact_ids = self._parse_contact_ids(visit.institution_id.sudo())
             vals = {
-                'contact_person': post.get('contact_person') or '',
+                'contact_ids': [(6, 0, contact_ids)],
                 'remarks': post.get('remarks') or '',
                 'next_action': post.get('next_action') or '',
                 'state': 'completed',
@@ -77,9 +129,11 @@ class OtmB2bPortalController(http.Controller):
         # second submit can never overwrite a first one.
 
         activity_types = request.env['otm.b2b.activity.type'].sudo().search([])
+        existing_contacts = visit.institution_id.sudo().contact_ids.sorted('name')
         values = {
             'visit': visit,
             'activity_types': activity_types,
+            'existing_contacts': existing_contacts,
             'submitted': True,
             'dashboard_url': self._get_dashboard_url(),
         }

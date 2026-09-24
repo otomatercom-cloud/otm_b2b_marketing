@@ -9,8 +9,11 @@
                 <header>
                     <button name="action_confirm_plan" type="object" string="Confirm"
                             class="btn-primary" invisible="state != 'draft'"/>
-                    <button name="action_check_in" type="object" string="Check In"
-                            class="btn-primary" invisible="state != 'planned'"/>
+                    <!-- No backend "Check In" button here on purpose: Check In only
+                         captures GPS location via the Dashboard's own JS, so a plain
+                         server-side button here would silently create a Visit Record
+                         with no location, indistinguishable from a real field visit.
+                         Check In from the Dashboard instead. -->
                     <button name="action_open_complete_wizard" type="object" string="Complete Visit"
                             class="btn-primary" invisible="state not in ('draft', 'planned', 'in_progress')"/>
                     <button name="action_cancel_plan" type="object" string="Cancel"

@@ -135,4 +135,27 @@
         <field name="groups" eval="[(4, ref('group_otm_b2b_marketing_manager'))]"/>
     </record>
 
+    <!-- Institution Contact: same institution-linked scoping as Lead/Seminar/MOU
+         above. Without this, ir.model.access.csv's exec row (full CRUD, no
+         model-level company/institution scoping of its own) would let any
+         Marketing Executive read/edit/delete ANY institution's contacts, not
+         just their own assigned institutions' - the same class of gap fixed
+         on Institution/Lead/Seminar/MOU earlier. Company scoping here goes
+         through institution_id.company_id since the contact's own
+         company_id is a related field, not independently stored/filterable
+         for this purpose. -->
+    <record id="rule_otm_b2b_institution_contact_executive" model="ir.rule">
+        <field name="name">B2B Institution Contact: executive sees only own institutions</field>
+        <field name="model_id" ref="model_otm_b2b_institution_contact"/>
+        <field name="domain_force">['&amp;', '|', ('institution_id.company_id', '=', False), ('institution_id.company_id', 'in', company_ids), '|', ('institution_id.marketing_manager_id', '=', user.id), ('institution_id.user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_otm_b2b_marketing_executive'))]"/>
+    </record>
+
+    <record id="rule_otm_b2b_institution_contact_manager" model="ir.rule">
+        <field name="name">B2B Institution Contact: manager sees all</field>
+        <field name="model_id" ref="model_otm_b2b_institution_contact"/>
+        <field name="domain_force">['|', ('institution_id.company_id', '=', False), ('institution_id.company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[(4, ref('group_otm_b2b_marketing_manager'))]"/>
+    </record>
+
 </odoo>
