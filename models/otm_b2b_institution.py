@@ -534,18 +534,25 @@ class OtmB2bInstitution(models.Model):
             ('state', 'in', ('draft', 'planned', 'in_progress')),
         ])
         my_institutions_list = []
-        for plan in today_plans.sorted(key=lambda p: p.institution_id.name):
+        for plan in today_plans.sorted(key=lambda p: p.institution_id.sudo().name):
+            # The plan itself is already scoped to this user (user_id =
+            # target_uid above), so if they own the plan they're entitled
+            # to see which institution it's for - even if that institution
+            # isn't (or is no longer) formally assigned to them. Read the
+            # institution via sudo() here purely for display; this does not
+            # widen what institutions they can browse/search/edit.
+            institution = plan.institution_id.sudo()
             visit = plan.visit_record_id
             is_live = bool(
                 visit and visit.checkin_time and not visit.checkout_time
                 and visit.state not in ('cancelled', 'completed')
             )
             my_institutions_list.append({
-                'id': plan.institution_id.id,
+                'id': institution.id,
                 'plan_id': plan.id,
-                'name': plan.institution_id.name,
-                'tier': plan.institution_id.tier_id.name or '',
-                'district': district_labels.get(plan.institution_id.district, ''),
+                'name': institution.name,
+                'tier': institution.tier_id.name or '',
+                'district': district_labels.get(institution.district, ''),
                 'live_visit_id': visit.id if is_live else False,
                 'live_visit_portal_url': visit.portal_url if is_live else False,
             })
@@ -560,18 +567,23 @@ class OtmB2bInstitution(models.Model):
             ('state', 'in', ('draft', 'planned', 'in_progress')),
         ])
         my_seminars_list = []
-        for plan in today_seminar_plans.sorted(key=lambda p: p.institution_id.name):
+        for plan in today_seminar_plans.sorted(key=lambda p: p.institution_id.sudo().name):
+            # Same reasoning as "My Institutions" above: the seminar plan
+            # is already scoped to this user, so showing its institution
+            # name is not a security concern even if that institution
+            # isn't currently assigned to them.
+            institution = plan.institution_id.sudo()
             seminar = plan.seminar_id
             is_live = bool(
                 seminar and seminar.checkin_time and not seminar.checkout_time
                 and seminar.state != 'cancelled'
             )
             my_seminars_list.append({
-                'id': plan.institution_id.id,
+                'id': institution.id,
                 'plan_id': plan.id,
-                'name': plan.institution_id.name,
-                'tier': plan.institution_id.tier_id.name or '',
-                'district': district_labels.get(plan.institution_id.district, ''),
+                'name': institution.name,
+                'tier': institution.tier_id.name or '',
+                'district': district_labels.get(institution.district, ''),
                 'live_seminar_id': seminar.id if is_live else False,
                 'live_seminar_portal_url': seminar.portal_url if is_live else False,
             })
@@ -589,18 +601,18 @@ class OtmB2bInstitution(models.Model):
             seminar_plan_state_labels = dict(all_plans._fields['state'].selection)
             all_seminars_planned_list = [{
                 'plan_id': plan.id,
-                'institution': plan.institution_id.name,
+                'institution': plan.institution_id.sudo().name,
                 'executive': plan.user_id.name,
-                'district': district_labels.get(plan.institution_id.district, ''),
+                'district': district_labels.get(plan.institution_id.sudo().district, ''),
                 'seminar_date': fields.Date.to_string(plan.seminar_date),
                 'state': seminar_plan_state_labels.get(plan.state, plan.state),
             } for plan in all_plans]
 
         upcoming_visit_list = [{
             'id': plan.id,
-            'institution': plan.institution_id.name,
+            'institution': plan.institution_id.sudo().name,
             'executive': plan.user_id.name,
-            'district': district_labels.get(plan.institution_id.district, ''),
+            'district': district_labels.get(plan.institution_id.sudo().district, ''),
             'visit_date': fields.Date.to_string(plan.visit_date),
             'priority': plan.priority,
         } for plan in upcoming_plans[:5]]
@@ -614,10 +626,10 @@ class OtmB2bInstitution(models.Model):
             ], order='checkin_time desc', limit=5)
         live_visit_list = [{
             'id': v.id,
-            'institution': v.institution_id.name,
+            'institution': v.institution_id.sudo().name,
             'institution_id': v.institution_id.id,
             'executive': v.user_id.name,
-            'district': district_labels.get(v.institution_id.district, ''),
+            'district': district_labels.get(v.institution_id.sudo().district, ''),
             'checkin_time': fields.Datetime.to_string(v.checkin_time) if v.checkin_time else '',
             'portal_url': v.portal_url,
         } for v in live_visits]
@@ -629,9 +641,9 @@ class OtmB2bInstitution(models.Model):
             ], order='checkout_time desc', limit=8)
         today_completed_list = [{
             'id': v.id,
-            'institution': v.institution_id.name,
+            'institution': v.institution_id.sudo().name,
             'executive': v.user_id.name,
-            'district': district_labels.get(v.institution_id.district, ''),
+            'district': district_labels.get(v.institution_id.sudo().district, ''),
             'marketing_activity': v.marketing_activity_type_id.name or '',
         } for v in today_completed_visits]
 
