@@ -179,23 +179,53 @@ export class OtmB2bDashboard extends Component {
                 resolve({ location: null, error: "Geolocation not available in this browser/app" });
                 return;
             }
-            const options = { enableHighAccuracy: true, timeout: 20000, maximumAge: 30000 };
-            let result = await tryOnce(options);
-            if (!result.location) {
+            // Permission being granted doesn't guarantee a GPS fix -
+            // indoors, underground, or a cold GPS chip can all still fail
+            // or take too long. Try three times with progressively looser
+            // requirements before giving up, instead of retrying the same
+            // strict high-accuracy request twice:
+            // 1. Fresh, high-accuracy (satellite) fix - best case.
+            // 2. High-accuracy again, but now accept a fix the phone
+            //    already has cached from the last minute - often
+            //    resolves instantly if attempt 1 just needed more time.
+            // 3. Low-accuracy (WiFi/cell-tower) fallback, which works
+            //    indoors where GPS satellites can't be seen at all, and
+            //    accepts anything cached in the last 5 minutes.
+            const attempts = [
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 },
+                { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 },
+            ];
+            let result = { location: null, error: "Unknown error" };
+            for (const options of attempts) {
                 result = await tryOnce(options);
+                if (result.location) {
+                    break;
+                }
             }
             resolve(result);
         });
     }
 
+    // Permission being granted doesn't mean a fix will succeed, so the
+    // message needs to differ: "Permission denied" is a settings problem,
+    // everything else ("Position unavailable", "Timed out") is a signal
+    // problem that moving somewhere with a clearer view of the sky (or
+    // just near a window) usually fixes.
+    _locationErrorMessage(error) {
+        if (error === "Permission denied") {
+            return `Check-in requires location access. Permission denied - please enable location ` +
+                `for this site in your browser/app settings and try again.`;
+        }
+        return `Couldn't get a location fix (${error}). This usually happens indoors or ` +
+            `underground - try moving near a window, outdoors, or somewhere with a clearer view ` +
+            `of the sky, then try again.`;
+    }
+
     async checkIn(planId) {
         const { location, error } = await this._getLocation();
         if (!location) {
-            this.notification.add(
-                `Check-in requires location access. ${error}. Please enable location for this site ` +
-                `and try again.`,
-                { type: "danger", sticky: true }
-            );
+            this.notification.add(this._locationErrorMessage(error), { type: "danger", sticky: true });
             return;
         }
         const result = await this.orm.call("otm.b2b.visit.plan", "action_dashboard_check_in", [planId], {
@@ -233,11 +263,7 @@ export class OtmB2bDashboard extends Component {
     async checkInSeminar(planId) {
         const { location, error } = await this._getLocation();
         if (!location) {
-            this.notification.add(
-                `Check-in requires location access. ${error}. Please enable location for this site ` +
-                `and try again.`,
-                { type: "danger", sticky: true }
-            );
+            this.notification.add(this._locationErrorMessage(error), { type: "danger", sticky: true });
             return;
         }
         const result = await this.orm.call("otm.b2b.seminar.plan", "action_dashboard_check_in", [planId], {
