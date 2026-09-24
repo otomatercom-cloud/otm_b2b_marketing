@@ -23,6 +23,7 @@ export class OtmB2bDashboard extends Component {
                 live_visits: 0,
                 today_completed: 0,
                 total_institutions: 0,
+                high_priority_institutions: 0,
                 leads_collected: 0,
                 seminars_conducted: 0,
                 mou_signed: 0,
@@ -346,6 +347,15 @@ export class OtmB2bDashboard extends Component {
         // executive is currently selected in the filter (if any), so the
         // number on the card and what you see after clicking it agree.
         this.openFiltered("otm.b2b.institution", "Institutions", this._institutionExecDomain());
+    }
+
+    // Replaces the old "Within 20km" GPS-based card: institutions starred
+    // High Priority (the same scope as "Total institutions" above, just
+    // narrowed to the starred ones), instead of whatever happens to be
+    // physically nearby right now.
+    openHighPriorityInstitutions() {
+        this.openFiltered("otm.b2b.institution", "High Priority Institutions",
+            [...this._institutionExecDomain(), ["is_high_priority", "=", true]]);
     }
 
     openFiltered(model, name, domain, context) {

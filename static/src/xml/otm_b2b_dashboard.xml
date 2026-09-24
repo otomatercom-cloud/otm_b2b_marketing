@@ -90,12 +90,12 @@
                         </div>
                         <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.total_institutions"/></div>
                     </div>
-                    <div class="o_otm_b2b_kpi_card" t-on-click="openNearbyInstitutions">
+                    <div class="o_otm_b2b_kpi_card" t-on-click="openHighPriorityInstitutions">
                         <div class="o_otm_b2b_kpi_top">
-                            <span class="o_otm_b2b_kpi_label">Within 20km</span>
-                            <i class="fa fa-map-marker o_otm_b2b_kpi_icon"/>
+                            <span class="o_otm_b2b_kpi_label">High Priority</span>
+                            <i class="fa fa-star o_otm_b2b_kpi_icon" style="color:#f1c40f;"/>
                         </div>
-                        <div class="o_otm_b2b_kpi_value">Find</div>
+                        <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.high_priority_institutions"/></div>
                     </div>
                     <div class="o_otm_b2b_kpi_card" t-on-click="openLeads">
                         <div class="o_otm_b2b_kpi_top">

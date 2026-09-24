@@ -121,6 +121,11 @@ class OtmB2bInstitution(models.Model):
         ('inactive', 'Inactive'),
         ('blacklisted', 'Blacklisted'),
     ], string='Status', default='new', required=True, tracking=True)
+    # Plain star toggle (like a "favorite") a Marketing Executive/Manager
+    # sets on an institution that needs extra attention - shows up as its
+    # own KPI/list on the Dashboard (see get_dashboard_data() below) so
+    # these don't get lost among everything else assigned to them.
+    is_high_priority = fields.Boolean(string='High Priority', tracking=True)
     remarks = fields.Text(string='Remarks')
     marketing_manager_id = fields.Many2one(
         'res.users', string='Assigned Marketing Manager', tracking=True,
@@ -476,6 +481,7 @@ class OtmB2bInstitution(models.Model):
         Institution = self.env['otm.b2b.institution']
         institutions = Institution.search(institution_domain)
         institution_ids = institutions.ids
+        high_priority_institutions = institutions.filtered('is_high_priority')
 
         # Leads/Seminars scoped to this person: either tied to one of
         # their assigned institutions, OR directly performed by them (via
@@ -719,6 +725,7 @@ class OtmB2bInstitution(models.Model):
                 'live_visits': len(live_visits),
                 'today_completed': len(today_completed_visits),
                 'total_institutions': len(institutions),
+                'high_priority_institutions': len(high_priority_institutions),
                 # "Leads Collected" = actual otm.b2b.lead records PLUS the
                 # "Number of Students" logged on each seminar - a seminar's
                 # interested/attending students are leads too, but usually

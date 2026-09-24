@@ -35,7 +35,10 @@
                         </button>
                     </div>
                     <div class="oe_title">
-                        <h1><field name="name" placeholder="Institution Name"/></h1>
+                        <h1>
+                            <field name="is_high_priority" widget="boolean_favorite" nolabel="1"/>
+                            <field name="name" placeholder="Institution Name"/>
+                        </h1>
                         <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
                     </div>
                     <group>
@@ -189,6 +192,7 @@
         <field name="arch" type="xml">
             <list string="Institutions" decoration-danger="status == 'blacklisted'"
                   decoration-muted="status == 'inactive'">
+                <field name="is_high_priority" widget="boolean_favorite" nolabel="1" string=" "/>
                 <field name="code"/>
                 <field name="name"/>
                 <field name="institution_type_id"/>
@@ -271,7 +275,14 @@
                 <field name="district"/>
                 <field name="state_id"/>
                 <field name="marketing_manager_id"/>
+                <field name="user_id" string="Salesperson"/>
+                <field name="status"/>
+                <field name="mou_status"/>
+                <field name="total_visits"/>
+                <field name="last_visit_date"/>
+                <field name="upcoming_visit_date"/>
                 <field name="tag_ids"/>
+                <filter string="High Priority" name="filter_high_priority" domain="[('is_high_priority', '=', True)]"/>
                 <filter string="New" name="filter_new" domain="[('status', '=', 'new')]"/>
                 <filter string="Active" name="filter_active" domain="[('status', '=', 'active')]"/>
                 <filter string="Inactive" name="filter_inactive" domain="[('status', '=', 'inactive')]"/>
@@ -287,6 +298,7 @@
                 <filter string="My Institutions" name="filter_mine"
                         domain="['|', ('marketing_manager_id', '=', uid), ('user_id', '=', uid)]"/>
                 <group>
+                    <filter string="High Priority" name="groupby_high_priority" context="{'group_by': 'is_high_priority'}"/>
                     <filter string="Institution Type" name="groupby_type" context="{'group_by': 'institution_type_id'}"/>
                     <filter string="Institution Category" name="groupby_category" context="{'group_by': 'institution_category'}"/>
                     <filter string="University" name="groupby_university" context="{'group_by': 'university_id'}"/>
@@ -296,6 +308,7 @@
                     <filter string="State" name="groupby_state" context="{'group_by': 'state_id'}"/>
                     <filter string="Marketing Manager" name="groupby_manager" context="{'group_by': 'marketing_manager_id'}"/>
                     <filter string="Status" name="groupby_status" context="{'group_by': 'status'}"/>
+                    <filter string="MOU Status" name="groupby_mou_status" context="{'group_by': 'mou_status'}"/>
                 </group>
             </search>
         </field>
