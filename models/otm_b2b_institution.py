@@ -417,9 +417,11 @@ class OtmB2bInstitution(models.Model):
         to that one person's data instead - same shape as an executive's
         own view, just chosen by the manager rather than implied by login.
 
-        "New" status institutions are excluded everywhere on this
-        dashboard (counts, breakdowns, lists) - the full Institutions app
-        list is unaffected, this only hides them from the dashboard."""
+        "New" status institutions are only hidden from the type/district
+        distribution charts and the Institutions click-through list - the
+        "Total institutions" count and the Lead/Seminar/MOU numbers always
+        reflect true assignment/activity regardless of status (see notes
+        below on why)."""
         is_manager = self.env.user.has_group('otm_b2b_marketing.group_otm_b2b_marketing_manager')
         uid = self.env.uid
         today = fields.Date.context_today(self)
@@ -453,12 +455,21 @@ class OtmB2bInstitution(models.Model):
 
         scope_to_target = (not is_manager) or viewing_other
 
-        # Hide "New" institutions from every dashboard number/list below.
-        institution_domain = [('status', '!=', 'new')]
+        # Institution assignment scoping - NOT status-filtered. "Total
+        # institutions" and the Lead/Seminar/MOU counts below must reflect
+        # everything actually assigned to (or worked by) this person,
+        # including institutions still sitting in "New" status - almost
+        # every institution starts as "New" and nothing in this module
+        # currently auto-promotes that status on first visit, so excluding
+        # "New" here would zero out real activity for most officers.
+        # "New" is only hidden from the type/district distribution charts
+        # and the Institutions click-through list further below, per the
+        # earlier request to declutter those specific views.
+        institution_domain = []
         visit_plan_domain = []
         visit_record_domain = []
         if scope_to_target:
-            institution_domain += ['|', ('marketing_manager_id', '=', target_uid), ('user_id', '=', target_uid)]
+            institution_domain = ['|', ('marketing_manager_id', '=', target_uid), ('user_id', '=', target_uid)]
             visit_plan_domain = [('user_id', '=', target_uid)]
             visit_record_domain = [('user_id', '=', target_uid)]
 
@@ -466,9 +477,20 @@ class OtmB2bInstitution(models.Model):
         institutions = Institution.search(institution_domain)
         institution_ids = institutions.ids
 
-        lead_domain = [('institution_id', 'in', institution_ids)] if scope_to_target else []
-        seminar_domain = [('institution_id', 'in', institution_ids)] if scope_to_target else []
-        mou_domain = [('institution_id', 'in', institution_ids)] if scope_to_target else []
+        # Leads/Seminars scoped to this person: either tied to one of
+        # their assigned institutions, OR directly performed by them (via
+        # the visit/seminar-plan that collected it) - covers a lead
+        # collected or seminar conducted at an institution that isn't (or
+        # is no longer) assigned to them, which otherwise vanished from
+        # their own numbers even though they did the work.
+        if scope_to_target:
+            lead_domain = ['|', ('institution_id', 'in', institution_ids), ('visit_id.user_id', '=', target_uid)]
+            seminar_domain = ['|', ('institution_id', 'in', institution_ids), ('seminar_plan_id.user_id', '=', target_uid)]
+            mou_domain = [('institution_id', 'in', institution_ids)]
+        else:
+            lead_domain = []
+            seminar_domain = []
+            mou_domain = []
 
         visit_plans = self.env['otm.b2b.visit.plan'].search(visit_plan_domain)
         today_visits = len(visit_plans.filtered(lambda p: p.visit_date == today))
@@ -478,14 +500,18 @@ class OtmB2bInstitution(models.Model):
         completed_visits = len(visit_plans.filtered(lambda p: p.state == 'completed'))
         pending_visits = len(visit_plans.filtered(lambda p: p.state in ('draft', 'planned', 'in_progress')))
 
+        # Distribution charts only: hide "New" institutions here, since
+        # these are about composition of active territory, not a raw
+        # assignment count.
+        chart_domain = institution_domain + [('status', '!=', 'new')]
         type_groups = Institution._read_group(
-            institution_domain, groupby=['institution_type_id'], aggregates=['__count'])
+            chart_domain, groupby=['institution_type_id'], aggregates=['__count'])
         by_type = [
             {'label': inst_type.name if inst_type else _('Unspecified'), 'count': count}
             for inst_type, count in type_groups if count
         ]
         district_groups = Institution._read_group(
-            institution_domain, groupby=['district'], aggregates=['__count'])
+            chart_domain, groupby=['district'], aggregates=['__count'])
         district_labels = dict(Institution._fields['district'].selection)
         by_district = sorted(
             [{'label': district_labels.get(district, district) or _('Unspecified'), 'count': count}

@@ -313,11 +313,11 @@ export class OtmB2bDashboard extends Component {
     }
 
     openInstitutions() {
-        // "New" institutions are hidden from the dashboard everywhere,
-        // including this click-through, and stays scoped to whichever
-        // executive is currently selected in the filter (if any).
-        const domain = [["status", "!=", "new"], ...this._institutionExecDomain()];
-        this.openFiltered("otm.b2b.institution", "Institutions", domain);
+        // Matches the "Total institutions" card exactly - the full
+        // assigned set (including "New" ones), scoped to whichever
+        // executive is currently selected in the filter (if any), so the
+        // number on the card and what you see after clicking it agree.
+        this.openFiltered("otm.b2b.institution", "Institutions", this._institutionExecDomain());
     }
 
     openFiltered(model, name, domain, context) {
@@ -361,7 +361,11 @@ export class OtmB2bDashboard extends Component {
     }
 
     openLeads() {
-        this.openFiltered("otm.b2b.lead", "Leads Collected", this._execInstitutionLinkedDomain());
+        // Matches get_dashboard_data()'s lead_domain: assigned institution
+        // OR directly collected by this person (their visit), so a lead
+        // from an institution no longer assigned to them still shows up.
+        this.openFiltered("otm.b2b.lead", "Leads Collected",
+            this._execInstitutionLinkedDomain("visit_id.user_id"));
     }
 
     openMou() {
@@ -369,21 +373,31 @@ export class OtmB2bDashboard extends Component {
     }
 
     openSeminarsConducted() {
-        this.openFiltered("otm.b2b.seminar", "Seminar Management", this._execInstitutionLinkedDomain());
+        // Matches get_dashboard_data()'s seminar_domain: assigned
+        // institution OR the seminar they personally conducted.
+        this.openFiltered("otm.b2b.seminar", "Seminar Management",
+            this._execInstitutionLinkedDomain("seminar_plan_id.user_id"));
     }
 
     // Same idea as _institutionExecDomain(), for models that don't carry
     // a direct user_id but link to Institution (Lead/Seminar/MOU) - filter
-    // through institution_id.marketing_manager_id / institution_id.user_id
-    // instead, matching the ir.rule scoping used for these models.
-    _execInstitutionLinkedDomain() {
+    // through institution_id.marketing_manager_id / institution_id.user_id,
+    // optionally OR'd with a direct-attribution field path (e.g.
+    // "visit_id.user_id") when the caller has one, matching the backend
+    // dashboard scoping exactly.
+    _execInstitutionLinkedDomain(directField) {
         if (!this.state.selectedExecutiveId) {
             return [];
         }
-        return ["|",
-            ["institution_id.marketing_manager_id", "=", this.state.selectedExecutiveId],
-            ["institution_id.user_id", "=", this.state.selectedExecutiveId],
+        const id = this.state.selectedExecutiveId;
+        const institutionLeaves = ["|",
+            ["institution_id.marketing_manager_id", "=", id],
+            ["institution_id.user_id", "=", id],
         ];
+        if (!directField) {
+            return institutionLeaves;
+        }
+        return ["|", ...institutionLeaves, [directField, "=", id]];
     }
 }
 
