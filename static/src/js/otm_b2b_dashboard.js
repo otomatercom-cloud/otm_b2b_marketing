@@ -44,6 +44,7 @@ export class OtmB2bDashboard extends Component {
             userName: "",
             telegramConnected: false,
             telegramDeepLink: false,
+            today: false,
             loading: true,
         });
 
@@ -78,6 +79,7 @@ export class OtmB2bDashboard extends Component {
         this.state.userName = data.user_name;
         this.state.telegramConnected = data.telegram_connected;
         this.state.telegramDeepLink = data.telegram_deep_link;
+        this.state.today = data.today;
         this.state.loading = false;
     }
 
@@ -380,6 +382,30 @@ export class OtmB2bDashboard extends Component {
 
     openVisitPlans() {
         this.openFiltered("otm.b2b.visit.plan", "Visit Planning", this._execDomain("user_id"));
+    }
+
+    // Matches get_dashboard_data()'s `today_visits` count exactly: every
+    // visit plan (any state) dated today for the current scope. Previously
+    // this card reused openVisitPlans() with no date filter at all, so it
+    // opened every visit plan ever created for the executive (all dates,
+    // all states) instead of just today's.
+    openTodayVisits() {
+        this.openFiltered("otm.b2b.visit.plan", "Today's Visits",
+            [...this._execDomain("user_id"), ["visit_date", "=", this.state.today]]);
+    }
+
+    // Matches get_dashboard_data()'s `upcoming_plans` count exactly:
+    // state = 'planned' and visit_date >= today.
+    openUpcomingVisits() {
+        this.openFiltered("otm.b2b.visit.plan", "Upcoming Visits",
+            [...this._execDomain("user_id"), ["state", "=", "planned"], ["visit_date", ">=", this.state.today]]);
+    }
+
+    // Matches the "Completed today" KPI card's own domain/context so the
+    // panel's "View all" agrees with the count next to it.
+    openTodayCompletedVisits() {
+        this.openFiltered("otm.b2b.visit.record", "Completed Today", [],
+            { search_default_filter_today: 1, search_default_filter_completed: 1 });
     }
 
     openSeminars() {

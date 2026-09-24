@@ -41,14 +41,14 @@
 
             <t t-if="!state.loading">
                 <div class="o_otm_b2b_kpi_row mt-3">
-                    <div class="o_otm_b2b_kpi_card" t-on-click="openVisitPlans">
+                    <div class="o_otm_b2b_kpi_card" t-on-click="openTodayVisits">
                         <div class="o_otm_b2b_kpi_top">
                             <span class="o_otm_b2b_kpi_label">Today's visits</span>
                             <i class="fa fa-map-marker o_otm_b2b_kpi_icon"/>
                         </div>
                         <div class="o_otm_b2b_kpi_value"><t t-esc="state.cards.today_visits"/></div>
                     </div>
-                    <div class="o_otm_b2b_kpi_card" t-on-click="openVisitPlans">
+                    <div class="o_otm_b2b_kpi_card" t-on-click="openUpcomingVisits">
                         <div class="o_otm_b2b_kpi_top">
                             <span class="o_otm_b2b_kpi_label">Upcoming visits</span>
                             <i class="fa fa-calendar o_otm_b2b_kpi_icon"/>
@@ -294,7 +294,7 @@
                 <div class="o_otm_b2b_panel mt-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h4 class="mb-0">Today's completed visits</h4>
-                        <a href="#" class="o_otm_b2b_view_all" t-on-click.prevent="openVisitPlans">View all</a>
+                        <a href="#" class="o_otm_b2b_view_all" t-on-click.prevent="openTodayCompletedVisits">View all</a>
                     </div>
                     <div class="o_otm_b2b_visit_row" t-foreach="state.todayCompleted" t-as="visit" t-key="visit_index">
                         <div class="o_otm_b2b_visit_avatar o_otm_b2b_visit_avatar_done">
@@ -317,7 +317,7 @@
                 <div class="o_otm_b2b_panel mt-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h4 class="mb-0">Upcoming visits</h4>
-                        <a href="#" class="o_otm_b2b_view_all" t-on-click.prevent="openVisitPlans">View all</a>
+                        <a href="#" class="o_otm_b2b_view_all" t-on-click.prevent="openUpcomingVisits">View all</a>
                     </div>
                     <div class="o_otm_b2b_visit_row" t-foreach="state.upcomingVisits" t-as="visit" t-key="visit_index">
                         <div class="o_otm_b2b_visit_avatar">

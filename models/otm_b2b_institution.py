@@ -700,6 +700,11 @@ class OtmB2bInstitution(models.Model):
 
         return {
             'is_manager': is_manager,
+            # Server's own "today" (context_today, above), so the client's
+            # Today's Visits / Completed Today drill-throughs filter on the
+            # exact same date the KPI counts were computed from, rather
+            # than recomputing "today" in the browser's own timezone.
+            'today': fields.Date.to_string(today),
             'user_name': self.env.user.name,
             'telegram_connected': self.env.user.otm_telegram_connected,
             'telegram_deep_link': self.env.user.otm_telegram_deep_link,
