@@ -178,6 +178,10 @@
                 <field name="institution_id"/>
                 <field name="user_id"/>
                 <field name="marketing_activity_type_id"/>
+                <field name="visit_date"/>
+                <field name="duration"/>
+                <field name="next_followup_date"/>
+                <field name="state"/>
                 <filter string="Today" name="filter_today"
                         domain="[('visit_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="This Month" name="filter_this_month"
@@ -194,6 +198,7 @@
                     <filter string="Activity Type" name="groupby_activity" context="{'group_by': 'marketing_activity_type_id'}"/>
                     <filter string="Status" name="groupby_state" context="{'group_by': 'state'}"/>
                     <filter string="Visit Date" name="groupby_date" context="{'group_by': 'visit_date'}"/>
+                    <filter string="Next Followup Date" name="groupby_followup" context="{'group_by': 'next_followup_date'}"/>
                 </group>
             </search>
         </field>

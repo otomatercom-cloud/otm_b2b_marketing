@@ -108,6 +108,10 @@
                 <field name="user_id"/>
                 <field name="tier_id"/>
                 <field name="zone_id"/>
+                <field name="visit_date"/>
+                <field name="purpose"/>
+                <field name="priority"/>
+                <field name="state"/>
                 <filter string="Today" name="filter_today"
                         domain="[('visit_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="Upcoming" name="filter_upcoming"
@@ -124,6 +128,7 @@
                     <filter string="Zone" name="groupby_zone" context="{'group_by': 'zone_id'}"/>
                     <filter string="Status" name="groupby_state" context="{'group_by': 'state'}"/>
                     <filter string="Visit Date" name="groupby_date" context="{'group_by': 'visit_date'}"/>
+                    <filter string="Priority" name="groupby_priority" context="{'group_by': 'priority'}"/>
                 </group>
             </search>
         </field>

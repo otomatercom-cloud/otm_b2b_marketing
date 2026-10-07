@@ -80,12 +80,20 @@
                 <field name="institution_id"/>
                 <field name="agreement_number"/>
                 <field name="mou_type_id"/>
+                <field name="discussion_date"/>
+                <field name="signed_date"/>
+                <field name="expiry_date"/>
+                <field name="renewal_date"/>
+                <field name="state"/>
                 <filter string="Signed" name="filter_signed" domain="[('state', '=', 'signed')]"/>
                 <filter string="Under Discussion" name="filter_discussion" domain="[('state', '=', 'discussion')]"/>
                 <group>
                     <filter string="Institution" name="groupby_institution" context="{'group_by': 'institution_id'}"/>
                     <filter string="MOU Type" name="groupby_mou_type" context="{'group_by': 'mou_type_id'}"/>
                     <filter string="Status" name="groupby_state" context="{'group_by': 'state'}"/>
+                    <filter string="Discussion Date" name="groupby_discussion" context="{'group_by': 'discussion_date'}"/>
+                    <filter string="Signed Date" name="groupby_signed" context="{'group_by': 'signed_date'}"/>
+                    <filter string="Expiry Date" name="groupby_expiry" context="{'group_by': 'expiry_date'}"/>
                 </group>
             </search>
         </field>

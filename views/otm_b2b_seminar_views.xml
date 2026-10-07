@@ -102,11 +102,16 @@
                 <field name="institution_id"/>
                 <field name="speaker"/>
                 <field name="category_ids"/>
+                <field name="seminar_date"/>
+                <field name="student_count"/>
+                <field name="faculty_count"/>
+                <field name="state"/>
                 <filter string="Completed" name="filter_completed" domain="[('state', '=', 'completed')]"/>
                 <group>
                     <filter string="Institution" name="groupby_institution" context="{'group_by': 'institution_id'}"/>
                     <filter string="Seminar Date" name="groupby_date" context="{'group_by': 'seminar_date'}"/>
                     <filter string="Status" name="groupby_state" context="{'group_by': 'state'}"/>
+                    <filter string="Speaker" name="groupby_speaker" context="{'group_by': 'speaker'}"/>
                 </group>
             </search>
         </field>

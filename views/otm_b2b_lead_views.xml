@@ -89,6 +89,10 @@
                 <field name="name"/>
                 <field name="institution_id"/>
                 <field name="counselor_id"/>
+                <field name="mobile"/>
+                <field name="course_interested"/>
+                <field name="source"/>
+                <field name="state"/>
                 <filter string="New" name="filter_new" domain="[('state', '=', 'new')]"/>
                 <filter string="Interested" name="filter_interested" domain="[('state', '=', 'interested')]"/>
                 <filter string="Admission" name="filter_admission" domain="[('state', '=', 'admission')]"/>
@@ -98,6 +102,7 @@
                     <filter string="Source" name="groupby_source" context="{'group_by': 'source'}"/>
                     <filter string="Counselor" name="groupby_counselor" context="{'group_by': 'counselor_id'}"/>
                     <filter string="Status" name="groupby_state" context="{'group_by': 'state'}"/>
+                    <filter string="Course Interested" name="groupby_course" context="{'group_by': 'course_interested'}"/>
                 </group>
             </search>
         </field>

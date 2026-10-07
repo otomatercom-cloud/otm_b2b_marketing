@@ -60,6 +60,8 @@
             <search string="Search Seminar Plans">
                 <field name="institution_id"/>
                 <field name="user_id"/>
+                <field name="seminar_date"/>
+                <field name="state"/>
                 <filter string="Today" name="filter_today"
                         domain="[('seminar_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="Upcoming" name="filter_upcoming"
