@@ -42,7 +42,7 @@
         <field name="name">otm.b2b.seminar.plan.list</field>
         <field name="model">otm.b2b.seminar.plan</field>
         <field name="arch" type="xml">
-            <list string="Seminar Plans" decoration-info="state == 'draft'"
+            <list string="Seminar Plans" js_class="otm_colsearch_list" decoration-info="state == 'draft'"
                   decoration-warning="state == 'in_progress'"
                   decoration-success="state == 'completed'" decoration-muted="state == 'cancelled'">
                 <field name="seminar_date"/>

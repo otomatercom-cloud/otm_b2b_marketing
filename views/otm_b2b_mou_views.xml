@@ -59,7 +59,7 @@
         <field name="name">otm.b2b.mou.list</field>
         <field name="model">otm.b2b.mou</field>
         <field name="arch" type="xml">
-            <list string="MOUs" decoration-success="state == 'signed'" decoration-danger="state == 'rejected'">
+            <list string="MOUs" js_class="otm_colsearch_list" decoration-success="state == 'signed'" decoration-danger="state == 'rejected'">
                 <field name="institution_id"/>
                 <field name="mou_type_id"/>
                 <field name="discussion_date"/>

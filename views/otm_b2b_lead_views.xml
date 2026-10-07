@@ -46,7 +46,7 @@
         <field name="name">otm.b2b.lead.list</field>
         <field name="model">otm.b2b.lead</field>
         <field name="arch" type="xml">
-            <list string="B2B Leads" decoration-success="state == 'admission'" decoration-muted="state == 'lost'">
+            <list string="B2B Leads" js_class="otm_colsearch_list" decoration-success="state == 'admission'" decoration-muted="state == 'lost'">
                 <field name="name"/>
                 <field name="mobile"/>
                 <field name="course_interested"/>

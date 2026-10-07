@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="otm_b2b_marketing.ColSearchListRenderer"
+       t-inherit="web.ListRenderer" t-inherit-mode="primary">
+        <xpath expr="//thead/tr" position="after">
+            <tr class="o_otm_colsearch_row">
+                <th t-if="hasSelectors"/>
+                <t t-foreach="columns" t-as="column" t-key="column.id">
+                    <th class="o_otm_colsearch_cell">
+                        <t t-set="cs" t-value="getColSearch(column)"/>
+                        <t t-if="cs and cs.kind === 'text'">
+                            <input type="text" class="form-control form-control-sm"
+                                   t-att-value="cs.value"
+                                   t-att-placeholder="column.label"
+                                   t-on-change="(ev) => this.onColSearchChange(column, 'value', ev.target.value)"/>
+                        </t>
+                        <t t-elif="cs and cs.kind === 'select'">
+                            <select class="form-select form-select-sm"
+                                    t-on-change="(ev) => this.onColSearchChange(column, 'value', ev.target.value)">
+                                <option value="" t-att-selected="!cs.value">All</option>
+                                <t t-foreach="cs.options" t-as="opt" t-key="opt[0]">
+                                    <option t-att-value="opt[0]" t-att-selected="cs.value === opt[0]"
+                                            t-esc="opt[1]"/>
+                                </t>
+                            </select>
+                        </t>
+                        <t t-elif="cs and cs.kind === 'date'">
+                            <div class="d-flex gap-1">
+                                <input type="date" class="form-control form-control-sm" title="From"
+                                       t-att-value="cs.from"
+                                       t-on-change="(ev) => this.onColSearchChange(column, 'from', ev.target.value)"/>
+                                <input type="date" class="form-control form-control-sm" title="To"
+                                       t-att-value="cs.to"
+                                       t-on-change="(ev) => this.onColSearchChange(column, 'to', ev.target.value)"/>
+                            </div>
+                        </t>
+                    </th>
+                </t>
+                <th t-if="hasOpenFormViewColumn"/>
+                <th t-if="hasActionsColumn"/>
+            </tr>
+        </xpath>
+    </t>
+
+</templates>

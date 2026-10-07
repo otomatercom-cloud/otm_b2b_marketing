@@ -128,7 +128,7 @@
         <field name="name">otm.b2b.visit.record.list</field>
         <field name="model">otm.b2b.visit.record</field>
         <field name="arch" type="xml">
-            <list string="Visit Records" decoration-success="state == 'completed'"
+            <list string="Visit Records" js_class="otm_colsearch_list" decoration-success="state == 'completed'"
                   decoration-warning="state == 'partially_completed'" decoration-muted="state == 'cancelled'">
                 <field name="name"/>
                 <field name="visit_date"/>

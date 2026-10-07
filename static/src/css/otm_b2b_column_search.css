@@ -1,0 +1,18 @@
+.o_otm_colsearch_row th {
+    padding: 4px !important;
+    background: var(--o-view-background-color, #fff);
+    position: sticky;
+    top: 34px;
+    z-index: 3;
+    font-weight: normal;
+}
+.o_otm_colsearch_cell input,
+.o_otm_colsearch_cell select {
+    min-width: 70px;
+    font-size: 12px;
+}
+.o_otm_colsearch_cell input[type="date"] {
+    min-width: 108px;
+    padding-left: 4px;
+    padding-right: 2px;
+}

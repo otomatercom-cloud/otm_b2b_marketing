@@ -80,7 +80,7 @@
         <field name="name">otm.b2b.seminar.list</field>
         <field name="model">otm.b2b.seminar</field>
         <field name="arch" type="xml">
-            <list string="Seminars" decoration-success="state == 'completed'" decoration-muted="state == 'cancelled'">
+            <list string="Seminars" js_class="otm_colsearch_list" decoration-success="state == 'completed'" decoration-muted="state == 'cancelled'">
                 <field name="seminar_date"/>
                 <field name="institution_id"/>
                 <field name="topic"/>

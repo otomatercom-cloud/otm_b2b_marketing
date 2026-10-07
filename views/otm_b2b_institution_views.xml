@@ -190,7 +190,7 @@
         <field name="name">otm.b2b.institution.list</field>
         <field name="model">otm.b2b.institution</field>
         <field name="arch" type="xml">
-            <list string="Institutions" decoration-danger="status == 'blacklisted'"
+            <list string="Institutions" js_class="otm_colsearch_list" decoration-danger="status == 'blacklisted'"
                   decoration-muted="status == 'inactive'">
                 <field name="is_high_priority" widget="boolean_favorite" nolabel="1" string=" "/>
                 <field name="code"/>

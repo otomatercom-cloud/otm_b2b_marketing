@@ -60,7 +60,7 @@
         <field name="name">otm.b2b.visit.plan.list</field>
         <field name="model">otm.b2b.visit.plan</field>
         <field name="arch" type="xml">
-            <list string="Visit Plans" decoration-info="state == 'draft'"
+            <list string="Visit Plans" js_class="otm_colsearch_list" decoration-info="state == 'draft'"
                   decoration-warning="state == 'in_progress'"
                   decoration-success="state == 'completed'" decoration-muted="state == 'cancelled'">
                 <field name="visit_date"/>
