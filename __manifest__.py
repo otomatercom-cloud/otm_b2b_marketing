@@ -52,6 +52,7 @@ Features
         'wizard/otm_b2b_telegram_settings_wizard_views.xml',
         'wizard/otm_b2b_seminar_book_wizard_views.xml',
         'wizard/otm_b2b_seminar_complete_wizard_views.xml',
+        'wizard/otm_b2b_seminar_lead_import_wizard_views.xml',
         # views
         'views/otm_b2b_institution_type_views.xml',
         'views/otm_b2b_activity_type_views.xml',

@@ -194,4 +194,71 @@
 </html>
     </template>
 
+    <template id="portal_seminar_student_form" name="B2B Seminar - Student Form">
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Student details - Logic School Of Management</title>
+    <style>
+        body { font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background:#f5f4f2; margin:0; padding:0; color:#2b2b2b; }
+        .o_b2b_wrap { max-width:480px; margin:0 auto; padding:24px 20px; }
+        .o_b2b_card { background:#ffffff; border-radius:12px; border:1px solid #e0e0e0; padding:20px; }
+        .o_b2b_title { font-size:18px; font-weight:600; margin:0 0 4px; }
+        .o_b2b_sub { font-size:13px; color:#6c757d; margin:0 0 20px; }
+        label { display:block; font-size:13px; font-weight:600; margin:16px 0 6px; }
+        input[type=text], input[type=tel], input[type=email] {
+            width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid #d0d0d0;
+            border-radius:8px; font-size:15px; background:#fff;
+        }
+        button { width:100%; margin-top:24px; padding:12px; border:none; border-radius:8px;
+                 background:#714B67; color:#ffffff; font-size:15px; font-weight:600; cursor:pointer; }
+        .o_b2b_done { text-align:center; padding:24px 0; }
+        .o_b2b_done_icon { font-size:40px; color:#28a745; margin-bottom:8px; }
+        .o_b2b_error { background:#fdecea; color:#b71c1c; padding:10px 12px; border-radius:8px; font-size:13px; margin-bottom:8px; }
+        .o_b2b_hp { position:absolute; left:-9999px; height:0; overflow:hidden; }
+    </style>
+</head>
+<body>
+    <div class="o_b2b_wrap">
+        <div class="o_b2b_card">
+            <t t-if="done">
+                <div class="o_b2b_done">
+                    <div class="o_b2b_done_icon">&#10004;</div>
+                    <p class="o_b2b_title">Thank you!</p>
+                    <p class="o_b2b_sub">Your details have been received. Our team will contact you soon.</p>
+                </div>
+            </t>
+            <t t-elif="not seminar.form_active">
+                <div class="o_b2b_done">
+                    <p class="o_b2b_title">This form is closed</p>
+                    <p class="o_b2b_sub">Registrations for this seminar are no longer being accepted.</p>
+                </div>
+            </t>
+            <t t-else="">
+                <p class="o_b2b_title"><t t-esc="seminar.institution_id.name"/></p>
+                <p class="o_b2b_sub">Seminar<t t-if="seminar.topic">: <t t-esc="seminar.topic"/></t> - please share your details</p>
+                <div t-if="error" class="o_b2b_error"><t t-esc="error"/></div>
+                <form t-attf-action="/b2b/seminar/#{seminar.id}/#{seminar.form_token}/register/submit" method="post">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <div class="o_b2b_hp"><input type="text" name="website_url" tabindex="-1" autocomplete="off"/></div>
+                    <label for="name">Full name *</label>
+                    <input type="text" name="name" id="name" required="required" t-att-value="values.get('name')"/>
+                    <label for="mobile">Mobile number *</label>
+                    <input type="tel" name="mobile" id="mobile" required="required" inputmode="numeric" t-att-value="values.get('mobile')"/>
+                    <label for="email">Email</label>
+                    <input type="email" name="email" id="email" t-att-value="values.get('email')"/>
+                    <label for="current_class">Current class / year</label>
+                    <input type="text" name="current_class" id="current_class" placeholder="e.g. Plus Two, B.Com 2nd year" t-att-value="values.get('current_class')"/>
+                    <label for="course_interested">Course interested in</label>
+                    <input type="text" name="course_interested" id="course_interested" placeholder="e.g. CA Foundation, ACCA" t-att-value="values.get('course_interested')"/>
+                    <button type="submit">Submit</button>
+                </form>
+            </t>
+        </div>
+    </div>
+</body>
+</html>
+    </template>
+
 </odoo>

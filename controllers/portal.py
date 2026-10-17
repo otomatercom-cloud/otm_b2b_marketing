@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import io
+import re
 from itertools import zip_longest
 
 from odoo import http, fields
@@ -200,3 +202,75 @@ class OtmB2bPortalController(http.Controller):
             'dashboard_url': self._get_dashboard_url(),
         }
         return request.render('otm_b2b_marketing.portal_seminar_complete_form', values)
+
+    # ------------------------------------------------------------------
+    # Seminar student data collection
+    # ------------------------------------------------------------------
+    def _get_seminar_for_form(self, seminar_id, token):
+        seminar = request.env['otm.b2b.seminar'].sudo().browse(seminar_id)
+        if not seminar.exists() or not token or seminar.form_token != token:
+            return None
+        return seminar
+
+    def _render_student_form(self, seminar, **extra):
+        values = {'seminar': seminar, 'error': False, 'done': False, 'values': {}}
+        values.update(extra)
+        return request.render('otm_b2b_marketing.portal_seminar_student_form', values)
+
+    @http.route('/b2b/seminar/<int:seminar_id>/<string:token>/register', type='http',
+                auth='public', methods=['GET'])
+    def seminar_student_form(self, seminar_id, token, **kwargs):
+        seminar = self._get_seminar_for_form(seminar_id, token)
+        if not seminar:
+            return request.not_found()
+        return self._render_student_form(seminar)
+
+    @http.route('/b2b/seminar/<int:seminar_id>/<string:token>/register/submit', type='http',
+                auth='public', methods=['POST'])
+    def seminar_student_submit(self, seminar_id, token, **post):
+        seminar = self._get_seminar_for_form(seminar_id, token)
+        if not seminar:
+            return request.not_found()
+        if not seminar.form_active:
+            return self._render_student_form(seminar)
+        values = {k: (post.get(k) or '').strip()[:200] for k in
+                  ('name', 'mobile', 'email', 'course_interested', 'current_class')}
+        if post.get('website_url'):  # honeypot - real students never see this field
+            return self._render_student_form(seminar, done=True)
+        digits = re.sub(r'\D', '', values['mobile'])
+        if len(digits) > 10 and digits.startswith('91'):
+            digits = digits[-10:]
+        if not values['name']:
+            return self._render_student_form(seminar, error='Please enter your name.', values=values)
+        if len(digits) != 10:
+            return self._render_student_form(
+                seminar, error='Please enter a valid 10-digit mobile number.', values=values)
+        if seminar.lead_ids.filtered(lambda l: l.mobile == digits):
+            return self._render_student_form(seminar, done=True, duplicate=True)
+        values['mobile'] = digits
+        values.update({
+            'institution_id': seminar.institution_id.id,
+            'seminar_id': seminar.id,
+            'source': 'seminar',
+            'entry_mode': 'online_form',
+            'company_id': seminar.company_id.id,
+        })
+        request.env['otm.b2b.lead'].sudo().create(values)
+        return self._render_student_form(seminar, done=True)
+
+    @http.route('/b2b/seminar/lead_template.xlsx', type='http', auth='user', methods=['GET'])
+    def seminar_lead_template(self, **kwargs):
+        import openpyxl
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.title = 'Students'
+        sheet.append(['Name', 'Mobile', 'Email', 'Course Interested', 'Current Class'])
+        sheet.append(['Example Student', '9876543210', 'student@example.com', 'CA Foundation', 'Plus Two'])
+        for col, width in zip('ABCDE', (28, 16, 28, 22, 18)):
+            sheet.column_dimensions[col].width = width
+        buf = io.BytesIO()
+        workbook.save(buf)
+        return request.make_response(buf.getvalue(), headers=[
+            ('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
+            ('Content-Disposition', 'attachment; filename="seminar_students_template.xlsx"'),
+        ])

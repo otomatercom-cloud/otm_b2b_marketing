@@ -12,9 +12,16 @@
                          captures GPS location on check-out. -->
                     <button name="action_open_complete_wizard" type="object" string="Complete Seminar"
                             class="btn-primary" invisible="state == 'completed'"/>
+                    <button name="action_open_lead_import_wizard" type="object" string="Upload Students (Excel)"
+                            icon="fa-upload" invisible="state == 'cancelled'"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,completed"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_leads" type="object" class="oe_stat_button" icon="fa-users">
+                            <field name="lead_count" widget="statinfo" string="Students"/>
+                        </button>
+                    </div>
                     <div class="oe_title">
                         <h1><field name="topic" placeholder="Seminar Topic"/></h1>
                     </div>
@@ -54,6 +61,9 @@
                             </div>
                             <field name="portal_url" widget="url" readonly="1"
                                    string="Mobile update link" invisible="not portal_url"/>
+                            <field name="form_active"/>
+                            <field name="form_url" widget="CopyClipboardChar" readonly="1"
+                                   string="Student form link (share / QR)" invisible="not form_url"/>
                         </group>
                     </group>
                     <group>
@@ -64,6 +74,18 @@
                         <page string="Feedback &amp; Outcome" name="feedback">
                             <field name="feedback"/>
                             <field name="outcome"/>
+                        </page>
+                        <page string="Students Collected" name="students">
+                            <field name="lead_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="mobile"/>
+                                    <field name="course_interested"/>
+                                    <field name="current_class"/>
+                                    <field name="entry_mode"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
                         </page>
                         <page string="Attachments" name="attachments">
                             <field name="photo" widget="image" class="oe_avatar"/>

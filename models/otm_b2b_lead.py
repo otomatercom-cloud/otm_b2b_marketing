@@ -23,6 +23,14 @@ class OtmB2bLead(models.Model):
         ('website', 'Website'),
         ('other', 'Other'),
     ], string='Source', default='b2b_visit', required=True)
+    seminar_id = fields.Many2one(
+        'otm.b2b.seminar', string='Seminar', index=True, ondelete='set null',
+        help='Seminar this student was collected at (Excel upload or online form).')
+    entry_mode = fields.Selection([
+        ('manual', 'Manual'),
+        ('excel', 'Excel Upload (hardcopy)'),
+        ('online_form', 'Online Form'),
+    ], string='Collected Via', default='manual', required=True)
     counselor_id = fields.Many2one('res.users', string='Assigned Counselor', tracking=True)
     state = fields.Selection([
         ('new', 'New'),

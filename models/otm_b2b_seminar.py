@@ -53,6 +53,57 @@ class OtmB2bSeminar(models.Model):
                                 default=lambda self: uuid.uuid4().hex)
     portal_url = fields.Char(string='Portal Link', compute='_compute_portal_url')
 
+    # Student data collection: (1) hardcopy forms typed into Excel and
+    # uploaded, or (2) students scan/open a public online form. Both create
+    # otm.b2b.lead records linked back to this seminar.
+    lead_ids = fields.One2many('otm.b2b.lead', 'seminar_id', string='Students Collected')
+    lead_count = fields.Integer(string='Students Collected', compute='_compute_lead_count')
+    form_token = fields.Char(string='Student Form Token', copy=False, readonly=True,
+                             default=lambda self: uuid.uuid4().hex)
+    form_active = fields.Boolean(string='Accept Online Student Form', default=True,
+                                 help='Untick to close the public student form for this seminar.')
+    form_url = fields.Char(string='Student Form Link', compute='_compute_form_url')
+
+    @api.depends('lead_ids')
+    def _compute_lead_count(self):
+        for rec in self:
+            rec.lead_count = len(rec.lead_ids)
+
+    def _compute_form_url(self):
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        for rec in self:
+            is_saved = isinstance(rec.id, int)
+            rec.form_url = (
+                f"{base_url}/b2b/seminar/{rec.id}/{rec.form_token}/register"
+                if is_saved and rec.form_token else False
+            )
+
+    def action_open_leads(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Students Collected'),
+            'res_model': 'otm.b2b.lead',
+            'view_mode': 'list,form',
+            'domain': [('seminar_id', '=', self.id)],
+            'context': {
+                'default_seminar_id': self.id,
+                'default_institution_id': self.institution_id.id,
+                'default_source': 'seminar',
+            },
+        }
+
+    def action_open_lead_import_wizard(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Upload Students (Excel)'),
+            'res_model': 'otm.b2b.seminar.lead.import.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_seminar_id': self.id},
+        }
+
     def _compute_portal_url(self):
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         for rec in self:

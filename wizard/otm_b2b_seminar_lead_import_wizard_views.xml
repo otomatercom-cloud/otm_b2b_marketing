@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_otm_b2b_seminar_lead_import_wizard_form" model="ir.ui.view">
+        <field name="name">otm.b2b.seminar.lead.import.wizard.form</field>
+        <field name="model">otm.b2b.seminar.lead.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Upload Students (Excel)">
+                <group>
+                    <field name="seminar_id"/>
+                    <field name="institution_id"/>
+                    <field name="template_url" widget="url" text="Download Excel Template" readonly="1"/>
+                    <field name="file" filename="filename"/>
+                    <field name="filename" invisible="1"/>
+                    <field name="skip_duplicates"/>
+                </group>
+                <div class="text-muted">
+                    First row must be the headers: Name, Mobile, Email, Course Interested, Current Class.
+                    Only Name is required. Each row becomes a lead linked to this seminar.
+                </div>
+                <footer>
+                    <button name="action_import" type="object" string="Upload" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>
