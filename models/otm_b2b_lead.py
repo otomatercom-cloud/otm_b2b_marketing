@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class OtmB2bLead(models.Model):
@@ -31,6 +31,11 @@ class OtmB2bLead(models.Model):
         ('excel', 'Excel Upload (hardcopy)'),
         ('online_form', 'Online Form'),
     ], string='Collected Via', default='manual', required=True)
+    stream_id = fields.Many2one('otm.b2b.stream', string='Stream', tracking=True)
+    source_campaign = fields.Char(
+        string='Source Campaign', tracking=True,
+        help='Campaign / event this lead came from. Auto-filled for seminar leads '
+             '(e.g. "Seminar - Institution - 17 Oct 2026") when left blank.')
     counselor_id = fields.Many2one('res.users', string='Assigned Counselor', tracking=True)
     state = fields.Selection([
         ('new', 'New'),
@@ -42,6 +47,15 @@ class OtmB2bLead(models.Model):
     company_id = fields.Many2one(
         'res.company', string='Company', required=True,
         default=lambda self: self.env.company)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('seminar_id') and not vals.get('source_campaign'):
+                seminar = self.env['otm.b2b.seminar'].browse(vals['seminar_id'])
+                vals['source_campaign'] = 'Seminar - %s - %s' % (
+                    seminar.institution_id.name, fields.Date.to_string(seminar.seminar_date))
+        return super().create(vals_list)
 
     def action_set_contacted(self):
         self.write({'state': 'contacted'})

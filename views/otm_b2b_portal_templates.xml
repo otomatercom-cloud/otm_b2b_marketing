@@ -207,7 +207,7 @@
         .o_b2b_title { font-size:18px; font-weight:600; margin:0 0 4px; }
         .o_b2b_sub { font-size:13px; color:#6c757d; margin:0 0 20px; }
         label { display:block; font-size:13px; font-weight:600; margin:16px 0 6px; }
-        input[type=text], input[type=tel], input[type=email] {
+        select, input[type=text], input[type=tel], input[type=email] {
             width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid #d0d0d0;
             border-radius:8px; font-size:15px; background:#fff;
         }
@@ -248,6 +248,13 @@
                     <input type="tel" name="mobile" id="mobile" required="required" inputmode="numeric" t-att-value="values.get('mobile')"/>
                     <label for="email">Email</label>
                     <input type="email" name="email" id="email" t-att-value="values.get('email')"/>
+                    <label for="stream_id">Stream</label>
+                    <select name="stream_id" id="stream_id">
+                        <option value="">Select stream</option>
+                        <t t-foreach="streams" t-as="st">
+                            <option t-att-value="st.id" t-esc="st.name"/>
+                        </t>
+                    </select>
                     <label for="current_class">Current class / year</label>
                     <input type="text" name="current_class" id="current_class" placeholder="e.g. Plus Two, B.Com 2nd year" t-att-value="values.get('current_class')"/>
                     <label for="course_interested">Course interested in</label>

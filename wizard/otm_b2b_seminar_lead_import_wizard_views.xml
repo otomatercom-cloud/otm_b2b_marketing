@@ -15,7 +15,7 @@
                     <field name="skip_duplicates"/>
                 </group>
                 <div class="text-muted">
-                    First row must be the headers: Name, Mobile, Email, Course Interested, Current Class.
+                    First row must be the headers: Name, Mobile, Email, Course Interested, Current Class, Stream, Source Campaign (last two optional).
                     Only Name is required. Each row becomes a lead linked to this seminar.
                 </div>
                 <footer>

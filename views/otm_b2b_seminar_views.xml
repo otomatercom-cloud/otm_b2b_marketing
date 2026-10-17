@@ -32,6 +32,8 @@
                             <field name="seminar_plan_id" readonly="1" invisible="not seminar_plan_id"/>
                             <field name="seminar_date"/>
                             <field name="speaker"/>
+                            <field name="booked_by_id" options="{'no_create': True}"/>
+                            <field name="attended_by_ids" widget="many2many_tags" options="{'no_create': True}"/>
                         </group>
                         <group>
                             <!-- readonly on purpose - see otm_b2b_visit_record_views.xml:
@@ -82,6 +84,8 @@
                                     <field name="mobile"/>
                                     <field name="course_interested"/>
                                     <field name="current_class"/>
+                                    <field name="stream_id"/>
+                                    <field name="source_campaign"/>
                                     <field name="entry_mode"/>
                                     <field name="state" widget="badge"/>
                                 </list>
@@ -108,6 +112,8 @@
                 <field name="topic"/>
                 <field name="category_ids" widget="many2many_tags" optional="show"/>
                 <field name="speaker"/>
+                <field name="booked_by_id" optional="show"/>
+                <field name="attended_by_ids" widget="many2many_tags" optional="show"/>
                 <field name="student_count"/>
                 <field name="faculty_count"/>
                 <field name="state" widget="badge"/>
@@ -123,6 +129,8 @@
                 <field name="topic"/>
                 <field name="institution_id"/>
                 <field name="speaker"/>
+                <field name="booked_by_id"/>
+                <field name="attended_by_ids"/>
                 <field name="category_ids"/>
                 <field name="seminar_date"/>
                 <field name="student_count"/>
@@ -134,6 +142,7 @@
                     <filter string="Seminar Date" name="groupby_date" context="{'group_by': 'seminar_date'}"/>
                     <filter string="Status" name="groupby_state" context="{'group_by': 'state'}"/>
                     <filter string="Speaker" name="groupby_speaker" context="{'group_by': 'speaker'}"/>
+                    <filter string="Booked By" name="groupby_booked_by" context="{'group_by': 'booked_by_id'}"/>
                 </group>
             </search>
         </field>

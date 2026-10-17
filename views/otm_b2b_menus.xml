@@ -86,6 +86,9 @@
     <menuitem id="menu_otm_b2b_seminar_category" name="Seminar Categories" parent="menu_otm_b2b_configuration"
               action="action_otm_b2b_seminar_category" sequence="75"/>
 
+    <menuitem id="menu_otm_b2b_stream" name="Streams" parent="menu_otm_b2b_configuration"
+              action="action_otm_b2b_stream" sequence="76"/>
+
     <menuitem id="menu_otm_b2b_telegram_settings" name="Telegram Settings" parent="menu_otm_b2b_configuration"
               action="action_otm_b2b_telegram_settings_wizard" sequence="80"
               groups="otm_b2b_marketing.group_otm_b2b_marketing_head"/>

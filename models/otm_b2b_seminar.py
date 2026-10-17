@@ -26,6 +26,13 @@ class OtmB2bSeminar(models.Model):
         help='Class/course categories this seminar covered, e.g. Plus 1 Commerce, B.Com 1st Year. '
              'Select as many as apply.')
     speaker = fields.Char(string='Speaker')
+    booked_by_id = fields.Many2one(
+        'res.users', string='Booked By', tracking=True,
+        help='Who booked / scheduled this seminar.')
+    attended_by_ids = fields.Many2many(
+        'res.users', 'otm_b2b_seminar_attended_by_rel', 'seminar_id', 'user_id',
+        string='Attended By', tracking=True,
+        help='Team members who attended / conducted this seminar.')
     student_count = fields.Integer(string='Number of Students')
     faculty_count = fields.Integer(string='Number of Faculty')
     duration = fields.Float(string='Duration (Hours)')

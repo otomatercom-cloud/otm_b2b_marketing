@@ -70,6 +70,8 @@ class OtmB2bSeminarPlan(models.Model):
             'seminar_plan_id': self.id,
             'seminar_date': self.seminar_date,
             'company_id': self.company_id.id,
+            'booked_by_id': self.create_uid.id,
+            'attended_by_ids': [(6, 0, self.user_id.ids)],
             'checkin_time': fields.Datetime.now(),
         }
         if latitude is not None and longitude is not None:

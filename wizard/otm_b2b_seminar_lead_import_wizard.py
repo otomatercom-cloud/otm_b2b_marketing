@@ -19,6 +19,8 @@ HEADER_ALIASES = {
     'interestedcourse': 'course_interested', 'coursename': 'course_interested',
     'class': 'current_class', 'currentclass': 'current_class', 'standard': 'current_class',
     'year': 'current_class', 'studying': 'current_class',
+    'stream': 'stream', 'group': 'stream',
+    'sourcecampaign': 'source_campaign', 'campaign': 'source_campaign',
 }
 
 
@@ -83,13 +85,15 @@ class OtmB2bSeminarLeadImportWizard(models.TransientModel):
                 columns[idx] = field
         if 'name' not in columns.values():
             raise UserError(_('No "Name" column found in the first row. Use the template headers: '
-                              'Name, Mobile, Email, Course Interested, Current Class.'))
+                              'Name, Mobile, Email, Course Interested, Current Class, Stream, Source Campaign.'))
 
         seminar = self.seminar_id
         Lead = self.env['otm.b2b.lead']
         seen = set()
         if self.skip_duplicates:
             seen = {m for m in seminar.lead_ids.mapped('mobile') if m}
+        Stream = self.env['otm.b2b.stream'].sudo()
+        stream_cache = {s.name.strip().lower(): s.id for s in Stream.search([])}
         vals_list, skipped_dup, skipped_empty = [], 0, 0
         for count, row in enumerate(rows, start=1):
             if count > MAX_ROWS:
@@ -107,6 +111,12 @@ class OtmB2bSeminarLeadImportWizard(models.TransientModel):
                     skipped_dup += 1
                     continue
                 seen.add(mobile)
+            stream_name = data.pop('stream', '')
+            if stream_name:
+                key = stream_name.lower()
+                if key not in stream_cache:
+                    stream_cache[key] = Stream.create({'name': stream_name}).id
+                data['stream_id'] = stream_cache[key]
             data.update({
                 'institution_id': seminar.institution_id.id,
                 'seminar_id': seminar.id,

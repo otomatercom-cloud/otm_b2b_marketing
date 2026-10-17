@@ -213,7 +213,10 @@ class OtmB2bPortalController(http.Controller):
         return seminar
 
     def _render_student_form(self, seminar, **extra):
-        values = {'seminar': seminar, 'error': False, 'done': False, 'values': {}}
+        values = {
+            'seminar': seminar, 'error': False, 'done': False, 'values': {},
+            'streams': request.env['otm.b2b.stream'].sudo().search([]),
+        }
         values.update(extra)
         return request.render('otm_b2b_marketing.portal_seminar_student_form', values)
 
@@ -248,6 +251,8 @@ class OtmB2bPortalController(http.Controller):
         if seminar.lead_ids.filtered(lambda l: l.mobile == digits):
             return self._render_student_form(seminar, done=True, duplicate=True)
         values['mobile'] = digits
+        stream = request.env['otm.b2b.stream'].sudo().browse(int(post.get('stream_id') or 0)).exists()
+        values['stream_id'] = stream.id or False
         values.update({
             'institution_id': seminar.institution_id.id,
             'seminar_id': seminar.id,
@@ -264,9 +269,9 @@ class OtmB2bPortalController(http.Controller):
         workbook = openpyxl.Workbook()
         sheet = workbook.active
         sheet.title = 'Students'
-        sheet.append(['Name', 'Mobile', 'Email', 'Course Interested', 'Current Class'])
-        sheet.append(['Example Student', '9876543210', 'student@example.com', 'CA Foundation', 'Plus Two'])
-        for col, width in zip('ABCDE', (28, 16, 28, 22, 18)):
+        sheet.append(['Name', 'Mobile', 'Email', 'Course Interested', 'Current Class', 'Stream', 'Source Campaign'])
+        sheet.append(['Example Student', '9876543210', 'student@example.com', 'CA Foundation', 'Plus Two', 'Commerce', ''])
+        for col, width in zip('ABCDEFG', (28, 16, 28, 22, 18, 16, 28)):
             sheet.column_dimensions[col].width = width
         buf = io.BytesIO()
         workbook.save(buf)

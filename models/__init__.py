@@ -16,3 +16,4 @@ from . import otm_b2b_seminar
 from . import otm_b2b_seminar_plan
 from . import otm_b2b_mou
 from . import otm_b2b_telegram
+from . import otm_b2b_stream

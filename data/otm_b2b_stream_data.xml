@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="stream_commerce" model="otm.b2b.stream"><field name="name">Commerce</field><field name="sequence">10</field></record>
+    <record id="stream_science" model="otm.b2b.stream"><field name="name">Science</field><field name="sequence">20</field></record>
+    <record id="stream_humanities" model="otm.b2b.stream"><field name="name">Humanities</field><field name="sequence">30</field></record>
+    <record id="stream_vocational" model="otm.b2b.stream"><field name="name">Vocational</field><field name="sequence">40</field></record>
+    <record id="stream_other" model="otm.b2b.stream"><field name="name">Other</field><field name="sequence">90</field></record>
+</odoo>

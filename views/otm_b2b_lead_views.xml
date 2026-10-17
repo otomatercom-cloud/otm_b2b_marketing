@@ -27,6 +27,8 @@
                             <field name="email"/>
                             <field name="course_interested"/>
                             <field name="current_class"/>
+                            <field name="stream_id" options="{'no_create': True}"/>
+                            <field name="source_campaign"/>
                         </group>
                         <group>
                             <field name="institution_id" options="{'no_create': True}"/>
@@ -52,8 +54,10 @@
                 <field name="name"/>
                 <field name="mobile"/>
                 <field name="course_interested"/>
+                <field name="stream_id" optional="show"/>
                 <field name="institution_id"/>
                 <field name="source"/>
+                <field name="source_campaign" optional="show"/>
                 <field name="seminar_id" optional="show"/>
                 <field name="entry_mode" optional="show"/>
                 <field name="counselor_id"/>
@@ -98,6 +102,8 @@
                 <field name="source"/>
                 <field name="state"/>
                 <field name="seminar_id"/>
+                <field name="stream_id"/>
+                <field name="source_campaign"/>
                 <field name="entry_mode"/>
                 <filter string="New" name="filter_new" domain="[('state', '=', 'new')]"/>
                 <filter string="Interested" name="filter_interested" domain="[('state', '=', 'interested')]"/>
@@ -106,6 +112,8 @@
                 <group>
                     <filter string="Institution" name="groupby_institution" context="{'group_by': 'institution_id'}"/>
                     <filter string="Source" name="groupby_source" context="{'group_by': 'source'}"/>
+                    <filter string="Stream" name="groupby_stream" context="{'group_by': 'stream_id'}"/>
+                    <filter string="Source Campaign" name="groupby_source_campaign" context="{'group_by': 'source_campaign'}"/>
                     <filter string="Seminar" name="groupby_seminar" context="{'group_by': 'seminar_id'}"/>
                     <filter string="Collected Via" name="groupby_entry_mode" context="{'group_by': 'entry_mode'}"/>
                     <filter string="Counselor" name="groupby_counselor" context="{'group_by': 'counselor_id'}"/>
