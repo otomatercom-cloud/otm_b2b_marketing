@@ -268,4 +268,108 @@
 </html>
     </template>
 
+    <template id="portal_day_trip_form" name="B2B Day Trip - Mobile">
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Day trip - Logic School Of Management</title>
+    <style>
+        body { font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background:#f5f4f2; margin:0; padding:0; color:#2b2b2b; }
+        .o_b2b_wrap { max-width:480px; margin:0 auto; padding:24px 20px; }
+        .o_b2b_card { background:#ffffff; border-radius:12px; border:1px solid #e0e0e0; padding:20px; }
+        .o_b2b_title { font-size:18px; font-weight:600; margin:0 0 4px; }
+        .o_b2b_sub { font-size:13px; color:#6c757d; margin:0 0 20px; }
+        label { display:block; font-size:13px; font-weight:600; margin:16px 0 6px; }
+        select, textarea, input[type=number], input[type=text], input[type=date] {
+            width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid #d0d0d0;
+            border-radius:8px; font-size:15px; background:#fff;
+        }
+        textarea { min-height:90px; resize:vertical; }
+        .o_b2b_checks { border:1px solid #d0d0d0; border-radius:8px; padding:10px 12px; max-height:220px; overflow-y:auto; }
+        .o_b2b_check_row { display:flex; align-items:center; gap:8px; padding:6px 0; font-size:14px; }
+        .o_b2b_check_row input { width:auto; }
+        .o_b2b_new_contact_row { display:flex; gap:8px; margin-bottom:8px; }
+        .o_b2b_new_contact_row input { width:50%; }
+        .o_b2b_add_link { display:inline-block; margin-top:2px; font-size:13px; color:#714B67; font-weight:600; text-decoration:none; }
+        button { width:100%; margin-top:24px; padding:12px; border:none; border-radius:8px;
+                 background:#714B67; color:#ffffff; font-size:15px; font-weight:600; cursor:pointer; }
+        .o_b2b_done { text-align:center; padding:24px 0; }
+        .o_b2b_done_icon { font-size:40px; color:#28a745; margin-bottom:8px; }
+        .o_b2b_done_btn {
+            display:block; width:100%; box-sizing:border-box; margin-top:24px; padding:12px;
+            border-radius:8px; background:#714B67; color:#ffffff; font-size:15px; font-weight:600;
+            text-decoration:none; text-align:center;
+        }
+    .o_b2b_stat { display:flex; gap:8px; margin:12px 0; }
+        .o_b2b_stat div { flex:1; background:#f5f4f2; border-radius:8px; padding:10px; text-align:center; font-size:12px; color:#6c757d; }
+        .o_b2b_stat b { display:block; font-size:18px; color:#2b2b2b; }
+        .o_b2b_err { background:#fdecea; color:#b3261e; padding:10px 12px; border-radius:8px; font-size:13px; margin-bottom:12px; }
+        .o_b2b_leg { padding:8px 0; border-bottom:1px solid #eee; font-size:14px; display:flex; justify-content:space-between; }
+        .o_b2b_modes label { display:inline-block; margin-right:16px; font-weight:normal; }
+        .o_b2b_modes input { width:auto; }
+    </style>
+</head>
+<body>
+    <div class="o_b2b_wrap">
+        <div class="o_b2b_card">
+            <p class="o_b2b_title">Day trip - <t t-esc="trip.trip_date"/></p>
+            <p class="o_b2b_sub"><t t-esc="trip.user_id.name"/> - started at meter <t t-esc="'%.1f' % trip.start_meter"/></p>
+            <div t-if="error" class="o_b2b_err"><t t-esc="error"/></div>
+            <div class="o_b2b_stat">
+                <div><b><t t-esc="'%.1f' % trip.total_km"/></b>KM</div>
+                <div><b><t t-esc="trip.visit_count"/></b>Visits</div>
+                <div><b><t t-esc="'%.2f' % trip.amount"/></b>Amount</div>
+            </div>
+            <t t-foreach="trip.line_ids.sorted(key=lambda l: (l.sequence, l.id))" t-as="line">
+                <div class="o_b2b_leg">
+                    <span><t t-esc="line.location_name"/></span>
+                    <span><t t-esc="'%.1f' % line.km"/> km</span>
+                </div>
+            </t>
+            <t t-if="trip.state == 'in_progress'">
+                <form t-attf-action="/b2b/trip/#{trip.id}/#{trip.access_token}/stop" method="post">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <label>Reached a stop</label>
+                    <select name="visit_plan_id">
+                        <option value="">- Other location -</option>
+                        <t t-foreach="plans" t-as="plan">
+                            <option t-att-value="plan.id"><t t-esc="plan.institution_id.name"/></option>
+                        </t>
+                    </select>
+                    <label>Location name (if not a planned visit)</label>
+                    <input type="text" name="location_name" t-att-value="values.get('location_name', '')"/>
+                    <div class="o_b2b_modes">
+                        <label><input type="radio" name="entry_mode" value="meter" checked="checked"/> Meter reading</label>
+                        <label><input type="radio" name="entry_mode" value="km"/> Enter KM</label>
+                    </div>
+                    <label>Meter reading (now)</label>
+                    <input type="number" step="0.1" inputmode="decimal" name="meter_reading"/>
+                    <label>OR KM travelled from last stop</label>
+                    <input type="number" step="0.1" inputmode="decimal" name="manual_km"/>
+                    <button type="submit">Add Stop</button>
+                </form>
+                <form t-attf-action="/b2b/trip/#{trip.id}/#{trip.access_token}/finish" method="post">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <label>Reached home</label>
+                    <div class="o_b2b_modes">
+                        <label><input type="radio" name="entry_mode" value="meter" checked="checked"/> Meter reading</label>
+                        <label><input type="radio" name="entry_mode" value="km"/> Enter KM</label>
+                    </div>
+                    <input type="number" step="0.1" inputmode="decimal" name="meter_reading" placeholder="Meter reading"/>
+                    <input type="number" step="0.1" inputmode="decimal" name="manual_km" placeholder="or KM from last stop" style="margin-top:8px"/>
+                    <button type="submit" style="background:#28a745">Return Home &amp; Complete Day</button>
+                </form>
+            </t>
+            <div t-else="" class="o_b2b_done">
+                <div class="o_b2b_done_icon">&#10003;</div>
+                <p>Day completed. Total <b><t t-esc="'%.1f' % trip.total_km"/> km</b>,
+                   <b><t t-esc="trip.visit_count"/></b> visits.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+    </template>
+
 </odoo>

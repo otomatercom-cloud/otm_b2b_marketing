@@ -73,6 +73,7 @@ Features
         'views/otm_b2b_report_views.xml',
         'views/otm_b2b_portal_templates.xml',
         'views/otm_b2b_res_users_views.xml',
+        'views/otm_b2b_day_trip_views.xml',
         # reports (QWeb)
         'report/otm_b2b_visit_report_templates.xml',
         'report/otm_b2b_mou_report_templates.xml',

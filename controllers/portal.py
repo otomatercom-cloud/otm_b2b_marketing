@@ -279,3 +279,91 @@ class OtmB2bPortalController(http.Controller):
             ('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
             ('Content-Disposition', 'attachment; filename="seminar_students_template.xlsx"'),
         ])
+
+    # ------------------------------------------------------------------
+    # Day trip (KM tracking) - mobile page
+    # ------------------------------------------------------------------
+    def _get_trip(self, trip_id, token):
+        trip = request.env['otm.b2b.day.trip'].sudo().browse(trip_id)
+        if not trip.exists() or not token or trip.access_token != token:
+            return None
+        return trip
+
+    def _render_trip(self, trip, **extra):
+        plans = request.env['otm.b2b.visit.plan'].sudo().search([
+            ('user_id', '=', trip.user_id.id),
+            ('visit_date', '=', trip.trip_date),
+            ('state', '!=', 'cancelled'),
+        ])
+        values = {'trip': trip, 'plans': plans, 'error': False, 'values': {}}
+        values.update(extra)
+        return request.render('otm_b2b_marketing.portal_day_trip_form', values)
+
+    @staticmethod
+    def _trip_float(post, key):
+        try:
+            return float((post.get(key) or '').replace(',', '').strip())
+        except ValueError:
+            return None
+
+    def _trip_leg_vals(self, trip, post):
+        """Meter/KM part shared by add-stop and finish. Returns (vals, error)."""
+        mode = 'km' if post.get('entry_mode') == 'km' else 'meter'
+        last = trip.end_meter or trip.start_meter
+        if mode == 'meter':
+            reading = self._trip_float(post, 'meter_reading')
+            if reading is None:
+                return None, 'Please enter the meter reading.'
+            if reading < last:
+                return None, 'Meter reading cannot be less than the last reading (%.1f).' % last
+            return {'entry_mode': 'meter', 'meter_reading': reading}, None
+        km = self._trip_float(post, 'manual_km')
+        if km is None or km < 0:
+            return None, 'Please enter the kilometres travelled.'
+        return {'entry_mode': 'km', 'manual_km': km}, None
+
+    @http.route('/b2b/trip/<int:trip_id>/<string:token>', type='http', auth='public', methods=['GET'])
+    def trip_form(self, trip_id, token, **kwargs):
+        trip = self._get_trip(trip_id, token)
+        if not trip:
+            return request.not_found()
+        return self._render_trip(trip)
+
+    @http.route('/b2b/trip/<int:trip_id>/<string:token>/stop', type='http', auth='public', methods=['POST'])
+    def trip_add_stop(self, trip_id, token, **post):
+        trip = self._get_trip(trip_id, token)
+        if not trip:
+            return request.not_found()
+        if trip.state != 'in_progress':
+            return self._render_trip(trip)
+        vals, error = self._trip_leg_vals(trip, post)
+        plan = request.env['otm.b2b.visit.plan'].sudo().browse(
+            int(post.get('visit_plan_id') or 0)).exists()
+        if plan and plan.user_id != trip.user_id:
+            plan = request.env['otm.b2b.visit.plan']
+        location = (post.get('location_name') or '').strip()[:200]
+        if not error and not plan and not location:
+            error = 'Choose a planned visit or type the location.'
+        if error:
+            return self._render_trip(trip, error=error, values=post)
+        vals.update({
+            'line_type': 'visit' if plan else 'other',
+            'visit_plan_id': plan.id or False,
+            'institution_id': plan.institution_id.id or False,
+            'location_name': location or plan.institution_id.name,
+        })
+        trip._add_line(vals)
+        return self._render_trip(trip)
+
+    @http.route('/b2b/trip/<int:trip_id>/<string:token>/finish', type='http', auth='public', methods=['POST'])
+    def trip_finish(self, trip_id, token, **post):
+        trip = self._get_trip(trip_id, token)
+        if not trip:
+            return request.not_found()
+        if trip.state != 'in_progress':
+            return self._render_trip(trip)
+        vals, error = self._trip_leg_vals(trip, post)
+        if error:
+            return self._render_trip(trip, error=error, values=post)
+        trip._finish(vals)
+        return self._render_trip(trip)

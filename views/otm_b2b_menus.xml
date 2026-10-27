@@ -21,6 +21,12 @@
               action="action_otm_b2b_visit_record" sequence="50"
               groups="otm_b2b_marketing.group_otm_b2b_marketing_manager"/>
 
+    <menuitem id="menu_otm_b2b_day_trip_start" name="Start Day Trip" parent="menu_otm_b2b_marketing_root"
+              action="action_otm_b2b_day_trip_start_wizard" sequence="42"/>
+
+    <menuitem id="menu_otm_b2b_day_trip" name="Day Trips (KM)" parent="menu_otm_b2b_marketing_root"
+              action="action_otm_b2b_day_trip" sequence="44"/>
+
     <menuitem id="menu_otm_b2b_lead" name="Leads Collected" parent="menu_otm_b2b_marketing_root"
               action="action_otm_b2b_lead" sequence="60"/>
 
@@ -85,6 +91,9 @@
 
     <menuitem id="menu_otm_b2b_seminar_category" name="Seminar Categories" parent="menu_otm_b2b_configuration"
               action="action_otm_b2b_seminar_category" sequence="75"/>
+
+    <menuitem id="menu_otm_b2b_travel_settings" name="Travel Settings" parent="menu_otm_b2b_configuration"
+              action="action_otm_b2b_travel_settings_wizard" sequence="77"/>
 
     <menuitem id="menu_otm_b2b_stream" name="Streams" parent="menu_otm_b2b_configuration"
               action="action_otm_b2b_stream" sequence="76"/>

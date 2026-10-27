@@ -51,3 +51,10 @@ access_otm_b2b_seminar_lead_import_wizard,otm.b2b.seminar.lead.import.wizard,mod
 access_otm_b2b_stream_exec,otm.b2b.stream.exec,model_otm_b2b_stream,group_otm_b2b_marketing_executive,1,0,0,0
 access_otm_b2b_stream_manager,otm.b2b.stream.manager,model_otm_b2b_stream,group_otm_b2b_marketing_manager,1,1,1,0
 access_otm_b2b_stream_head,otm.b2b.stream.head,model_otm_b2b_stream,group_otm_b2b_marketing_head,1,1,1,1
+access_otm_b2b_day_trip_exec,otm.b2b.day.trip.exec,model_otm_b2b_day_trip,group_otm_b2b_marketing_executive,1,1,1,0
+access_otm_b2b_day_trip_manager,otm.b2b.day.trip.manager,model_otm_b2b_day_trip,group_otm_b2b_marketing_manager,1,1,1,1
+access_otm_b2b_day_trip_line_exec,otm.b2b.day.trip.line.exec,model_otm_b2b_day_trip_line,group_otm_b2b_marketing_executive,1,1,1,1
+access_otm_b2b_day_trip_start_wizard,otm.b2b.day.trip.start.wizard,model_otm_b2b_day_trip_start_wizard,group_otm_b2b_marketing_executive,1,1,1,1
+access_otm_b2b_day_trip_stop_wizard,otm.b2b.day.trip.stop.wizard,model_otm_b2b_day_trip_stop_wizard,group_otm_b2b_marketing_executive,1,1,1,1
+access_otm_b2b_day_trip_finish_wizard,otm.b2b.day.trip.finish.wizard,model_otm_b2b_day_trip_finish_wizard,group_otm_b2b_marketing_executive,1,1,1,1
+access_otm_b2b_travel_settings_wizard,otm.b2b.travel.settings.wizard,model_otm_b2b_travel_settings_wizard,group_otm_b2b_marketing_head,1,1,1,1
