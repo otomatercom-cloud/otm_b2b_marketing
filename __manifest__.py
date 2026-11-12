@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'B2B Marketing - Logic School Of Management',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.0.1',
     'category': 'Marketing',
     'summary': 'B2B institutional marketing, visit tracking and lead management for '
                'educational institutions',

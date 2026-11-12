@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
+from odoo.exceptions import AccessError
+
+MANAGER_GROUP = 'otm_b2b_marketing.group_otm_b2b_marketing_manager'
 
 
 class OtmB2bMou(models.Model):
@@ -34,17 +37,35 @@ class OtmB2bMou(models.Model):
         'res.company', string='Company', required=True,
         default=lambda self: self.env.company)
 
+    def _require_manager(self):
+        if not (self.env.su or self.env.user.has_group(MANAGER_GROUP)):
+            raise AccessError(_('Only a Marketing Manager or Head can approve, sign, reject or renew an MOU.'))
+
+    def write(self, vals):
+        # Server-side guard: a plain edit/RPC write of `state` by an Executive
+        # is refused. The proposal/review steps (open to Executives) and the
+        # manager-only steps go through _set_state(), which sets the context flag.
+        if 'state' in vals and not self.env.context.get('otm_mou_state_ok') \
+                and not (self.env.su or self.env.user.has_group(MANAGER_GROUP)):
+            raise AccessError(_('Use the MOU buttons to change the status.'))
+        return super().write(vals)
+
+    def _set_state(self, vals):
+        return self.with_context(otm_mou_state_ok=True).write(vals)
+
     def action_send_proposal(self):
-        self.write({'state': 'proposal_sent'})
+        self._set_state({'state': 'proposal_sent'})
 
     def action_under_review(self):
-        self.write({'state': 'under_review'})
+        self._set_state({'state': 'under_review'})
 
     def action_approve(self):
-        self.write({'state': 'approved'})
+        self._require_manager()
+        self._set_state({'state': 'approved'})
 
     def action_sign(self):
-        self.write({'state': 'signed', 'signed_date': fields.Date.context_today(self)})
+        self._require_manager()
+        self._set_state({'state': 'signed', 'signed_date': fields.Date.context_today(self)})
         for mou in self:
             text = self.env['otm.b2b.telegram.template']._render(
                 'mou_signed', institution=mou.institution_id.name,
@@ -56,10 +77,12 @@ class OtmB2bMou(models.Model):
                     manager._otm_telegram_send(text)
 
     def action_reject(self):
-        self.write({'state': 'rejected'})
+        self._require_manager()
+        self._set_state({'state': 'rejected'})
 
     def action_renew(self):
-        self.write({'state': 'renewed'})
+        self._require_manager()
+        self._set_state({'state': 'renewed'})
 
     @api.model
     def _cron_mou_expiry_reminders(self):

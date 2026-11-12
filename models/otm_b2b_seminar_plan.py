@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
+from odoo.exceptions import UserError
 
 
 class OtmB2bSeminarPlan(models.Model):
@@ -65,6 +66,8 @@ class OtmB2bSeminarPlan(models.Model):
         check-in time, move the plan to 'Checked In'. Completed later
         via Check Out / the Complete Seminar wizard."""
         self.ensure_one()
+        if self.seminar_id or self.state in ('in_progress', 'completed', 'cancelled'):
+            raise UserError(_('This seminar is already checked in, completed or cancelled.'))
         vals = {
             'institution_id': self.institution_id.id,
             'seminar_plan_id': self.id,

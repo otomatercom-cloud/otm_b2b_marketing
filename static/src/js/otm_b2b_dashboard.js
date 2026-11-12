@@ -144,7 +144,41 @@ export class OtmB2bDashboard extends Component {
         }));
     }
 
-    _getLocation() {
+    // Run one user action at a time: a second tap while the first is still
+    // waiting for GPS/the server is ignored (it used to create duplicate
+    // check-ins / confusing double check-outs). Any failure is shown to the
+    // user instead of leaving the screen silently stuck.
+    async _runOnce(fn) {
+        if (this._busy) {
+            this.notification.add("Please wait - the previous action is still running.", { type: "info" });
+            return;
+        }
+        this._busy = true;
+        try {
+            await fn();
+        } catch (error) {
+            const message = (error && error.data && error.data.message) || (error && error.message) || "Unknown error";
+            this.notification.add(`Could not complete the action: ${message}`, { type: "danger", sticky: true });
+        } finally {
+            this._busy = false;
+        }
+    }
+
+    // Location with a hard time budget. Check-OUT must never wait up to
+    // 45s (3 x 15s GPS attempts) before anything is saved - that looked like
+    // "check-out is not working". Callers that can live without a fix pass a
+    // short budget; the check-out is saved with or without a location.
+    _getLocation(maxWaitMs) {
+        const full = this._getLocationFull();
+        if (!maxWaitMs) {
+            return full;
+        }
+        const timeout = new Promise((resolve) =>
+            setTimeout(() => resolve({ location: null, error: "Timed out" }), maxWaitMs));
+        return Promise.race([full, timeout]);
+    }
+
+    _getLocationFull() {
         // Best-effort GPS capture - never blocks check-in/check-out if
         // there's no location available, but tries hard to actually get
         // one first, AND reports back WHY it failed rather than just
@@ -226,79 +260,87 @@ export class OtmB2bDashboard extends Component {
     }
 
     async checkIn(planId) {
-        const { location, error } = await this._getLocation();
-        if (!location) {
-            this.notification.add(this._locationErrorMessage(error), { type: "danger", sticky: true });
-            return;
-        }
-        const result = await this.orm.call("otm.b2b.visit.plan", "action_dashboard_check_in", [planId], {
-            latitude: location.latitude,
-            longitude: location.longitude,
+        await this._runOnce(async () => {
+            const { location, error } = await this._getLocation();
+            if (!location) {
+                this.notification.add(this._locationErrorMessage(error), { type: "danger", sticky: true });
+                return;
+            }
+            const result = await this.orm.call("otm.b2b.visit.plan", "action_dashboard_check_in", [planId], {
+                latitude: location.latitude,
+                longitude: location.longitude,
+            });
+            this.notification.add(`Checked in at ${result.institution}.`, { type: "success" });
+            await this.loadDashboard();
         });
-        this.notification.add(`Checked in at ${result.institution}.`, { type: "success" });
-        await this.loadDashboard();
     }
 
     async checkOut(visit) {
-        const { location, error } = await this._getLocation();
-        await this.orm.call("otm.b2b.visit.record", "action_check_out", [visit.id], {
-            latitude: location ? location.latitude : null,
-            longitude: location ? location.longitude : null,
+        await this._runOnce(async () => {
+            const { location, error } = await this._getLocation(6000);
+            await this.orm.call("otm.b2b.visit.record", "action_check_out", [visit.id], {
+                latitude: location ? location.latitude : null,
+                longitude: location ? location.longitude : null,
+            });
+
+            if (!location) {
+                this.notification.add(`Location not captured: ${error}`, { type: "warning" });
+            }
+
+            if (visit.portal_url) {
+                window.open(visit.portal_url, "_blank");
+                this.notification.add(
+                    `Checked out of ${visit.institution}. Complete the visit update in the new tab.`,
+                    { type: "success" }
+                );
+            } else {
+                this.notification.add("Checked out.", { type: "success" });
+            }
+
+            await this.loadDashboard();
         });
-
-        if (!location) {
-            this.notification.add(`Location not captured: ${error}`, { type: "warning" });
-        }
-
-        if (visit.portal_url) {
-            window.open(visit.portal_url, "_blank");
-            this.notification.add(
-                `Checked out of ${visit.institution}. Complete the visit update in the new tab.`,
-                { type: "success" }
-            );
-        } else {
-            this.notification.add("Checked out.", { type: "success" });
-        }
-
-        await this.loadDashboard();
     }
 
     async checkInSeminar(planId) {
-        const { location, error } = await this._getLocation();
-        if (!location) {
-            this.notification.add(this._locationErrorMessage(error), { type: "danger", sticky: true });
-            return;
-        }
-        const result = await this.orm.call("otm.b2b.seminar.plan", "action_dashboard_check_in", [planId], {
-            latitude: location.latitude,
-            longitude: location.longitude,
+        await this._runOnce(async () => {
+            const { location, error } = await this._getLocation();
+            if (!location) {
+                this.notification.add(this._locationErrorMessage(error), { type: "danger", sticky: true });
+                return;
+            }
+            const result = await this.orm.call("otm.b2b.seminar.plan", "action_dashboard_check_in", [planId], {
+                latitude: location.latitude,
+                longitude: location.longitude,
+            });
+            this.notification.add(`Checked in for seminar at ${result.institution}.`, { type: "success" });
+            await this.loadDashboard();
         });
-        this.notification.add(`Checked in for seminar at ${result.institution}.`, { type: "success" });
-        await this.loadDashboard();
     }
 
     async checkOutSeminar(seminar) {
-        const { location, error } = await this._getLocation();
-        await this.orm.call("otm.b2b.seminar", "action_check_out", [seminar.id], {
-            latitude: location ? location.latitude : null,
-            longitude: location ? location.longitude : null,
+        await this._runOnce(async () => {
+            const { location, error } = await this._getLocation(6000);
+            await this.orm.call("otm.b2b.seminar", "action_check_out", [seminar.id], {
+                latitude: location ? location.latitude : null,
+                longitude: location ? location.longitude : null,
+            });
+
+            if (!location) {
+                this.notification.add(`Location not captured: ${error}`, { type: "warning" });
+            }
+
+            if (seminar.portal_url) {
+                window.open(seminar.portal_url, "_blank");
+                this.notification.add(
+                    `Checked out of the seminar at ${seminar.institution}. Complete the update in the new tab.`,
+                    { type: "success" }
+                );
+            } else {
+                this.notification.add("Checked out.", { type: "success" });
+            }
+
+            await this.loadDashboard();
         });
-
-        if (!location) {
-            this.notification.add(`Location not captured: ${error}`, { type: "warning" });
-        }
-
-        if (seminar.portal_url) {
-            window.open(seminar.portal_url, "_blank");
-            this.notification.add(
-                `Checked out of the seminar at ${seminar.institution}. Complete the update in the new tab.`,
-                { type: "success" }
-            );
-        } else {
-            this.notification.add("Checked out.", { type: "success" });
-        }
-
-        await this.loadDashboard();
     }
 
     openSeminarRecord(seminarId) {

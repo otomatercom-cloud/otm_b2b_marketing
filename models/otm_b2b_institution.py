@@ -2,7 +2,7 @@
 import math
 
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 from odoo.tools.date_utils import start_of
 
 
@@ -260,6 +260,17 @@ class OtmB2bInstitution(models.Model):
             if vals.get('code', _('New')) == _('New'):
                 vals['code'] = self.env['ir.sequence'].next_by_code('otm.b2b.institution') or _('New')
         return super().create(vals_list)
+
+    def write(self, vals):
+        # Ownership/status are Manager decisions - the form has no per-field
+        # group switch, so enforce it server-side (also blocks RPC).
+        if not (self.env.su or self.env.user.has_group('otm_b2b_marketing.group_otm_b2b_marketing_manager')):
+            locked = {'marketing_manager_id', 'user_id', 'company_id'} & set(vals)
+            if locked or vals.get('status') == 'blacklisted':
+                raise AccessError(_(
+                    'Only a Marketing Manager or Head can change the assigned manager, '
+                    'salesperson, company or blacklist an institution.'))
+        return super().write(vals)
 
     # ---------------------------------------------------------------
     # Smart button actions

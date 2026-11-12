@@ -30,8 +30,10 @@ class ResUsers(models.Model):
     _inherit = 'res.users'
 
     otm_telegram_chat_id = fields.Char(string='Telegram Chat ID', copy=False, readonly=True)
+    # groups: the token alone lets anyone bind THEIR Telegram chat to this
+    # user, so it must not be readable through RPC by other internal users.
     otm_telegram_link_token = fields.Char(
-        string='Telegram Link Token', copy=False, readonly=True,
+        string='Telegram Link Token', copy=False, readonly=True, groups='base.group_system',
         default=lambda self: uuid.uuid4().hex)
     otm_telegram_connected = fields.Boolean(
         string='Telegram Connected', compute='_compute_otm_telegram_connected')
@@ -46,10 +48,13 @@ class ResUsers(models.Model):
     @api.depends('otm_telegram_link_token')
     def _compute_otm_telegram_deep_link(self):
         bot_username = self.env['ir.config_parameter'].sudo().get_param('otm_b2b_marketing.telegram_bot_username')
+        is_admin = self.env.user.has_group('base.group_system')
         for user in self:
+            # Own link only (or an administrator) - never expose another user's token.
+            token = user.sudo().otm_telegram_link_token if (is_admin or user == self.env.user) else False
             user.otm_telegram_deep_link = (
-                f"https://t.me/{bot_username}?start={user.otm_telegram_link_token}"
-                if bot_username and user.otm_telegram_link_token else False
+                f"https://t.me/{bot_username}?start={token}"
+                if bot_username and token else False
             )
 
     def action_regenerate_telegram_link(self):
@@ -57,7 +62,7 @@ class ResUsers(models.Model):
         through it) and issue a fresh one - e.g. the officer switched
         phones, or blocked/deleted the old chat with the bot."""
         for user in self:
-            user.write({
+            user.sudo().write({
                 'otm_telegram_link_token': uuid.uuid4().hex,
                 'otm_telegram_chat_id': False,
             })
@@ -135,7 +140,8 @@ def _otm_telegram_api_send(env, chat_id, text):
             _logger.warning('otm_b2b_marketing: Telegram sendMessage failed: %s', response.text)
         return response.ok
     except requests.RequestException as exc:
-        _logger.warning('otm_b2b_marketing: Telegram sendMessage error: %s', exc)
+        # Do not log `exc`: requests embeds the request URL, which contains the bot token.
+        _logger.warning('otm_b2b_marketing: Telegram sendMessage error (%s)', type(exc).__name__)
         return False
 
 

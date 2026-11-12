@@ -3,7 +3,11 @@ import uuid
 from datetime import timedelta
 
 from odoo import api, fields, models, _
+import logging
+
 from odoo.exceptions import ValidationError
+
+_logger = logging.getLogger(__name__)
 
 
 class OtmB2bVisitRecord(models.Model):
@@ -180,12 +184,16 @@ class OtmB2bVisitRecord(models.Model):
         return result
 
     def action_check_in(self):
+        if self.filtered('checkin_time'):
+            raise ValidationError(_('This visit is already checked in.'))
         self.write({'checkin_time': fields.Datetime.now()})
 
     def action_check_out(self, latitude=None, longitude=None):
-        vals = {'checkout_time': fields.Datetime.now()}
-        self.write(vals)
-        for visit in self:
+        # Idempotent: a double tap / retry must not fail or overwrite the
+        # first check-out time, and nothing after the write may block it.
+        pending = self.filtered(lambda v: not v.checkout_time)
+        pending.write({'checkout_time': fields.Datetime.now()})
+        for visit in pending:
             # Fallback capture: check-in's GPS attempt is the primary one
             # (most relevant to "where did the visit happen"), but if that
             # failed to get a fix (weak indoor signal etc.), check-out is
@@ -193,11 +201,14 @@ class OtmB2bVisitRecord(models.Model):
             if (not visit.gps_latitude and not visit.gps_longitude
                     and latitude is not None and longitude is not None):
                 visit.write({'gps_latitude': latitude, 'gps_longitude': longitude})
-            if visit.user_id.otm_telegram_connected:
-                visit.user_id._otm_telegram_send(
-                    f"Checked out of {visit.institution_id.name}.\n"
-                    f"Log the activity type and remarks here: {visit.portal_url}"
-                )
+            try:
+                if visit.user_id.otm_telegram_connected:
+                    visit.user_id._otm_telegram_send(
+                        f"Checked out of {visit.institution_id.name}.\n"
+                        f"Log the activity type and remarks here: {visit.portal_url}"
+                    )
+            except Exception:  # never let a notification block check-out
+                _logger.exception('otm_b2b_marketing: check-out notification failed')
 
     def action_mark_completed(self):
         self.write({'state': 'completed'})
@@ -260,9 +271,14 @@ class OtmB2bVisitRecord(models.Model):
 
     def unlink(self):
         for rec in self:
-            if rec.state == 'completed' and not self.env.user.has_group(
+            if rec.state in ('completed', 'partially_completed') and not self.env.user.has_group(
                     'otm_b2b_marketing.group_otm_b2b_marketing_manager'):
                 raise ValidationError(_(
                     'Completed visit records cannot be deleted by a Marketing Executive. '
                     'Ask a Marketing Manager or Head.'))
-        return super().unlink()
+        # A plan must not stay "Checked In" pointing at a record that is gone.
+        plans = self.mapped('visit_plan_id').filtered(lambda p: p.state == 'in_progress')
+        result = super().unlink()
+        if plans:
+            plans.sudo().write({'state': 'planned', 'visit_record_id': False})
+        return result

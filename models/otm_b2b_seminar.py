@@ -144,8 +144,9 @@ class OtmB2bSeminar(models.Model):
             )
 
     def action_check_out(self, latitude=None, longitude=None):
-        self.write({'checkout_time': fields.Datetime.now()})
-        for seminar in self:
+        pending = self.filtered(lambda s: not s.checkout_time)
+        pending.write({'checkout_time': fields.Datetime.now()})
+        for seminar in pending:
             if (not seminar.gps_latitude and not seminar.gps_longitude
                     and latitude is not None and longitude is not None):
                 seminar.write({'gps_latitude': latitude, 'gps_longitude': longitude})

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import hmac
 import json
 import logging
 import uuid
@@ -22,7 +23,10 @@ class OtmB2bTelegramController(http.Controller):
         params = request.env['ir.config_parameter'].sudo()
         expected_secret = params.get_param('otm_b2b_marketing.telegram_webhook_secret')
         received_secret = request.httprequest.headers.get('X-Telegram-Bot-Api-Secret-Token')
-        if expected_secret and received_secret != expected_secret:
+        # The secret is mandatory: without it anyone could post fake updates.
+        # It is created by Telegram Settings > "Save & set webhook".
+        if not expected_secret or not hmac.compare_digest(
+                (received_secret or '').encode(), expected_secret.encode()):
             # Doesn't match what Telegram itself would send back per the
             # secret_token set during setWebhook - reject silently.
             _logger.warning('otm_b2b_marketing: Telegram webhook called with invalid/missing secret token.')
@@ -38,7 +42,8 @@ class OtmB2bTelegramController(http.Controller):
         chat_id = chat.get('id')
         text = (message.get('text') or '').strip()
 
-        if chat_id and text.startswith('/start'):
+        # Only private chats may be linked - never a group/channel.
+        if chat_id and chat.get('type', 'private') == 'private' and text.startswith('/start'):
             self._handle_start(chat_id, text)
         # Any other message type/content is intentionally ignored - this
         # bot only exists to deliver reminders/links, not to hold a
@@ -71,6 +76,11 @@ class OtmB2bTelegramController(http.Controller):
         # Regenerate the token immediately after a successful link so the
         # same link/token can't be reused by someone else to hijack a
         # different chat onto this user's account.
+        # One chat belongs to one user: detach it from anybody else first.
+        others = env['res.users'].sudo().search([
+            ('otm_telegram_chat_id', '=', str(chat_id)), ('id', '!=', user.id)])
+        if others:
+            others.write({'otm_telegram_chat_id': False})
         user.sudo().write({
             'otm_telegram_chat_id': str(chat_id),
             'otm_telegram_link_token': uuid.uuid4().hex,

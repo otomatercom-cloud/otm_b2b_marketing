@@ -41,7 +41,8 @@ class OtmB2bTelegramSettingsWizard(models.TransientModel):
         res = super().default_get(fields_list)
         params = self.env['ir.config_parameter'].sudo()
         res['bot_username'] = params.get_param('otm_b2b_marketing.telegram_bot_username', '')
-        res['bot_token'] = params.get_param('otm_b2b_marketing.telegram_bot_token', '')
+        # The stored token is never sent back to the browser; leave blank to keep it.
+        res['bot_token'] = ''
         res['reminder_hour'] = float(params.get_param('otm_b2b_marketing.telegram_reminder_hour', '9.0') or 9.0)
         res['not_submitted_reminder_hours'] = float(params.get_param(
             'otm_b2b_marketing.telegram_not_submitted_reminder_hours', '4.0') or 4.0)
@@ -51,7 +52,8 @@ class OtmB2bTelegramSettingsWizard(models.TransientModel):
         self.ensure_one()
         params = self.env['ir.config_parameter'].sudo()
         params.set_param('otm_b2b_marketing.telegram_bot_username', self.bot_username or '')
-        params.set_param('otm_b2b_marketing.telegram_bot_token', self.bot_token or '')
+        if self.bot_token:
+            params.set_param('otm_b2b_marketing.telegram_bot_token', self.bot_token)
         params.set_param('otm_b2b_marketing.telegram_reminder_hour', str(self.reminder_hour or 9.0))
         params.set_param(
             'otm_b2b_marketing.telegram_not_submitted_reminder_hours',
@@ -81,7 +83,9 @@ class OtmB2bTelegramSettingsWizard(models.TransientModel):
         self.action_save()
         if requests is None:
             raise UserError(_('The "requests" Python package is not available on this server.'))
-        if not self.bot_token:
+        bot_token = self.bot_token or self.env['ir.config_parameter'].sudo().get_param(
+            'otm_b2b_marketing.telegram_bot_token')
+        if not bot_token:
             raise UserError(_('Enter the Bot Token first.'))
 
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
@@ -103,12 +107,13 @@ class OtmB2bTelegramSettingsWizard(models.TransientModel):
 
         try:
             response = requests.post(
-                f'https://api.telegram.org/bot{self.bot_token}/setWebhook',
+                f'https://api.telegram.org/bot{bot_token}/setWebhook',
                 json={'url': webhook_url, 'secret_token': secret_token},
                 timeout=15,
             )
         except requests.RequestException as exc:
-            raise UserError(_('Could not reach Telegram: %s', exc))
+            # exc text contains the URL (with the bot token) - do not show/log it
+            raise UserError(_('Could not reach Telegram (%s). Check the server\'s internet access.', type(exc).__name__))
 
         data = response.json() if response.ok else {}
         if response.ok and data.get('ok'):

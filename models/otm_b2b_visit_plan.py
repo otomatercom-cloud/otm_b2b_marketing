@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
+from odoo.exceptions import UserError
 
 
 class OtmB2bVisitPlan(models.Model):
@@ -130,6 +131,8 @@ class OtmB2bVisitPlan(models.Model):
         The visit is completed later via Check Out / the Complete Visit
         wizard, either from here or from the Visit Record itself."""
         self.ensure_one()
+        if self.visit_record_id or self.state in ('in_progress', 'completed', 'cancelled'):
+            raise UserError(_('This visit plan is already checked in, completed or cancelled.'))
         vals = {
             'institution_id': self.institution_id.id,
             'visit_plan_id': self.id,
