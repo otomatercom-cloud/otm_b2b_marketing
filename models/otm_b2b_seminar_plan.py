@@ -35,12 +35,18 @@ class OtmB2bSeminarPlan(models.Model):
         default=lambda self: self.env.company)
 
     def action_confirm_plan(self):
+        if any(p.state != 'draft' for p in self):
+            raise UserError(_('Only draft plans can be confirmed.'))
         self.write({'state': 'planned'})
 
     def action_cancel_plan(self):
+        if any(p.state in ('completed', 'in_progress') for p in self):
+            raise UserError(_('Completed or checked-in plans cannot be cancelled.'))
         self.write({'state': 'cancelled'})
 
     def action_reset_draft(self):
+        if any(p.state in ('completed', 'in_progress') for p in self):
+            raise UserError(_('Completed or checked-in plans cannot be reset.'))
         self.write({'state': 'draft'})
 
     def action_open_complete_wizard(self):
@@ -121,6 +127,10 @@ class OtmB2bSeminarPlan(models.Model):
         activity_type = self.env.ref('mail.mail_activity_data_todo', raise_if_not_found=False)
         for plan in plans:
             label = _('Today') if plan.seminar_date == today else _('Tomorrow')
+            if plan.activity_ids.filtered(
+                    lambda a: a.user_id == plan.user_id and a.date_deadline == plan.seminar_date
+                    and (a.summary or '').startswith('B2B Seminar Reminder')):
+                continue
             plan.activity_schedule(
                 activity_type_id=activity_type.id if activity_type else False,
                 summary=_('B2B Seminar Reminder (%s)', label),

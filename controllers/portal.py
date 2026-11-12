@@ -103,6 +103,8 @@ class OtmB2bPortalController(http.Controller):
         if not visit:
             return request.not_found()
 
+        if visit.state == 'cancelled':
+            return request.not_found()
         if visit.state != 'completed':
             now = fields.Datetime.now()
             contact_ids = self._parse_contact_ids(visit.institution_id.sudo())
@@ -116,7 +118,8 @@ class OtmB2bPortalController(http.Controller):
             if not visit.checkin_time:
                 vals['checkin_time'] = now
             activity_type_id = post.get('marketing_activity_type_id')
-            if activity_type_id:
+            if activity_type_id and str(activity_type_id).isdigit() and \
+                    request.env['otm.b2b.activity.type'].sudo().browse(int(activity_type_id)).exists():
                 vals['marketing_activity_type_id'] = int(activity_type_id)
             next_followup_date = post.get('next_followup_date')
             if next_followup_date:
@@ -167,19 +170,24 @@ class OtmB2bPortalController(http.Controller):
         if not seminar:
             return request.not_found()
 
+        if seminar.state == 'cancelled':
+            return request.not_found()
         if seminar.state != 'completed':
             now = fields.Datetime.now()
             # Checkboxes with the same name submit multiple values - only
             # available via the raw form, not the **post kwargs (which
             # collapses repeats to the last one).
-            category_ids = [int(i) for i in request.httprequest.form.getlist('category_ids') if i]
+            def _n(v):
+                v = str(v or '0').strip()
+                return max(int(v), 0) if v.isdigit() else 0
+            category_ids = [int(i) for i in request.httprequest.form.getlist('category_ids') if str(i).isdigit()]
             vals = {
                 'topic': post.get('topic') or '',
                 'category_ids': [(6, 0, category_ids)],
                 'speaker': post.get('speaker') or '',
-                'student_count': int(post.get('student_count') or 0),
-                'faculty_count': int(post.get('faculty_count') or 0),
-                'interested_students': int(post.get('interested_students') or 0),
+                'student_count': _n(post.get('student_count')),
+                'faculty_count': _n(post.get('faculty_count')),
+                'interested_students': _n(post.get('interested_students')),
                 'feedback': post.get('feedback') or '',
                 'outcome': post.get('outcome') or '',
                 'state': 'completed',

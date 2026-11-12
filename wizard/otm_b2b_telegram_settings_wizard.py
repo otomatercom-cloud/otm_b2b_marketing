@@ -73,7 +73,9 @@ class OtmB2bTelegramSettingsWizard(models.TransientModel):
         hour = int(self.reminder_hour or 9)
         minute = int(round((self.reminder_hour or 9) % 1 * 60))
         now = fields.Datetime.now()
-        next_call = now.replace(hour=hour % 24, minute=minute, second=0, microsecond=0)
+        # Reminder hour is entered in IST; cron nextcall is stored in UTC.
+        next_call = now.replace(hour=hour % 24, minute=minute, second=0, microsecond=0) \
+            - timedelta(hours=5, minutes=30)
         if next_call <= now:
             next_call += timedelta(days=1)
         cron.sudo().write({'nextcall': next_call})

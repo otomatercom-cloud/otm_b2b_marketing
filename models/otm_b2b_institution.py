@@ -656,6 +656,11 @@ class OtmB2bInstitution(models.Model):
                 ('state', '=', 'completed'),
                 ('visit_date', '=', today),
             ], order='checkout_time desc', limit=8)
+        live_count = VisitRecord.search_count(visit_record_domain + [
+            ('checkin_time', '!=', False), ('checkout_time', '=', False),
+            ('state', 'not in', ('cancelled', 'completed'))])
+        today_completed_count = VisitRecord.search_count(visit_record_domain + [
+            ('state', '=', 'completed'), ('visit_date', '=', today)])
         today_completed_list = [{
             'id': v.id,
             'institution': v.institution_id.sudo().name,
@@ -733,8 +738,8 @@ class OtmB2bInstitution(models.Model):
                 'upcoming_visits': len(upcoming_plans),
                 'completed_visits': completed_visits,
                 'pending_visits': pending_visits,
-                'live_visits': len(live_visits),
-                'today_completed': len(today_completed_visits),
+                'live_visits': live_count,
+                'today_completed': today_completed_count,
                 'total_institutions': len(institutions),
                 'high_priority_institutions': len(high_priority_institutions),
                 # "Leads Collected" = actual otm.b2b.lead records PLUS the

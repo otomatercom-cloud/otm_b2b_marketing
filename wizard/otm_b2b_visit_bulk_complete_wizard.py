@@ -28,7 +28,7 @@ class OtmB2bVisitBulkCompleteWizard(models.TransientModel):
         if self.env.context.get('active_model') == 'otm.b2b.visit.record':
             active_ids = self.env.context.get('active_ids', [])
             visits = self.env['otm.b2b.visit.record'].browse(active_ids)
-            already_done = visits.filtered(lambda v: v.state == 'completed')
+            already_done = visits.filtered(lambda v: v.state in ('completed', 'cancelled'))
             res['visit_ids'] = [(6, 0, (visits - already_done).ids)]
         return res
 
@@ -38,19 +38,17 @@ class OtmB2bVisitBulkCompleteWizard(models.TransientModel):
             raise UserError(_('No visits to complete - they may already be marked done.'))
 
         now = fields.Datetime.now()
+        if any(v.state == 'cancelled' for v in self.visit_ids):
+            raise UserError(_('Cancelled visits cannot be completed.'))
         for visit in self.visit_ids:
             vals = {
                 'marketing_activity_type_id': self.marketing_activity_type_id.id,
                 'state': 'completed',
                 'checkout_time': visit.checkout_time or now,
             }
-            if not visit.checkin_time:
-                vals['checkin_time'] = now
             if self.remarks:
                 vals['remarks'] = self.remarks
             visit.write(vals)
-            if visit.visit_plan_id and visit.visit_plan_id.state != 'completed':
-                visit.visit_plan_id.write({'state': 'completed'})
 
         return {
             'type': 'ir.actions.client',

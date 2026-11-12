@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, UserError, ValidationError
 
 MANAGER_GROUP = 'otm_b2b_marketing.group_otm_b2b_marketing_manager'
 
@@ -37,6 +37,19 @@ class OtmB2bMou(models.Model):
         'res.company', string='Company', required=True,
         default=lambda self: self.env.company)
 
+    @api.constrains('agreement_number', 'company_id')
+    def _check_agreement_unique(self):
+        for mou in self.filtered('agreement_number'):
+            if self.search_count([('id', '!=', mou.id), ('company_id', '=', mou.company_id.id),
+                                  ('agreement_number', '=', mou.agreement_number)]):
+                raise ValidationError(_('Agreement Number %s is already used.', mou.agreement_number))
+
+    @api.constrains('signed_date', 'expiry_date')
+    def _check_dates(self):
+        for mou in self:
+            if mou.signed_date and mou.expiry_date and mou.expiry_date < mou.signed_date:
+                raise ValidationError(_('Expiry Date must be after the Signed Date.'))
+
     def _require_manager(self):
         if not (self.env.su or self.env.user.has_group(MANAGER_GROUP)):
             raise AccessError(_('Only a Marketing Manager or Head can approve, sign, reject or renew an MOU.'))
@@ -61,10 +74,17 @@ class OtmB2bMou(models.Model):
 
     def action_approve(self):
         self._require_manager()
+        if any(m.state not in ('proposal_sent', 'under_review', 'discussion') for m in self):
+            raise UserError(_('This MOU cannot be approved from its current status.'))
         self._set_state({'state': 'approved'})
 
     def action_sign(self):
         self._require_manager()
+        for mou in self:
+            if mou.state not in ('approved', 'renewed'):
+                raise UserError(_('Only an approved MOU can be signed.'))
+            if not mou.agreement_number or not mou.expiry_date:
+                raise UserError(_('Enter the Agreement Number and Expiry Date before signing.'))
         self._set_state({'state': 'signed', 'signed_date': fields.Date.context_today(self)})
         for mou in self:
             text = self.env['otm.b2b.telegram.template']._render(
@@ -97,6 +117,9 @@ class OtmB2bMou(models.Model):
         ])
         activity_type = self.env.ref('mail.mail_activity_data_todo', raise_if_not_found=False)
         for mou in expiring:
+            if mou.activity_ids.filtered(lambda a: a.summary == _('MOU Expiry Reminder')
+                                         and a.date_deadline == mou.expiry_date):
+                continue
             mou.activity_schedule(
                 activity_type_id=activity_type.id if activity_type else False,
                 summary=_('MOU Expiry Reminder'),

@@ -175,6 +175,16 @@ class OtmB2bVisitRecord(models.Model):
         if vals.get('state') == 'completed':
             newly_completed = self.filtered(lambda v: v.state != 'completed')
         result = super().write(vals)
+        new_state = vals.get('state')
+        if new_state in ('completed', 'partially_completed', 'cancelled'):
+            for visit in self:
+                plan = visit.visit_plan_id.sudo()
+                if not plan:
+                    continue
+                if new_state in ('completed', 'partially_completed') and plan.state in ('planned', 'in_progress'):
+                    plan.write({'state': 'completed'})
+                elif new_state == 'cancelled' and plan.state == 'in_progress':
+                    plan.write({'state': 'planned', 'visit_record_id': False})
         for visit in newly_completed:
             if visit.user_id.otm_telegram_connected:
                 text = self.env['otm.b2b.telegram.template']._render(

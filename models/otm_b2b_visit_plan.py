@@ -45,6 +45,8 @@ class OtmB2bVisitPlan(models.Model):
         default=lambda self: self.env.company)
 
     def action_confirm_plan(self):
+        if any(p.state != 'draft' for p in self):
+            raise UserError(_('Only draft plans can be confirmed.'))
         self.write({'state': 'planned'})
         for plan in self:
             if plan.user_id.otm_telegram_connected:
@@ -55,9 +57,13 @@ class OtmB2bVisitPlan(models.Model):
                     plan.user_id._otm_telegram_send(text)
 
     def action_cancel_plan(self):
+        if any(p.state in ('completed', 'in_progress') for p in self):
+            raise UserError(_('Completed or checked-in plans cannot be cancelled.'))
         self.write({'state': 'cancelled'})
 
     def action_reset_draft(self):
+        if any(p.state in ('completed', 'in_progress') for p in self):
+            raise UserError(_('Completed or checked-in plans cannot be reset.'))
         self.write({'state': 'draft'})
 
     @api.model
